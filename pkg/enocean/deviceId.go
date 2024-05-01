@@ -31,7 +31,7 @@ func DeviceIdFromHexString(s string) (DeviceId, error) {
 	}
 
 	if len(stringToDecode) > SIZE_MAX_STR {
-		return 0, fmt.Errorf("invalid length (got %d, max: %d)", len(stringToDecode), SIZE_MAX_STR)
+		return 0, fmt.Errorf("invalid length (got:%d, max:%d)", len(stringToDecode), SIZE_MAX_STR)
 	}
 
 	if len(stringToDecode)%2 != 0 {
@@ -49,7 +49,7 @@ func DeviceIdFromHexString(s string) (DeviceId, error) {
 
 func DeviceIdFromByteArray(b []byte) (DeviceId, error) {
 	if len(b) > SIZE_DEVICE_ID {
-		return 0, fmt.Errorf("invalid length (got %d, need: %d)", len(b), SIZE_DEVICE_ID)
+		return 0, fmt.Errorf("invalid length (got:%d, need:%d)", len(b), SIZE_DEVICE_ID)
 	}
 
 	if len(b) < SIZE_DEVICE_ID {
