@@ -1,5 +1,7 @@
 package enocean
 
+import "errors"
+
 type Esp3PacketType uint8
 
 const (
@@ -17,6 +19,39 @@ const (
 	PACKET_TYPE_RADIO_802_15_4     Esp3PacketType = 0x10
 	PACKET_TYPE_COMMAND_2_4        Esp3PacketType = 0x11
 )
+
+func ParseEsp3PacketFromByte(byte uint8) (Esp3PacketType, error) {
+	switch byte {
+	case 0x01:
+		return PACKET_TYPE_RADIO_ERP1, nil
+	case 0x02:
+		return PACKET_TYPE_RESPONSE, nil
+	case 0x03:
+		return PACKET_TYPE_RADIO_SUB_TEL, nil
+	case 0x04:
+		return PACKET_TYPE_EVENT, nil
+	case 0x05:
+		return PACKET_TYPE_COMMON_COMMAND, nil
+	case 0x06:
+		return PACKET_TYPE_SMART_ACK_COMMAND, nil
+	case 0x07:
+		return PACKET_TYPE_REMOTE_MAN_COMMAND, nil
+	case 0x09:
+		return PACKET_TYPE_RADIO_MESSAGE, nil
+	case 0x0a:
+		return PACKET_TYPE_RADIO_ERP2, nil
+	case 0x0b:
+		return PACKET_TYPE_CONFIG_COMMAND, nil
+	case 0x0c:
+		return PACKET_TYPE_COMMAND_ACCEPTED, nil
+	case 0x10:
+		return PACKET_TYPE_RADIO_802_15_4, nil
+	case 0x11:
+		return PACKET_TYPE_COMMAND_2_4, nil
+	default:
+		return 0, errors.New("invalid packet type")
+	}
+}
 
 func (packetType Esp3PacketType) String() string {
 	switch packetType {
