@@ -35,7 +35,7 @@ func TestCrcTable(t *testing.T) {
 
 func TestTelegram_String(t *testing.T) {
 	t.Run("returns a string representation of the telegram", func(t *testing.T) {
-		telegram := FromData(PACKET_TYPE_RADIO_ERP1, []byte{0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80},
+		telegram := NewEsp3TelegramFromData(PACKET_TYPE_RADIO_ERP1, []byte{0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80},
 			[]byte{0x00, 0xff, 0xff, 0xff, 0xff, 0x41, 0x00})
 
 		var resultBuilder strings.Builder
@@ -52,7 +52,7 @@ func TestTelegram_String(t *testing.T) {
 
 func TestTelegram_Serialize(t *testing.T) {
 	t.Run("returns the ESP3 telegram in hex format", func(t *testing.T) {
-		telegram := FromData(PACKET_TYPE_RADIO_ERP1, []byte{0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80},
+		telegram := NewEsp3TelegramFromData(PACKET_TYPE_RADIO_ERP1, []byte{0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80},
 			[]byte{0x00, 0xff, 0xff, 0xff, 0xff, 0x41, 0x00})
 
 		test.Eq(t, telegram.Serialize(), []byte{0x55, 0x00, 0x0c, 0x07, 0x01, 0x96, 0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80, 0x00, 0xff, 0xff, 0xff, 0xff, 0x41, 0x00, 0x99})
@@ -61,10 +61,10 @@ func TestTelegram_Serialize(t *testing.T) {
 
 func TestFromData(t *testing.T) {
 	t.Run("feeds structure from arguments", func(t *testing.T) {
-		telegram := FromData(PACKET_TYPE_RADIO_ERP1, []byte{0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80},
+		telegram := NewEsp3TelegramFromData(PACKET_TYPE_RADIO_ERP1, []byte{0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80},
 			[]byte{0x00, 0xff, 0xff, 0xff, 0xff, 0x41, 0x00})
 
-		test.Eq(t, telegram, Telegram{
+		test.Eq(t, telegram, Esp3Telegram{
 			PacketType: PACKET_TYPE_RADIO_ERP1,
 			Data:       []byte{0xD2, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x03, 0xFF, 0x82, 0x00, 0x85, 0x80},
 			DataLen:    0x000c,
@@ -76,10 +76,10 @@ func TestFromData(t *testing.T) {
 
 func TestFromHexString(t *testing.T) {
 	t.Run("parses hex string into an esp3 structure", func(t *testing.T) {
-		telegram, err := FromHexString("55000C070196D200000000FF03FF8200858000FFFFFFFF410099")
+		telegram, err := NewEsp3TelegramFromHexString("55000C070196D200000000FF03FF8200858000FFFFFFFF410099")
 
 		test.NoError(t, err)
-		test.Eq(t, telegram, Telegram{
+		test.Eq(t, telegram, Esp3Telegram{
 			PacketType: PACKET_TYPE_RADIO_ERP1,
 			Data:       []byte{0xD2, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x03, 0xFF, 0x82, 0x00, 0x85, 0x80},
 			DataLen:    0x000c,
@@ -89,37 +89,37 @@ func TestFromHexString(t *testing.T) {
 	})
 
 	t.Run("returns an error when hex string is not in hex format", func(t *testing.T) {
-		_, err := FromHexString("55XX0C070196D200000000FF03FF8200858000FFFFFFFF410099")
+		_, err := NewEsp3TelegramFromHexString("55XX0C070196D200000000FF03FF8200858000FFFFFFFF410099")
 		test.Error(t, err)
 	})
 
 	t.Run("returns an error when hex string does not start with 55", func(t *testing.T) {
-		_, err := FromHexString("000C0701FFD200000000FF03FF8200858000FFFFFFFF410099")
+		_, err := NewEsp3TelegramFromHexString("000C0701FFD200000000FF03FF8200858000FFFFFFFF410099")
 		test.EqError(t, err, "sync byte missing")
 	})
 
 	t.Run("returns an error when hex string does not start with 55 (odd length)", func(t *testing.T) {
-		_, err := FromHexString("5000C0701FFD200000000FF03FF8200858000FFFFFFFF410099")
+		_, err := NewEsp3TelegramFromHexString("5000C0701FFD200000000FF03FF8200858000FFFFFFFF410099")
 		test.EqError(t, err, "sync byte missing")
 	})
 
 	t.Run("returns an error when hex string is too short", func(t *testing.T) {
-		_, err := FromHexString("55000C070196")
+		_, err := NewEsp3TelegramFromHexString("55000C070196")
 		test.EqError(t, err, "hex string too short")
 	})
 
 	t.Run("returns an error when packet type is invalid", func(t *testing.T) {
-		_, err := FromHexString("55000C07FF62D200000000FF03FF8200858000FFFFFFFF410099")
+		_, err := NewEsp3TelegramFromHexString("55000C07FF62D200000000FF03FF8200858000FFFFFFFF410099")
 		test.EqError(t, err, "invalid packet type")
 	})
 
 	t.Run("returns an error when CRC8H is invalid", func(t *testing.T) {
-		_, err := FromHexString("55000C0701FFD200000000FF03FF8200858000FFFFFFFF410099")
+		_, err := NewEsp3TelegramFromHexString("55000C0701FFD200000000FF03FF8200858000FFFFFFFF410099")
 		test.EqError(t, err, fmt.Sprintf("invalid CRC8H (got:0x%x, valid:0x%x)", 0xFF, 0x96))
 	})
 
 	t.Run("returns an error when CRC8D is invalid", func(t *testing.T) {
-		_, err := FromHexString("55000C070196D200000000FF03FF8200858000FFFFFFFF4100FF")
+		_, err := NewEsp3TelegramFromHexString("55000C070196D200000000FF03FF8200858000FFFFFFFF4100FF")
 		test.EqError(t, err, fmt.Sprintf("invalid CRC8D (got:0x%x, valid:0x%x)", 0xFF, 0x99))
 	})
 }

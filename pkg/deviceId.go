@@ -7,21 +7,21 @@ import (
 	"strings"
 )
 
-type DeviceId uint32
+type DeviceID uint32
 
 const (
 	SIZE_DEVICE_ID int = 4
 )
 
-func GetBroadcastId() DeviceId {
+func GetBroadcastId() DeviceID {
 	return 0xffffffff
 }
 
-func (d DeviceId) String() string {
+func (d DeviceID) String() string {
 	return fmt.Sprintf("%08x", uint32(d))
 }
 
-func DeviceIdFromHexString(s string) (DeviceId, error) {
+func DeviceIdFromHexString(s string) (DeviceID, error) {
 	const SIZE_MAX_STR = SIZE_DEVICE_ID * 2
 
 	stringToDecode := s
@@ -47,7 +47,7 @@ func DeviceIdFromHexString(s string) (DeviceId, error) {
 	return DeviceIdFromByteArray(b)
 }
 
-func DeviceIdFromByteArray(b []byte) (DeviceId, error) {
+func DeviceIdFromByteArray(b []byte) (DeviceID, error) {
 	if len(b) > SIZE_DEVICE_ID {
 		return 0, fmt.Errorf("invalid length (got:%d, need:%d)", len(b), SIZE_DEVICE_ID)
 	}
@@ -56,5 +56,5 @@ func DeviceIdFromByteArray(b []byte) (DeviceId, error) {
 		b = append(make([]byte, SIZE_DEVICE_ID-len(b)), b...)
 	}
 
-	return DeviceId(binary.BigEndian.Uint32(b[0:]) >> (32 - SIZE_DEVICE_ID*8)), nil
+	return DeviceID(binary.BigEndian.Uint32(b[0:]) >> (32 - SIZE_DEVICE_ID*8)), nil
 }

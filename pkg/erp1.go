@@ -1,76 +1,91 @@
 package pkg
 
 import (
+	"encoding/hex"
 	"errors"
+	"fmt"
+	"strings"
 )
 
-type Packet struct {
-	DestinationId DeviceId
+type Erp1Packet struct {
+	DestinationID DeviceID
 	Rorg          Rorg
 	Rssi          byte
 	SecurityLevel byte
 	Status        byte
 	SubTelNum     byte
-	SenderId      DeviceId
+	SenderID      DeviceID
 	UserData      []byte
 }
 
-func FromEsp3(esp3Telegram Telegram) (Packet, error) {
-	if esp3Telegram.PacketType != PACKET_TYPE_RADIO_ERP1 {
-		return Packet{}, errors.New("invalid packet type")
+func NewErp1PacketFromEsp3(telegram Esp3Telegram) (Erp1Packet, error) {
+	if telegram.PacketType != PACKET_TYPE_RADIO_ERP1 {
+		return Erp1Packet{}, errors.New("invalid packet type")
 	}
 
-	const SIZE_RORG = 1
-	const SIZE_DEVICE_ID = 4
-	const SIZE_STATUS = 1
-	const OFFSET_RORG = 0
-	const OFFSET_DATA = 1
-	const OFFSET_DESTINATION_ID = 1
-	const OFFSET_SUB_TEL_NUM = 0
-	const OFFSET_RSSI = OFFSET_DESTINATION_ID + SIZE_DEVICE_ID
-	const OFFSET_SECURITY_LEVEL = OFFSET_RSSI + 1
+	const rorgOffset = 0
+	const rorgLen = 1
+	const deviceIdLen = 4
+	const statusLen = 1
+	const dataOffset = 1
+	const destinationIdOffset = 1
+	const subTelNumOffset = 0
+	const rssiOffset = destinationIdOffset + deviceIdLen
+	const securityLevelOffset = rssiOffset + 1
 
-	sizeData := esp3Telegram.DataLen - SIZE_RORG - SIZE_DEVICE_ID - SIZE_STATUS
-	offsetSenderId := OFFSET_DATA + sizeData
-	offsetStatus := offsetSenderId + SIZE_DEVICE_ID
-	destinationId, err := DeviceIdFromByteArray(esp3Telegram.OptData[OFFSET_DESTINATION_ID : OFFSET_DESTINATION_ID+SIZE_DEVICE_ID])
+	dataLen := telegram.DataLen - rorgLen - deviceIdLen - statusLen
+	senderIdOffset := dataOffset + dataLen
+	statusOffset := senderIdOffset + deviceIdLen
+
+	destinationId, err := DeviceIdFromByteArray(telegram.OptData[destinationIdOffset : destinationIdOffset+deviceIdLen])
 
 	if err != nil {
-		return Packet{}, err
+		return Erp1Packet{}, err
 	}
 
-	senderId, err := DeviceIdFromByteArray(esp3Telegram.Data[offsetSenderId:SIZE_DEVICE_ID])
+	senderId, err := DeviceIdFromByteArray(telegram.Data[senderIdOffset:deviceIdLen])
 
 	if err != nil {
-		return Packet{}, err
+		return Erp1Packet{}, err
 	}
 
-	return Packet{
-		DestinationId: destinationId,
-		Rorg:          Rorg(esp3Telegram.Data[OFFSET_RORG]),
-		Rssi:          esp3Telegram.Data[OFFSET_RSSI],
-		SecurityLevel: esp3Telegram.Data[OFFSET_SECURITY_LEVEL],
-		Status:        esp3Telegram.Data[offsetStatus],
-		SubTelNum:     esp3Telegram.Data[OFFSET_SUB_TEL_NUM],
-		SenderId:      senderId,
-		UserData:      esp3Telegram.Data[OFFSET_DATA : OFFSET_DATA+sizeData],
+	return Erp1Packet{
+		DestinationID: destinationId,
+		Rorg:          Rorg(telegram.Data[rorgOffset]),
+		Rssi:          telegram.Data[rssiOffset],
+		SecurityLevel: telegram.Data[securityLevelOffset],
+		Status:        telegram.Data[statusOffset],
+		SubTelNum:     telegram.Data[subTelNumOffset],
+		SenderID:      senderId,
+		UserData:      telegram.Data[dataOffset : dataOffset+dataLen],
 	}, nil
 }
 
-func (p Packet) ToEsp3() Telegram {
-	return Telegram{
+func (p Erp1Packet) ToEsp3() Esp3Telegram {
+	return Esp3Telegram{
 		PacketType: PACKET_TYPE_RADIO_ERP1,
 		Data:       p.UserData,
 		OptData: []byte{
-			byte(p.DestinationId),
+			byte(p.DestinationID),
 		},
 	}
 }
 
-func (p Packet) Serialize() []byte {
+func (p Erp1Packet) Serialize() []byte {
 	return p.ToEsp3().Serialize()
 }
 
-func (p Packet) String() string {
-	return "not implemented yet"
+func (p Erp1Packet) String() string {
+	var stringBuilder strings.Builder
+
+	stringBuilder.WriteString(fmt.Sprintf("DestinationID: %s\n", p.DestinationID))
+	stringBuilder.WriteString(fmt.Sprintf("Rorg: %s\n", p.Rorg))
+	stringBuilder.WriteString(fmt.Sprintf("Rssi: %d\n", p.Rssi))
+	stringBuilder.WriteString(fmt.Sprintf("SecurityLevel: %d\n", p.SecurityLevel))
+	stringBuilder.WriteString(fmt.Sprintf("Status: %d\n", p.Status))
+	stringBuilder.WriteString(fmt.Sprintf("SubTelNum: %d\n", p.SubTelNum))
+	stringBuilder.WriteString(fmt.Sprintf("SenderID: %s\n", p.SenderID))
+	stringBuilder.WriteString(fmt.Sprintf("UserData: %s", hex.EncodeToString(p.UserData)))
+
+	return stringBuilder.String()
 }
