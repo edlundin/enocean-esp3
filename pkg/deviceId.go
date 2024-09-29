@@ -1,4 +1,4 @@
-package enocean
+package pkg
 
 import (
 	"encoding/binary"

@@ -1,4 +1,4 @@
-package esp3
+package pkg
 
 import (
 	"encoding/binary"
@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"slices"
 	"strings"
-
-	"github.com/edlundin/enocean-esp3/pkg/enocean"
 )
 
 type Serializer interface {
@@ -41,7 +39,7 @@ func crcTable() [256]byte {
 type Telegram struct {
 	DataLen    uint16
 	OptDataLen uint8
-	PacketType enocean.Esp3PacketType
+	PacketType Esp3PacketType
 	Data       []byte
 	OptData    []byte
 }
@@ -80,7 +78,7 @@ func (telegram Telegram) Serialize() []byte {
 	return slices.Concat([]byte{syncByte}, header, []byte{crc8h}, telegram.Data, telegram.OptData, []byte{crc8d})
 }
 
-func FromData(packetType enocean.Esp3PacketType, data []byte, optData []byte) Telegram {
+func FromData(packetType Esp3PacketType, data []byte, optData []byte) Telegram {
 	return Telegram{
 		DataLen:    uint16(len(data)),
 		OptDataLen: uint8(len(optData)),
@@ -138,7 +136,7 @@ func FromHexString(hexStr string) (Telegram, error) {
 	telegram.DataLen = binary.BigEndian.Uint16(bytes[1:3])
 	telegram.OptDataLen = bytes[3]
 
-	packetType, err := enocean.ParseEsp3PacketFromByte(bytes[4])
+	packetType, err := ParseEsp3PacketFromByte(bytes[4])
 
 	if err != nil {
 		return Telegram{}, err
