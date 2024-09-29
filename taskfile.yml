@@ -1,6 +1,11 @@
 version: '3'
 tasks:
+  default:
+    desc: List all available tasks
+    cmds:
+      - task --list-all
   test:
+    desc: Run tests and generate coverage report
     cmds:
       - go test ./... -coverprofile=cover.out
       - go tool cover -html=cover.out -o coverage.html
