@@ -11,6 +11,10 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/enocean"
 )
 
+type Serializer interface {
+	Serialize() []byte
+}
+
 const syncByte = 0x55
 
 func crcTable() [256]byte {
