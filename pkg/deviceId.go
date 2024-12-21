@@ -10,7 +10,7 @@ import (
 type DeviceID uint32
 
 const (
-	SIZE_DEVICE_ID int = 4
+	sizeDeviceID int = 4
 )
 
 func GetBroadcastId() DeviceID {
@@ -22,7 +22,7 @@ func (d DeviceID) String() string {
 }
 
 func DeviceIdFromHexString(s string) (DeviceID, error) {
-	const SIZE_MAX_STR = SIZE_DEVICE_ID * 2
+	const sizeMaxStr = sizeDeviceID * 2
 
 	stringToDecode := s
 
@@ -30,8 +30,8 @@ func DeviceIdFromHexString(s string) (DeviceID, error) {
 		stringToDecode = s[2:]
 	}
 
-	if len(stringToDecode) > SIZE_MAX_STR {
-		return 0, fmt.Errorf("invalid length (got:%d, max:%d)", len(stringToDecode), SIZE_MAX_STR)
+	if len(stringToDecode) > sizeMaxStr {
+		return 0, fmt.Errorf("invalid length (got:%d, max:%d)", len(stringToDecode), sizeMaxStr)
 	}
 
 	if len(stringToDecode)%2 != 0 {
@@ -48,13 +48,13 @@ func DeviceIdFromHexString(s string) (DeviceID, error) {
 }
 
 func DeviceIdFromByteArray(b []byte) (DeviceID, error) {
-	if len(b) > SIZE_DEVICE_ID {
-		return 0, fmt.Errorf("invalid length (got:%d, need:%d)", len(b), SIZE_DEVICE_ID)
+	if len(b) > sizeDeviceID {
+		return 0, fmt.Errorf("invalid length (got:%d, need:%d)", len(b), sizeDeviceID)
 	}
 
-	if len(b) < SIZE_DEVICE_ID {
-		b = append(make([]byte, SIZE_DEVICE_ID-len(b)), b...)
+	if len(b) < sizeDeviceID {
+		b = append(make([]byte, sizeDeviceID-len(b)), b...)
 	}
 
-	return DeviceID(binary.BigEndian.Uint32(b[0:]) >> (32 - SIZE_DEVICE_ID*8)), nil
+	return DeviceID(binary.BigEndian.Uint32(b[0:]) >> (32 - sizeDeviceID*8)), nil
 }
