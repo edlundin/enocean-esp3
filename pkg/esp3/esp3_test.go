@@ -1,9 +1,10 @@
-package pkg
+package esp3
 
 import (
 	"reflect"
-	"strings"
 	"testing"
+
+	"github.com/edlundin/enocean-esp3/pkg/enums"
 )
 
 func TestCrcTable(t *testing.T) {
@@ -35,29 +36,10 @@ func TestCrcTable(t *testing.T) {
 	})
 }
 
-func TestTelegram_String(t *testing.T) {
-	t.Run("returns a string representation of the telegram", func(t *testing.T) {
-		telegram := NewEsp3TelegramFromData(PACKET_TYPE_RADIO_ERP1, []byte{0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80},
-			[]byte{0x00, 0xff, 0xff, 0xff, 0xff, 0x41, 0x00})
-
-		var resultBuilder strings.Builder
-
-		resultBuilder.WriteString("PacketType: PACKET_TYPE_RADIO_ERP1\n")
-		resultBuilder.WriteString("DataLen: 12\n")
-		resultBuilder.WriteString("OptDataLen: 7\n")
-		resultBuilder.WriteString("Data: D200000000FF03FF82008580\n")
-		resultBuilder.WriteString("OptData: 00FFFFFFFF4100")
-
-		if telegram.String() != resultBuilder.String() {
-			t.Errorf("incorrect string representation\nexpected: %s\ngot: %s", resultBuilder.String(), telegram.String())
-		}
-	})
-}
-
 func TestTelegram_Serialize(t *testing.T) {
 	t.Run("returns the ESP3 telegram in hex format", func(t *testing.T) {
 		expectedTelegram := []byte{0x55, 0x00, 0x0c, 0x07, 0x01, 0x96, 0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80, 0x00, 0xff, 0xff, 0xff, 0xff, 0x41, 0x00, 0x99}
-		telegram := NewEsp3TelegramFromData(PACKET_TYPE_RADIO_ERP1, []byte{0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80},
+		telegram := NewEsp3TelegramFromData(enums.PACKET_TYPE_RADIO_ERP1, []byte{0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80},
 			[]byte{0x00, 0xff, 0xff, 0xff, 0xff, 0x41, 0x00})
 
 		if !reflect.DeepEqual(expectedTelegram, telegram.Serialize()) {
@@ -69,13 +51,11 @@ func TestTelegram_Serialize(t *testing.T) {
 func TestFromData(t *testing.T) {
 	t.Run("feeds structure from arguments", func(t *testing.T) {
 		expectedTelegram := Esp3Telegram{
-			PacketType: PACKET_TYPE_RADIO_ERP1,
+			PacketType: enums.PACKET_TYPE_RADIO_ERP1,
 			Data:       []byte{0xD2, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x03, 0xFF, 0x82, 0x00, 0x85, 0x80},
-			DataLen:    0x000c,
 			OptData:    []byte{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x41, 0x00},
-			OptDataLen: 0x07,
 		}
-		telegram := NewEsp3TelegramFromData(PACKET_TYPE_RADIO_ERP1, []byte{0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80},
+		telegram := NewEsp3TelegramFromData(enums.PACKET_TYPE_RADIO_ERP1, []byte{0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80},
 			[]byte{0x00, 0xff, 0xff, 0xff, 0xff, 0x41, 0x00})
 
 		if !reflect.DeepEqual(expectedTelegram, telegram) {
@@ -87,11 +67,9 @@ func TestFromData(t *testing.T) {
 func TestFromHexString(t *testing.T) {
 	t.Run("parses hex string into an esp3 structure", func(t *testing.T) {
 		expectedTelegram := Esp3Telegram{
-			PacketType: PACKET_TYPE_RADIO_ERP1,
+			PacketType: enums.PACKET_TYPE_RADIO_ERP1,
 			Data:       []byte{0xD2, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x03, 0xFF, 0x82, 0x00, 0x85, 0x80},
-			DataLen:    0x000c,
 			OptData:    []byte{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x41, 0x00},
-			OptDataLen: 0x07,
 		}
 		telegram, err := NewEsp3TelegramFromHexString("55000C070196D200000000FF03FF8200858000FFFFFFFF410099")
 

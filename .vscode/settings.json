@@ -1,35 +1,10 @@
 {
-	"cSpell.words": [
-		"codecov",
-		"Codecov",
-		"debian",
-		"enocean",
-		"rorg",
-		"Rorg",
-		"RORG",
-		"Rssi",
-		"RSSI",
-		"shoenig"
-	],
-	"cSpell.ignoreWords": [
-		"BAUDRATE",
-		"BIST",
-		"DUTYCYCLE",
-		"ENCAPS",
-		"IDBASE",
-		"LEARNMODE",
-		"MAINTENANCEKEY",
-		"NOISETHRESHOLD",
-		"NUMSECUREDEVICES",
-		"RSSITEST",
-		"SECUREDEVICE",
-		"SECUREDEVICES",
-		"SECUREDEVICEV",
-		"SENDTEACHIN",
-		"STEPCODE",
-		"SUBTEL",
-		"ffabcdef",
-		"ffabcdefaa",
-		"ffabcdeg"
-	]
+	"cSpell.customDictionaries": {
+		"custom-dictionary-workspace": {
+			"name": "custom-dictionary-workspace",
+			"path": "${workspaceFolder:enocean-esp3}/.cspell/custom-dictionary-workspace.txt",
+			"addWords": true,
+			"scope": "workspace"
+		}
+	}
 }

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/edlundin/enocean-esp3/pkg/enums"
+	"github.com/edlundin/enocean-esp3/pkg/esp3"
 	"go.bug.st/serial"
 )
 
@@ -92,7 +94,7 @@ func parser(ctx context.Context, serialPort serial.Port) {
 				continue
 			}
 
-			if time.Now().Sub(lastByteReceivedTime) >= interByteTimeout {
+			if time.Since(lastByteReceivedTime) >= interByteTimeout {
 				parserState = ParserStateWaitingForSyncByte
 			}
 
@@ -106,16 +108,13 @@ func parser(ctx context.Context, serialPort serial.Port) {
 						parserBuffer = make([]uint8, 0)
 						parserCrc = 0
 					}
-					break
 				case ParserStateWaitingForHeader:
 					parserBuffer = append(parserBuffer, parserByte)
-					parserCrc = computeCrc8(parserByte, parserCrc)
+					parserCrc = esp3.ComputeCrc8(parserByte, parserCrc)
 
 					if len(parserBuffer) == headerLen { // Header received
 						parserState = ParserStateWaitingForCrc8H
 					}
-
-					break
 				case ParserStateWaitingForCrc8H:
 					const syncByteIdxInit = -1
 
@@ -150,11 +149,11 @@ func parser(ctx context.Context, serialPort serial.Port) {
 
 						for i := 0; i < headerLen-syncByteIdx; i++ {
 							tmpBuffer = append(tmpBuffer, parserBuffer[syncByteIdx+i])
-							parserCrc = computeCrc8(parserBuffer[i], parserCrc)
+							parserCrc = esp3.ComputeCrc8(parserBuffer[i], parserCrc)
 						}
 
 						parserBuffer = append(tmpBuffer, parserByte)
-						parserCrc = computeCrc8(parserByte, parserCrc)
+						parserCrc = esp3.ComputeCrc8(parserByte, parserCrc)
 
 						if len(parserBuffer) < headerLen {
 							parserState = ParserStateWaitingForHeader
@@ -184,17 +183,13 @@ func parser(ctx context.Context, serialPort serial.Port) {
 					parserState = ParserStateWaitingForData
 					parserBuffer = make([]uint8, 0)
 					parserCrc = 0
-
-					break
 				case ParserStateWaitingForData:
 					parserBuffer = append(parserBuffer, parserByte)
-					parserCrc = computeCrc8(parserByte, parserCrc)
+					parserCrc = esp3.ComputeCrc8(parserByte, parserCrc)
 
 					if uint16(len(parserBuffer)) == parserDataLen+uint16(parserOptDataLen) {
 						parserState = ParserStateWaitingForCrc8D
 					}
-
-					break
 				case ParserStateWaitingForCrc8D:
 					// Parsing done, packet invalid, sync byte already received
 					if parserByte == syncByte {
@@ -210,15 +205,12 @@ func parser(ctx context.Context, serialPort serial.Port) {
 					// Parsing done, packet valid, calling callback
 					if parserByte == parserCrc {
 						telegram :=
-							NewEsp3TelegramFromData(Esp3PacketType(parserPacketType), parserBuffer[:parserDataLen], parserBuffer[parserDataLen:]) //TODO: check packet type
+							esp3.NewEsp3TelegramFromData(enums.PacketType(parserPacketType), parserBuffer[:parserDataLen], parserBuffer[parserDataLen:]) //TODO: check packet type
 
 						fmt.Println(telegram)
 					}
-
-					break
 				default:
 					parserState = ParserStateWaitingForSyncByte
-					break
 				}
 			}
 

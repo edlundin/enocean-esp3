@@ -1,4 +1,4 @@
-package pkg
+package esp3
 
 import (
 	"encoding/binary"
@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+
+	"github.com/edlundin/enocean-esp3/pkg/enums"
 )
 
 type Serializer interface {
@@ -37,51 +39,37 @@ func crcTable() [256]byte {
 }
 
 type Esp3Telegram struct {
-	DataLen    uint16
-	OptDataLen uint8
-	PacketType Esp3PacketType
+	PacketType enums.PacketType
 	Data       []byte
 	OptData    []byte
 }
 
-func computeCrc8(byte byte, crc byte) byte {
+func ComputeCrc8(byte byte, crc byte) byte {
 	return crcTable()[byte^crc]
 }
 
-func computeCrcFromSlice(slice []byte) byte {
+func ComputeCrcSlice(slice []byte) byte {
 	crc := byte(0)
 
 	for _, b := range slice {
-		crc = computeCrc8(b, crc)
+		crc = ComputeCrc8(b, crc)
 	}
 
 	return crc
 }
 
-func (telegram Esp3Telegram) String() string {
-	var stringBuilder strings.Builder
-
-	stringBuilder.WriteString(fmt.Sprintf("PacketType: %s\n", telegram.PacketType))
-	stringBuilder.WriteString(fmt.Sprintf("DataLen: %d\n", telegram.DataLen))
-	stringBuilder.WriteString(fmt.Sprintf("OptDataLen: %d\n", telegram.OptDataLen))
-	stringBuilder.WriteString(fmt.Sprintf("Data: %s\n", strings.ToUpper(hex.EncodeToString(telegram.Data))))
-	stringBuilder.WriteString(fmt.Sprintf("OptData: %s", strings.ToUpper(hex.EncodeToString(telegram.OptData))))
-
-	return stringBuilder.String()
-}
-
 func (telegram Esp3Telegram) Serialize() []byte {
-	header := []byte{byte(telegram.DataLen >> 8), byte(telegram.DataLen), telegram.OptDataLen, byte(telegram.PacketType)}
-	crc8h := computeCrcFromSlice(header)
-	crc8d := computeCrcFromSlice(slices.Concat(telegram.Data, telegram.OptData))
+	dataLen := len(telegram.Data)
+
+	header := []byte{byte(dataLen >> 8), byte(dataLen), byte(len(telegram.OptData)), byte(telegram.PacketType)}
+	crc8h := ComputeCrcSlice(header)
+	crc8d := ComputeCrcSlice(slices.Concat(telegram.Data, telegram.OptData))
 
 	return slices.Concat([]byte{syncByte}, header, []byte{crc8h}, telegram.Data, telegram.OptData, []byte{crc8d})
 }
 
-func NewEsp3TelegramFromData(packetType Esp3PacketType, data []byte, optData []byte) Esp3Telegram {
+func NewEsp3TelegramFromData(packetType enums.PacketType, data []byte, optData []byte) Esp3Telegram {
 	return Esp3Telegram{
-		DataLen:    uint16(len(data)),
-		OptDataLen: uint8(len(optData)),
 		PacketType: packetType,
 		Data:       data,
 		OptData:    optData,
@@ -114,7 +102,7 @@ func NewEsp3TelegramFromHexString(hexStr string) (Esp3Telegram, error) {
 	crc := byte(0)
 
 	for _, b := range bytes[1:5] {
-		crc = computeCrc8(b, crc)
+		crc = ComputeCrc8(b, crc)
 	}
 
 	if crc != crc8h {
@@ -126,25 +114,24 @@ func NewEsp3TelegramFromHexString(hexStr string) (Esp3Telegram, error) {
 	crc = 0
 
 	for _, b := range bytes[6:crc8dIndex] {
-		crc = computeCrc8(b, crc)
+		crc = ComputeCrc8(b, crc)
 	}
 
 	if crc != crc8d {
 		return Esp3Telegram{}, fmt.Errorf("invalid CRC8D (got:0x%x, valid:0x%x)", crc8d, crc)
 	}
 
-	telegram.DataLen = binary.BigEndian.Uint16(bytes[1:3])
-	telegram.OptDataLen = bytes[3]
+	dataLen := binary.BigEndian.Uint16(bytes[1:3])
 
-	packetType, err := ParseEsp3PacketFromByte(bytes[4])
+	packetType, err := enums.ParsePacketTypeFromByte(bytes[4])
 
 	if err != nil {
 		return Esp3Telegram{}, err
 	}
 
 	telegram.PacketType = packetType
-	telegram.Data = bytes[6 : telegram.DataLen+6]
-	telegram.OptData = bytes[telegram.DataLen+6 : crc8dIndex]
+	telegram.Data = bytes[6 : dataLen+6]
+	telegram.OptData = bytes[dataLen+6 : crc8dIndex]
 
 	return telegram, nil
 }

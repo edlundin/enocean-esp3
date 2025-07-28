@@ -30,3 +30,5 @@ coverage.html
 
 # Jetbrains IDE workspace settings
 .idea
+
+.DS_Store
