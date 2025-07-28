@@ -27,3 +27,8 @@ go.work
 # End of https://www.toptal.com/developers/gitignore/api/go
 
 coverage.html
+
+# Jetbrains IDE workspace settings
+.idea
+
+.DS_Store

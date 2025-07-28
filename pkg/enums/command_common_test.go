@@ -1,0 +1,199 @@
+package enums
+
+import (
+	"testing"
+)
+
+func TestParseCommonCommandFromByte(t *testing.T) {
+	t.Run("parses all valid common commands correctly", func(t *testing.T) {
+		testCases := []struct {
+			input    uint8
+			expected CommonCommand
+		}{
+			{0x01, COMMON_COMMAND_WR_SLEEP},
+			{0x02, COMMON_COMMAND_WR_RESET},
+			{0x03, COMMON_COMMAND_RD_VERSION},
+			{0x04, COMMON_COMMAND_RD_SYS_LOG},
+			{0x05, COMMON_COMMAND_WR_SYS_LOG},
+			{0x06, COMMON_COMMAND_WR_BIST},
+			{0x07, COMMON_COMMAND_WR_IDBASE},
+			{0x08, COMMON_COMMAND_RD_IDBASE},
+			{0x09, COMMON_COMMAND_WR_REPEATER},
+			{0x0a, COMMON_COMMAND_RD_REPEATER},
+			{0x0b, COMMON_COMMAND_WR_FILTER_ADD},
+			{0x0c, COMMON_COMMAND_WR_FILTER_DEL},
+			{0x0d, COMMON_COMMAND_WR_FILTER_DEL_ALL},
+			{0x0e, COMMON_COMMAND_WR_FILTER_ENABLE},
+			{0x0f, COMMON_COMMAND_RD_FILTER},
+			{0x10, COMMON_COMMAND_WR_WAIT_MATURITY},
+			{0x11, COMMON_COMMAND_WR_SUBTEL},
+			{0x12, COMMON_COMMAND_WR_MEM},
+			{0x13, COMMON_COMMAND_RD_MEM},
+			{0x14, COMMON_COMMAND_RD_MEM_ADDRESS},
+			{0x15, COMMON_COMMAND_RD_SECURITY},
+			{0x16, COMMON_COMMAND_WR_SECURITY},
+			{0x17, COMMON_COMMAND_WR_LEARNMODE},
+			{0x18, COMMON_COMMAND_RD_LEARNMODE},
+			{0x19, COMMON_COMMAND_WR_SECUREDEVICE_ADD},
+			{0x1a, COMMON_COMMAND_WR_SECUREDEVICE_DEL},
+			{0x1b, COMMON_COMMAND_RD_SECUREDEVICE_BY_INDEX},
+			{0x1c, COMMON_COMMAND_WR_MODE},
+			{0x1d, COMMON_COMMAND_RD_NUMSECUREDEVICES},
+			{0x1e, COMMON_COMMAND_RD_SECUREDEVICE_BY_ID},
+			{0x1f, COMMON_COMMAND_WR_SECUREDEVICE_ADD_PSK},
+			{0x20, COMMON_COMMAND_WR_SECUREDEVICE_SENDTEACHIN},
+			{0x21, COMMON_COMMAND_WR_TEMPORARY_RLC_WINDOW},
+			{0x22, COMMON_COMMAND_RD_SECUREDEVICE_PSK},
+			{0x23, COMMON_COMMAND_RD_DUTYCYCLE_LIMIT},
+			{0x24, COMMON_COMMAND_SET_BAUDRATE},
+			{0x25, COMMON_COMMAND_GET_FREQUENCY_INFO},
+			{0x27, COMMON_COMMAND_GET_STEPCODE},
+			{0x2e, COMMON_COMMAND_WR_REMAN_CODE},
+			{0x2f, COMMON_COMMAND_WR_STARTUP_DELAY},
+			{0x30, COMMON_COMMAND_WR_REMAN_REPEATING},
+			{0x31, COMMON_COMMAND_RD_REMAN_REPEATING},
+			{0x32, COMMON_COMMAND_SET_NOISETHRESHOLD},
+			{0x33, COMMON_COMMAND_GET_NOISETHRESHOLD},
+			{0x36, COMMON_COMMAND_WR_RLC_SAVE_PERIOD},
+			{0x37, COMMON_COMMAND_WR_RLC_LEGACY_MODE},
+			{0x38, COMMON_COMMAND_WR_SECUREDEVICEV2_ADD},
+			{0x39, COMMON_COMMAND_RD_SECUREDEVICEV2_BY_INDEX},
+			{0x3a, COMMON_COMMAND_WR_RSSITEST_MODE},
+			{0x3b, COMMON_COMMAND_RD_RSSITEST_MODE},
+			{0x3c, COMMON_COMMAND_WR_SECUREDEVICE_MAINTENANCEKEY},
+			{0x3d, COMMON_COMMAND_RD_SECUREDEVICE_MAINTENANCEKEY},
+			{0x3e, COMMON_COMMAND_WR_TRANSPARENT_MODE},
+			{0x3f, COMMON_COMMAND_RD_TRANSPARENT_MODE},
+			{0x40, COMMON_COMMAND_WR_TX_ONLY_MODE},
+			{0x41, COMMON_COMMAND_RD_TX_ONLY_MODE},
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.expected.String(), func(t *testing.T) {
+				result, err := ParseCommonCommandFromByte(tc.input)
+				if err != nil {
+					t.Errorf("expected no error for input 0x%02x, got: %s", tc.input, err)
+				}
+				if result != tc.expected {
+					t.Errorf("expected %v, got %v", tc.expected, result)
+				}
+			})
+		}
+	})
+
+	t.Run("returns error for invalid common command", func(t *testing.T) {
+		invalidInputs := []uint8{0x00, 0x26, 0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x34, 0x35, 0x42, 0xff}
+
+		for _, input := range invalidInputs {
+			t.Run(t.Name(), func(t *testing.T) {
+				result, err := ParseCommonCommandFromByte(input)
+				if err == nil {
+					t.Errorf("expected error for input 0x%02x, got nil", input)
+				}
+				if err.Error() != "invalid common command" {
+					t.Errorf("expected error 'invalid common command', got '%s'", err.Error())
+				}
+				if result != 0 {
+					t.Errorf("expected result 0, got %v", result)
+				}
+			})
+		}
+	})
+}
+
+func TestCommonCommand_String(t *testing.T) {
+	t.Run("returns correct string for all valid common commands", func(t *testing.T) {
+		testCases := []struct {
+			input    CommonCommand
+			expected string
+		}{
+			{COMMON_COMMAND_WR_SLEEP, "WR_SLEEP"},
+			{COMMON_COMMAND_WR_RESET, "WR_RESET"},
+			{COMMON_COMMAND_RD_VERSION, "RD_VERSION"},
+			{COMMON_COMMAND_RD_SYS_LOG, "RD_SYS_LOG"},
+			{COMMON_COMMAND_WR_SYS_LOG, "WR_SYS_LOG"},
+			{COMMON_COMMAND_WR_BIST, "WR_BIST"},
+			{COMMON_COMMAND_WR_IDBASE, "WR_IDBASE"},
+			{COMMON_COMMAND_RD_IDBASE, "RD_IDBASE"},
+			{COMMON_COMMAND_WR_REPEATER, "WR_REPEATER"},
+			{COMMON_COMMAND_RD_REPEATER, "RD_REPEATER"},
+			{COMMON_COMMAND_WR_FILTER_ADD, "WR_FILTER_ADD"},
+			{COMMON_COMMAND_WR_FILTER_DEL, "WR_FILTER_DEL"},
+			{COMMON_COMMAND_WR_FILTER_DEL_ALL, "WR_FILTER_DEL_ALL"},
+			{COMMON_COMMAND_WR_FILTER_ENABLE, "WR_FILTER_ENABLE"},
+			{COMMON_COMMAND_RD_FILTER, "RD_FILTER"},
+			{COMMON_COMMAND_WR_WAIT_MATURITY, "WR_WAIT_MATURITY"},
+			{COMMON_COMMAND_WR_SUBTEL, "WR_SUBTEL"},
+			{COMMON_COMMAND_WR_MEM, "WR_MEM"},
+			{COMMON_COMMAND_RD_MEM, "RD_MEM"},
+			{COMMON_COMMAND_RD_MEM_ADDRESS, "RD_MEM_ADDRESS"},
+			{COMMON_COMMAND_RD_SECURITY, "RD_SECURITY"},
+			{COMMON_COMMAND_WR_SECURITY, "WR_SECURITY"},
+			{COMMON_COMMAND_WR_LEARNMODE, "WR_LEARNMODE"},
+			{COMMON_COMMAND_RD_LEARNMODE, "RD_LEARNMODE"},
+			{COMMON_COMMAND_WR_SECUREDEVICE_ADD, "WR_SECUREDEVICE_ADD"},
+			{COMMON_COMMAND_WR_SECUREDEVICE_DEL, "WR_SECUREDEVICE_DEL"},
+			{COMMON_COMMAND_RD_SECUREDEVICE_BY_INDEX, "RD_SECUREDEVICE_BY_INDEX"},
+			{COMMON_COMMAND_WR_MODE, "WR_MODE"},
+			{COMMON_COMMAND_RD_NUMSECUREDEVICES, "RD_NUMSECUREDEVICES"},
+			{COMMON_COMMAND_RD_SECUREDEVICE_BY_ID, "RD_SECUREDEVICE_BY_ID"},
+			{COMMON_COMMAND_WR_SECUREDEVICE_ADD_PSK, "WR_SECUREDEVICE_ADD_PSK"},
+			{COMMON_COMMAND_WR_SECUREDEVICE_SENDTEACHIN, "WR_SECUREDEVICE_SENDTEACHIN"},
+			{COMMON_COMMAND_WR_TEMPORARY_RLC_WINDOW, "WR_TEMPORARY_RLC_WINDOW"},
+			{COMMON_COMMAND_RD_SECUREDEVICE_PSK, "RD_SECUREDEVICE_PSK"},
+			{COMMON_COMMAND_RD_DUTYCYCLE_LIMIT, "RD_DUTYCYCLE_LIMIT"},
+			{COMMON_COMMAND_SET_BAUDRATE, "SET_BAUDRATE"},
+			{COMMON_COMMAND_GET_FREQUENCY_INFO, "GET_FREQUENCY_INFO"},
+			{COMMON_COMMAND_GET_STEPCODE, "GET_STEPCODE"},
+			{COMMON_COMMAND_WR_REMAN_CODE, "WR_REMAN_CODE"},
+			{COMMON_COMMAND_WR_STARTUP_DELAY, "WR_STARTUP_DELAY"},
+			{COMMON_COMMAND_WR_REMAN_REPEATING, "WR_REMAN_REPEATING"},
+			{COMMON_COMMAND_RD_REMAN_REPEATING, "RD_REMAN_REPEATING"},
+			{COMMON_COMMAND_SET_NOISETHRESHOLD, "SET_NOISETHRESHOLD"},
+			{COMMON_COMMAND_GET_NOISETHRESHOLD, "GET_NOISETHRESHOLD"},
+			{COMMON_COMMAND_WR_RLC_SAVE_PERIOD, "WR_RLC_SAVE_PERIOD"},
+			{COMMON_COMMAND_WR_RLC_LEGACY_MODE, "WR_RLC_LEGACY_MODE"},
+			{COMMON_COMMAND_WR_SECUREDEVICEV2_ADD, "WR_SECUREDEVICEV2_ADD"},
+			{COMMON_COMMAND_RD_SECUREDEVICEV2_BY_INDEX, "RD_SECUREDEVICEV2_BY_INDEX"},
+			{COMMON_COMMAND_WR_RSSITEST_MODE, "WR_RSSITEST_MODE"},
+			{COMMON_COMMAND_RD_RSSITEST_MODE, "RD_RSSITEST_MODE"},
+			{COMMON_COMMAND_WR_SECUREDEVICE_MAINTENANCEKEY, "WR_SECUREDEVICE_MAINTENANCEKEY"},
+			{COMMON_COMMAND_RD_SECUREDEVICE_MAINTENANCEKEY, "RD_SECUREDEVICE_MAINTENANCEKEY"},
+			{COMMON_COMMAND_WR_TRANSPARENT_MODE, "WR_TRANSPARENT_MODE"},
+			{COMMON_COMMAND_WR_TX_ONLY_MODE, "WR_TX_ONLY_MODE"},
+			{COMMON_COMMAND_RD_TX_ONLY_MODE, "RD_TX_ONLY_MODE"},
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.expected, func(t *testing.T) {
+				result := tc.input.String()
+				if result != tc.expected {
+					t.Errorf("expected '%s', got '%s'", tc.expected, result)
+				}
+			})
+		}
+	})
+
+	t.Run("returns UNKNOWN for invalid common commands", func(t *testing.T) {
+		invalidTypes := []CommonCommand{0x00, 0x26, 0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x34, 0x35, 0x42, 0xff}
+
+		for _, input := range invalidTypes {
+			t.Run(t.Name(), func(t *testing.T) {
+				result := input.String()
+				if result != "UNKNOWN" {
+					t.Errorf("expected 'UNKNOWN' for input %v, got '%s'", input, result)
+				}
+			})
+		}
+	})
+
+	t.Run("handles COMMON_COMMAND_RD_TRANSPARENT_MODE correctly", func(t *testing.T) {
+		// This command is handled by String() but not by ParseCommonCommandFromByte
+		command := CommonCommand(0x3f) // COMMON_COMMAND_RD_TRANSPARENT_MODE
+		result := command.String()
+		expected := "RD_TRANSPARENT_MODE"
+		if result != expected {
+			t.Errorf("expected '%s', got '%s'", expected, result)
+		}
+	})
+}
