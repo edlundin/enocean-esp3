@@ -32,7 +32,7 @@ func NewErp1PacketFromEsp3(telegram esp3.Esp3Telegram) (Erp1Packet, error) {
 	statusOffset := len(telegram.Data) - 1
 	senderIdOffset := statusOffset - device_id.DeviceIDSize
 
-	if telegram.PacketType != enums.PACKET_TYPE_RADIO_ERP1 {
+	if telegram.PacketType != enums.PacketTypeRADIO_ERP1 {
 		return Erp1Packet{}, errors.New("invalid packet type")
 	}
 
@@ -83,7 +83,7 @@ func (p Erp1Packet) ToEsp3() esp3.Esp3Telegram {
 	optData = append(optData, 0x03)
 
 	return esp3.Esp3Telegram{
-		PacketType: enums.PACKET_TYPE_RADIO_ERP1,
+		PacketType: enums.PacketTypeRADIO_ERP1,
 		Data:       data,
 		OptData:    optData,
 	}

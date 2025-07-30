@@ -5,55 +5,55 @@ import "errors"
 type Rorg uint8
 
 const (
-	RORG_RPS        Rorg = 0xf6
-	RORG_1BS        Rorg = 0xd5
-	RORG_4BS        Rorg = 0xa5
-	RORG_VLD        Rorg = 0xd2
-	RORG_MSC        Rorg = 0xd1
-	RORG_ADT        Rorg = 0xa6
-	RORG_SM_LRN_REQ Rorg = 0xc6
-	RORG_SM_LRN_ANS Rorg = 0xc7
-	RORG_SM_REC     Rorg = 0xa7
-	RORG_SYS_EX     Rorg = 0xc5
-	RORG_SEC        Rorg = 0x30
-	RORG_SEC_ENCAPS Rorg = 0x31
-	RORG_SEC_MAN    Rorg = 0x34
-	RORG_SIGNAL     Rorg = 0xd0
-	RORG_UTE        Rorg = 0xd4
+	RorgRPS        Rorg = 0xf6
+	Rorg1BS        Rorg = 0xd5
+	Rorg4BS        Rorg = 0xa5
+	RorgVLD        Rorg = 0xd2
+	RorgMSC        Rorg = 0xd1
+	RorgADT        Rorg = 0xa6
+	RorgSM_LRN_REQ Rorg = 0xc6
+	RorgSM_LRN_ANS Rorg = 0xc7
+	RorgSM_REC     Rorg = 0xa7
+	RorgSYS_EX     Rorg = 0xc5
+	RorgSEC        Rorg = 0x30
+	RorgSEC_ENCAPS Rorg = 0x31
+	RorgSEC_MAN    Rorg = 0x34
+	RorgSIGNAL     Rorg = 0xd0
+	RorgUTE        Rorg = 0xd4
 )
 
 func ParseRorgFromByte(byte uint8) (Rorg, error) {
 	switch byte {
 	case 0xf6:
-		return RORG_RPS, nil
+		return RorgRPS, nil
 	case 0xd5:
-		return RORG_1BS, nil
+		return Rorg1BS, nil
 	case 0xa5:
-		return RORG_4BS, nil
+		return Rorg4BS, nil
 	case 0xd2:
-		return RORG_VLD, nil
+		return RorgVLD, nil
 	case 0xd1:
-		return RORG_MSC, nil
+		return RorgMSC, nil
 	case 0xa6:
-		return RORG_ADT, nil
+		return RorgADT, nil
 	case 0xc6:
-		return RORG_SM_LRN_REQ, nil
+		return RorgSM_LRN_REQ, nil
 	case 0xc7:
-		return RORG_SM_LRN_ANS, nil
+		return RorgSM_LRN_ANS, nil
 	case 0xa7:
-		return RORG_SM_REC, nil
+		return RorgSM_REC, nil
 	case 0xc5:
-		return RORG_SYS_EX, nil
+		return RorgSYS_EX, nil
 	case 0x30:
-		return RORG_SEC, nil
+		return RorgSEC, nil
 	case 0x31:
-		return RORG_SEC_ENCAPS, nil
+		return RorgSEC_ENCAPS, nil
 	case 0x34:
-		return RORG_SEC_MAN, nil
+		return RorgSEC_MAN, nil
 	case 0xd0:
-		return RORG_SIGNAL, nil
+		return RorgSIGNAL, nil
 	case 0xd4:
-		return RORG_UTE, nil
+		return RorgUTE, nil
 	default:
 		return 0, errors.New("invalid rorg")
 	}
@@ -61,35 +61,35 @@ func ParseRorgFromByte(byte uint8) (Rorg, error) {
 
 func (rorg Rorg) String() string {
 	switch rorg {
-	case RORG_RPS:
+	case RorgRPS:
 		return "RPS"
-	case RORG_1BS:
+	case Rorg1BS:
 		return "1BS"
-	case RORG_4BS:
+	case Rorg4BS:
 		return "4BS"
-	case RORG_VLD:
+	case RorgVLD:
 		return "VLD"
-	case RORG_MSC:
+	case RorgMSC:
 		return "MSC"
-	case RORG_ADT:
+	case RorgADT:
 		return "ADT"
-	case RORG_SM_LRN_REQ:
+	case RorgSM_LRN_REQ:
 		return "SM_LRN_REQ"
-	case RORG_SM_LRN_ANS:
+	case RorgSM_LRN_ANS:
 		return "SM_LRN_ANS"
-	case RORG_SM_REC:
+	case RorgSM_REC:
 		return "SM_REC"
-	case RORG_SYS_EX:
+	case RorgSYS_EX:
 		return "SYS_EX"
-	case RORG_SEC:
+	case RorgSEC:
 		return "SEC"
-	case RORG_SEC_ENCAPS:
+	case RorgSEC_ENCAPS:
 		return "SEC_ENCAPS"
-	case RORG_SEC_MAN:
+	case RorgSEC_MAN:
 		return "SEC_MAN"
-	case RORG_SIGNAL:
+	case RorgSIGNAL:
 		return "SIGNAL"
-	case RORG_UTE:
+	case RorgUTE:
 		return "UTE"
 	default:
 		return "UNKNOWN"

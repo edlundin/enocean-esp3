@@ -5,49 +5,49 @@ import "errors"
 type PacketType uint8
 
 const (
-	PACKET_TYPE_RADIO_ERP1         PacketType = 0x01
-	PACKET_TYPE_RESPONSE           PacketType = 0x02
-	PACKET_TYPE_RADIO_SUB_TEL      PacketType = 0x03
-	PACKET_TYPE_EVENT              PacketType = 0x04
-	PACKET_TYPE_COMMON_COMMAND     PacketType = 0x05
-	PACKET_TYPE_SMART_ACK_COMMAND  PacketType = 0x06
-	PACKET_TYPE_REMOTE_MAN_COMMAND PacketType = 0x07
-	PACKET_TYPE_RADIO_MESSAGE      PacketType = 0x09
-	PACKET_TYPE_RADIO_ERP2         PacketType = 0x0a
-	PACKET_TYPE_CONFIG_COMMAND     PacketType = 0x0b
-	PACKET_TYPE_COMMAND_ACCEPTED   PacketType = 0x0c
-	PACKET_TYPE_RADIO_802_15_4     PacketType = 0x10
-	PACKET_TYPE_COMMAND_2_4        PacketType = 0x11
+	PacketTypeRADIO_ERP1         PacketType = 0x01
+	PacketTypeRESPONSE           PacketType = 0x02
+	PacketTypeRADIO_SUB_TEL      PacketType = 0x03
+	PacketTypeEVENT              PacketType = 0x04
+	PacketTypeCOMMON_COMMAND     PacketType = 0x05
+	PacketTypeSMART_ACK_COMMAND  PacketType = 0x06
+	PacketTypeREMOTE_MAN_COMMAND PacketType = 0x07
+	PacketTypeRADIO_MESSAGE      PacketType = 0x09
+	PacketTypeRADIO_ERP2         PacketType = 0x0a
+	PacketTypeCONFIG_COMMAND     PacketType = 0x0b
+	PacketTypeCOMMAND_ACCEPTED   PacketType = 0x0c
+	PacketTypeRADIO_802_15_4     PacketType = 0x10
+	PacketTypeCOMMAND_2_4        PacketType = 0x11
 )
 
 func ParsePacketTypeFromByte(byte uint8) (PacketType, error) {
 	switch byte {
 	case 0x01:
-		return PACKET_TYPE_RADIO_ERP1, nil
+		return PacketTypeRADIO_ERP1, nil
 	case 0x02:
-		return PACKET_TYPE_RESPONSE, nil
+		return PacketTypeRESPONSE, nil
 	case 0x03:
-		return PACKET_TYPE_RADIO_SUB_TEL, nil
+		return PacketTypeRADIO_SUB_TEL, nil
 	case 0x04:
-		return PACKET_TYPE_EVENT, nil
+		return PacketTypeEVENT, nil
 	case 0x05:
-		return PACKET_TYPE_COMMON_COMMAND, nil
+		return PacketTypeCOMMON_COMMAND, nil
 	case 0x06:
-		return PACKET_TYPE_SMART_ACK_COMMAND, nil
+		return PacketTypeSMART_ACK_COMMAND, nil
 	case 0x07:
-		return PACKET_TYPE_REMOTE_MAN_COMMAND, nil
+		return PacketTypeREMOTE_MAN_COMMAND, nil
 	case 0x09:
-		return PACKET_TYPE_RADIO_MESSAGE, nil
+		return PacketTypeRADIO_MESSAGE, nil
 	case 0x0a:
-		return PACKET_TYPE_RADIO_ERP2, nil
+		return PacketTypeRADIO_ERP2, nil
 	case 0x0b:
-		return PACKET_TYPE_CONFIG_COMMAND, nil
+		return PacketTypeCONFIG_COMMAND, nil
 	case 0x0c:
-		return PACKET_TYPE_COMMAND_ACCEPTED, nil
+		return PacketTypeCOMMAND_ACCEPTED, nil
 	case 0x10:
-		return PACKET_TYPE_RADIO_802_15_4, nil
+		return PacketTypeRADIO_802_15_4, nil
 	case 0x11:
-		return PACKET_TYPE_COMMAND_2_4, nil
+		return PacketTypeCOMMAND_2_4, nil
 	default:
 		return 0, errors.New("invalid packet type")
 	}
@@ -55,31 +55,31 @@ func ParsePacketTypeFromByte(byte uint8) (PacketType, error) {
 
 func (packetType PacketType) String() string {
 	switch packetType {
-	case PACKET_TYPE_RADIO_ERP1:
+	case PacketTypeRADIO_ERP1:
 		return "RADIO_ERP1"
-	case PACKET_TYPE_RESPONSE:
+	case PacketTypeRESPONSE:
 		return "RESPONSE"
-	case PACKET_TYPE_RADIO_SUB_TEL:
+	case PacketTypeRADIO_SUB_TEL:
 		return "RADIO_SUB_TEL"
-	case PACKET_TYPE_EVENT:
+	case PacketTypeEVENT:
 		return "EVENT"
-	case PACKET_TYPE_COMMON_COMMAND:
+	case PacketTypeCOMMON_COMMAND:
 		return "COMMON_COMMAND"
-	case PACKET_TYPE_SMART_ACK_COMMAND:
+	case PacketTypeSMART_ACK_COMMAND:
 		return "SMART_ACK_COMMAND"
-	case PACKET_TYPE_REMOTE_MAN_COMMAND:
+	case PacketTypeREMOTE_MAN_COMMAND:
 		return "REMOTE_MAN_COMMAND"
-	case PACKET_TYPE_RADIO_MESSAGE:
+	case PacketTypeRADIO_MESSAGE:
 		return "RADIO_MESSAGE"
-	case PACKET_TYPE_RADIO_ERP2:
+	case PacketTypeRADIO_ERP2:
 		return "RADIO_ERP2"
-	case PACKET_TYPE_CONFIG_COMMAND:
+	case PacketTypeCONFIG_COMMAND:
 		return "CONFIG_COMMAND"
-	case PACKET_TYPE_COMMAND_ACCEPTED:
+	case PacketTypeCOMMAND_ACCEPTED:
 		return "COMMAND_ACCEPTED"
-	case PACKET_TYPE_RADIO_802_15_4:
+	case PacketTypeRADIO_802_15_4:
 		return "RADIO_802_15_4"
-	case PACKET_TYPE_COMMAND_2_4:
+	case PacketTypeCOMMAND_2_4:
 		return "COMMAND_2_4"
 	default:
 		return "UNKNOWN"

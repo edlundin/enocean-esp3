@@ -5,178 +5,178 @@ import "errors"
 type CommonCommand uint8
 
 const (
-	COMMON_COMMAND_WR_SLEEP                       CommonCommand = 0x01
-	COMMON_COMMAND_WR_RESET                       CommonCommand = 0x02
-	COMMON_COMMAND_RD_VERSION                     CommonCommand = 0x03
-	COMMON_COMMAND_RD_SYS_LOG                     CommonCommand = 0x04
-	COMMON_COMMAND_WR_SYS_LOG                     CommonCommand = 0x05
-	COMMON_COMMAND_WR_BIST                        CommonCommand = 0x06
-	COMMON_COMMAND_WR_IDBASE                      CommonCommand = 0x07
-	COMMON_COMMAND_RD_IDBASE                      CommonCommand = 0x08
-	COMMON_COMMAND_WR_REPEATER                    CommonCommand = 0x09
-	COMMON_COMMAND_RD_REPEATER                    CommonCommand = 0x0a
-	COMMON_COMMAND_WR_FILTER_ADD                  CommonCommand = 0x0b
-	COMMON_COMMAND_WR_FILTER_DEL                  CommonCommand = 0x0c
-	COMMON_COMMAND_WR_FILTER_DEL_ALL              CommonCommand = 0x0d
-	COMMON_COMMAND_WR_FILTER_ENABLE               CommonCommand = 0x0e
-	COMMON_COMMAND_RD_FILTER                      CommonCommand = 0x0f
-	COMMON_COMMAND_WR_WAIT_MATURITY               CommonCommand = 0x10
-	COMMON_COMMAND_WR_SUBTEL                      CommonCommand = 0x11
-	COMMON_COMMAND_WR_MEM                         CommonCommand = 0x12
-	COMMON_COMMAND_RD_MEM                         CommonCommand = 0x13
-	COMMON_COMMAND_RD_MEM_ADDRESS                 CommonCommand = 0x14
-	COMMON_COMMAND_RD_SECURITY                    CommonCommand = 0x15
-	COMMON_COMMAND_WR_SECURITY                    CommonCommand = 0x16
-	COMMON_COMMAND_WR_LEARNMODE                   CommonCommand = 0x17
-	COMMON_COMMAND_RD_LEARNMODE                   CommonCommand = 0x18
-	COMMON_COMMAND_WR_SECUREDEVICE_ADD            CommonCommand = 0x19
-	COMMON_COMMAND_WR_SECUREDEVICE_DEL            CommonCommand = 0x1a
-	COMMON_COMMAND_RD_SECUREDEVICE_BY_INDEX       CommonCommand = 0x1b
-	COMMON_COMMAND_WR_MODE                        CommonCommand = 0x1c
-	COMMON_COMMAND_RD_NUMSECUREDEVICES            CommonCommand = 0x1d
-	COMMON_COMMAND_RD_SECUREDEVICE_BY_ID          CommonCommand = 0x1e
-	COMMON_COMMAND_WR_SECUREDEVICE_ADD_PSK        CommonCommand = 0x1f
-	COMMON_COMMAND_WR_SECUREDEVICE_SENDTEACHIN    CommonCommand = 0x20
-	COMMON_COMMAND_WR_TEMPORARY_RLC_WINDOW        CommonCommand = 0x21
-	COMMON_COMMAND_RD_SECUREDEVICE_PSK            CommonCommand = 0x22
-	COMMON_COMMAND_RD_DUTYCYCLE_LIMIT             CommonCommand = 0x23
-	COMMON_COMMAND_SET_BAUDRATE                   CommonCommand = 0x24
-	COMMON_COMMAND_GET_FREQUENCY_INFO             CommonCommand = 0x25
-	COMMON_COMMAND_GET_STEPCODE                   CommonCommand = 0x27
-	COMMON_COMMAND_WR_REMAN_CODE                  CommonCommand = 0x2e
-	COMMON_COMMAND_WR_STARTUP_DELAY               CommonCommand = 0x2f
-	COMMON_COMMAND_WR_REMAN_REPEATING             CommonCommand = 0x30
-	COMMON_COMMAND_RD_REMAN_REPEATING             CommonCommand = 0x31
-	COMMON_COMMAND_SET_NOISETHRESHOLD             CommonCommand = 0x32
-	COMMON_COMMAND_GET_NOISETHRESHOLD             CommonCommand = 0x33
-	COMMON_COMMAND_WR_RLC_SAVE_PERIOD             CommonCommand = 0x36
-	COMMON_COMMAND_WR_RLC_LEGACY_MODE             CommonCommand = 0x37
-	COMMON_COMMAND_WR_SECUREDEVICEV2_ADD          CommonCommand = 0x38
-	COMMON_COMMAND_RD_SECUREDEVICEV2_BY_INDEX     CommonCommand = 0x39
-	COMMON_COMMAND_WR_RSSITEST_MODE               CommonCommand = 0x3a
-	COMMON_COMMAND_RD_RSSITEST_MODE               CommonCommand = 0x3b
-	COMMON_COMMAND_WR_SECUREDEVICE_MAINTENANCEKEY CommonCommand = 0x3c
-	COMMON_COMMAND_RD_SECUREDEVICE_MAINTENANCEKEY CommonCommand = 0x3d
-	COMMON_COMMAND_WR_TRANSPARENT_MODE            CommonCommand = 0x3e
-	COMMON_COMMAND_RD_TRANSPARENT_MODE            CommonCommand = 0x3f
-	COMMON_COMMAND_WR_TX_ONLY_MODE                CommonCommand = 0x40
-	COMMON_COMMAND_RD_TX_ONLY_MODE                CommonCommand = 0x41
+	CommonCommandWR_SLEEP                       CommonCommand = 0x01
+	CommonCommandWR_RESET                       CommonCommand = 0x02
+	CommonCommandRD_VERSION                     CommonCommand = 0x03
+	CommonCommandRD_SYS_LOG                     CommonCommand = 0x04
+	CommonCommandWR_SYS_LOG                     CommonCommand = 0x05
+	CommonCommandWR_BIST                        CommonCommand = 0x06
+	CommonCommandWR_IDBASE                      CommonCommand = 0x07
+	CommonCommandRD_IDBASE                      CommonCommand = 0x08
+	CommonCommandWR_REPEATER                    CommonCommand = 0x09
+	CommonCommandRD_REPEATER                    CommonCommand = 0x0a
+	CommonCommandWR_FILTER_ADD                  CommonCommand = 0x0b
+	CommonCommandWR_FILTER_DEL                  CommonCommand = 0x0c
+	CommonCommandWR_FILTER_DEL_ALL              CommonCommand = 0x0d
+	CommonCommandWR_FILTER_ENABLE               CommonCommand = 0x0e
+	CommonCommandRD_FILTER                      CommonCommand = 0x0f
+	CommonCommandWR_WAIT_MATURITY               CommonCommand = 0x10
+	CommonCommandWR_SUBTEL                      CommonCommand = 0x11
+	CommonCommandWR_MEM                         CommonCommand = 0x12
+	CommonCommandRD_MEM                         CommonCommand = 0x13
+	CommonCommandRD_MEM_ADDRESS                 CommonCommand = 0x14
+	CommonCommandRD_SECURITY                    CommonCommand = 0x15
+	CommonCommandWR_SECURITY                    CommonCommand = 0x16
+	CommonCommandWR_LEARNMODE                   CommonCommand = 0x17
+	CommonCommandRD_LEARNMODE                   CommonCommand = 0x18
+	CommonCommandWR_SECUREDEVICE_ADD            CommonCommand = 0x19
+	CommonCommandWR_SECUREDEVICE_DEL            CommonCommand = 0x1a
+	CommonCommandRD_SECUREDEVICE_BY_INDEX       CommonCommand = 0x1b
+	CommonCommandWR_MODE                        CommonCommand = 0x1c
+	CommonCommandRD_NUMSECUREDEVICES            CommonCommand = 0x1d
+	CommonCommandRD_SECUREDEVICE_BY_ID          CommonCommand = 0x1e
+	CommonCommandWR_SECUREDEVICE_ADD_PSK        CommonCommand = 0x1f
+	CommonCommandWR_SECUREDEVICE_SENDTEACHIN    CommonCommand = 0x20
+	CommonCommandWR_TEMPORARY_RLC_WINDOW        CommonCommand = 0x21
+	CommonCommandRD_SECUREDEVICE_PSK            CommonCommand = 0x22
+	CommonCommandRD_DUTYCYCLE_LIMIT             CommonCommand = 0x23
+	CommonCommandSET_BAUDRATE                   CommonCommand = 0x24
+	CommonCommandGET_FREQUENCY_INFO             CommonCommand = 0x25
+	CommonCommandGET_STEPCODE                   CommonCommand = 0x27
+	CommonCommandWR_REMAN_CODE                  CommonCommand = 0x2e
+	CommonCommandWR_STARTUP_DELAY               CommonCommand = 0x2f
+	CommonCommandWR_REMAN_REPEATING             CommonCommand = 0x30
+	CommonCommandRD_REMAN_REPEATING             CommonCommand = 0x31
+	CommonCommandSET_NOISETHRESHOLD             CommonCommand = 0x32
+	CommonCommandGET_NOISETHRESHOLD             CommonCommand = 0x33
+	CommonCommandWR_RLC_SAVE_PERIOD             CommonCommand = 0x36
+	CommonCommandWR_RLC_LEGACY_MODE             CommonCommand = 0x37
+	CommonCommandWR_SECUREDEVICEV2_ADD          CommonCommand = 0x38
+	CommonCommandRD_SECUREDEVICEV2_BY_INDEX     CommonCommand = 0x39
+	CommonCommandWR_RSSITEST_MODE               CommonCommand = 0x3a
+	CommonCommandRD_RSSITEST_MODE               CommonCommand = 0x3b
+	CommonCommandWR_SECUREDEVICE_MAINTENANCEKEY CommonCommand = 0x3c
+	CommonCommandRD_SECUREDEVICE_MAINTENANCEKEY CommonCommand = 0x3d
+	CommonCommandWR_TRANSPARENT_MODE            CommonCommand = 0x3e
+	CommonCommandRD_TRANSPARENT_MODE            CommonCommand = 0x3f
+	CommonCommandWR_TX_ONLY_MODE                CommonCommand = 0x40
+	CommonCommandRD_TX_ONLY_MODE                CommonCommand = 0x41
 )
 
 func ParseCommonCommandFromByte(byte uint8) (CommonCommand, error) {
 	switch byte {
 	case 0x01:
-		return COMMON_COMMAND_WR_SLEEP, nil
+		return CommonCommandWR_SLEEP, nil
 	case 0x02:
-		return COMMON_COMMAND_WR_RESET, nil
+		return CommonCommandWR_RESET, nil
 	case 0x03:
-		return COMMON_COMMAND_RD_VERSION, nil
+		return CommonCommandRD_VERSION, nil
 	case 0x04:
-		return COMMON_COMMAND_RD_SYS_LOG, nil
+		return CommonCommandRD_SYS_LOG, nil
 	case 0x05:
-		return COMMON_COMMAND_WR_SYS_LOG, nil
+		return CommonCommandWR_SYS_LOG, nil
 	case 0x06:
-		return COMMON_COMMAND_WR_BIST, nil
+		return CommonCommandWR_BIST, nil
 	case 0x07:
-		return COMMON_COMMAND_WR_IDBASE, nil
+		return CommonCommandWR_IDBASE, nil
 	case 0x08:
-		return COMMON_COMMAND_RD_IDBASE, nil
+		return CommonCommandRD_IDBASE, nil
 	case 0x09:
-		return COMMON_COMMAND_WR_REPEATER, nil
+		return CommonCommandWR_REPEATER, nil
 	case 0x0a:
-		return COMMON_COMMAND_RD_REPEATER, nil
+		return CommonCommandRD_REPEATER, nil
 	case 0x0b:
-		return COMMON_COMMAND_WR_FILTER_ADD, nil
+		return CommonCommandWR_FILTER_ADD, nil
 	case 0x0c:
-		return COMMON_COMMAND_WR_FILTER_DEL, nil
+		return CommonCommandWR_FILTER_DEL, nil
 	case 0x0d:
-		return COMMON_COMMAND_WR_FILTER_DEL_ALL, nil
+		return CommonCommandWR_FILTER_DEL_ALL, nil
 	case 0x0e:
-		return COMMON_COMMAND_WR_FILTER_ENABLE, nil
+		return CommonCommandWR_FILTER_ENABLE, nil
 	case 0x0f:
-		return COMMON_COMMAND_RD_FILTER, nil
+		return CommonCommandRD_FILTER, nil
 	case 0x10:
-		return COMMON_COMMAND_WR_WAIT_MATURITY, nil
+		return CommonCommandWR_WAIT_MATURITY, nil
 	case 0x11:
-		return COMMON_COMMAND_WR_SUBTEL, nil
+		return CommonCommandWR_SUBTEL, nil
 	case 0x12:
-		return COMMON_COMMAND_WR_MEM, nil
+		return CommonCommandWR_MEM, nil
 	case 0x13:
-		return COMMON_COMMAND_RD_MEM, nil
+		return CommonCommandRD_MEM, nil
 	case 0x14:
-		return COMMON_COMMAND_RD_MEM_ADDRESS, nil
+		return CommonCommandRD_MEM_ADDRESS, nil
 	case 0x15:
-		return COMMON_COMMAND_RD_SECURITY, nil
+		return CommonCommandRD_SECURITY, nil
 	case 0x16:
-		return COMMON_COMMAND_WR_SECURITY, nil
+		return CommonCommandWR_SECURITY, nil
 	case 0x17:
-		return COMMON_COMMAND_WR_LEARNMODE, nil
+		return CommonCommandWR_LEARNMODE, nil
 	case 0x18:
-		return COMMON_COMMAND_RD_LEARNMODE, nil
+		return CommonCommandRD_LEARNMODE, nil
 	case 0x19:
-		return COMMON_COMMAND_WR_SECUREDEVICE_ADD, nil
+		return CommonCommandWR_SECUREDEVICE_ADD, nil
 	case 0x1a:
-		return COMMON_COMMAND_WR_SECUREDEVICE_DEL, nil
+		return CommonCommandWR_SECUREDEVICE_DEL, nil
 	case 0x1b:
-		return COMMON_COMMAND_RD_SECUREDEVICE_BY_INDEX, nil
+		return CommonCommandRD_SECUREDEVICE_BY_INDEX, nil
 	case 0x1c:
-		return COMMON_COMMAND_WR_MODE, nil
+		return CommonCommandWR_MODE, nil
 	case 0x1d:
-		return COMMON_COMMAND_RD_NUMSECUREDEVICES, nil
+		return CommonCommandRD_NUMSECUREDEVICES, nil
 	case 0x1e:
-		return COMMON_COMMAND_RD_SECUREDEVICE_BY_ID, nil
+		return CommonCommandRD_SECUREDEVICE_BY_ID, nil
 	case 0x1f:
-		return COMMON_COMMAND_WR_SECUREDEVICE_ADD_PSK, nil
+		return CommonCommandWR_SECUREDEVICE_ADD_PSK, nil
 	case 0x20:
-		return COMMON_COMMAND_WR_SECUREDEVICE_SENDTEACHIN, nil
+		return CommonCommandWR_SECUREDEVICE_SENDTEACHIN, nil
 	case 0x21:
-		return COMMON_COMMAND_WR_TEMPORARY_RLC_WINDOW, nil
+		return CommonCommandWR_TEMPORARY_RLC_WINDOW, nil
 	case 0x22:
-		return COMMON_COMMAND_RD_SECUREDEVICE_PSK, nil
+		return CommonCommandRD_SECUREDEVICE_PSK, nil
 	case 0x23:
-		return COMMON_COMMAND_RD_DUTYCYCLE_LIMIT, nil
+		return CommonCommandRD_DUTYCYCLE_LIMIT, nil
 	case 0x24:
-		return COMMON_COMMAND_SET_BAUDRATE, nil
+		return CommonCommandSET_BAUDRATE, nil
 	case 0x25:
-		return COMMON_COMMAND_GET_FREQUENCY_INFO, nil
+		return CommonCommandGET_FREQUENCY_INFO, nil
 	case 0x27:
-		return COMMON_COMMAND_GET_STEPCODE, nil
+		return CommonCommandGET_STEPCODE, nil
 	case 0x2e:
-		return COMMON_COMMAND_WR_REMAN_CODE, nil
+		return CommonCommandWR_REMAN_CODE, nil
 	case 0x2f:
-		return COMMON_COMMAND_WR_STARTUP_DELAY, nil
+		return CommonCommandWR_STARTUP_DELAY, nil
 	case 0x30:
-		return COMMON_COMMAND_WR_REMAN_REPEATING, nil
+		return CommonCommandWR_REMAN_REPEATING, nil
 	case 0x31:
-		return COMMON_COMMAND_RD_REMAN_REPEATING, nil
+		return CommonCommandRD_REMAN_REPEATING, nil
 	case 0x32:
-		return COMMON_COMMAND_SET_NOISETHRESHOLD, nil
+		return CommonCommandSET_NOISETHRESHOLD, nil
 	case 0x33:
-		return COMMON_COMMAND_GET_NOISETHRESHOLD, nil
+		return CommonCommandGET_NOISETHRESHOLD, nil
 	case 0x36:
-		return COMMON_COMMAND_WR_RLC_SAVE_PERIOD, nil
+		return CommonCommandWR_RLC_SAVE_PERIOD, nil
 	case 0x37:
-		return COMMON_COMMAND_WR_RLC_LEGACY_MODE, nil
+		return CommonCommandWR_RLC_LEGACY_MODE, nil
 	case 0x38:
-		return COMMON_COMMAND_WR_SECUREDEVICEV2_ADD, nil
+		return CommonCommandWR_SECUREDEVICEV2_ADD, nil
 	case 0x39:
-		return COMMON_COMMAND_RD_SECUREDEVICEV2_BY_INDEX, nil
+		return CommonCommandRD_SECUREDEVICEV2_BY_INDEX, nil
 	case 0x3a:
-		return COMMON_COMMAND_WR_RSSITEST_MODE, nil
+		return CommonCommandWR_RSSITEST_MODE, nil
 	case 0x3b:
-		return COMMON_COMMAND_RD_RSSITEST_MODE, nil
+		return CommonCommandRD_RSSITEST_MODE, nil
 	case 0x3c:
-		return COMMON_COMMAND_WR_SECUREDEVICE_MAINTENANCEKEY, nil
+		return CommonCommandWR_SECUREDEVICE_MAINTENANCEKEY, nil
 	case 0x3d:
-		return COMMON_COMMAND_RD_SECUREDEVICE_MAINTENANCEKEY, nil
+		return CommonCommandRD_SECUREDEVICE_MAINTENANCEKEY, nil
 	case 0x3e:
-		return COMMON_COMMAND_WR_TRANSPARENT_MODE, nil
+		return CommonCommandWR_TRANSPARENT_MODE, nil
 	case 0x3f:
-		return COMMON_COMMAND_RD_TRANSPARENT_MODE, nil
+		return CommonCommandRD_TRANSPARENT_MODE, nil
 	case 0x40:
-		return COMMON_COMMAND_WR_TX_ONLY_MODE, nil
+		return CommonCommandWR_TX_ONLY_MODE, nil
 	case 0x41:
-		return COMMON_COMMAND_RD_TX_ONLY_MODE, nil
+		return CommonCommandRD_TX_ONLY_MODE, nil
 	default:
 		return 0, errors.New("invalid common command")
 	}
@@ -184,117 +184,117 @@ func ParseCommonCommandFromByte(byte uint8) (CommonCommand, error) {
 
 func (command CommonCommand) String() string {
 	switch command {
-	case COMMON_COMMAND_WR_SLEEP:
+	case CommonCommandWR_SLEEP:
 		return "WR_SLEEP"
-	case COMMON_COMMAND_WR_RESET:
+	case CommonCommandWR_RESET:
 		return "WR_RESET"
-	case COMMON_COMMAND_RD_VERSION:
+	case CommonCommandRD_VERSION:
 		return "RD_VERSION"
-	case COMMON_COMMAND_RD_SYS_LOG:
+	case CommonCommandRD_SYS_LOG:
 		return "RD_SYS_LOG"
-	case COMMON_COMMAND_WR_SYS_LOG:
+	case CommonCommandWR_SYS_LOG:
 		return "WR_SYS_LOG"
-	case COMMON_COMMAND_WR_BIST:
+	case CommonCommandWR_BIST:
 		return "WR_BIST"
-	case COMMON_COMMAND_WR_IDBASE:
+	case CommonCommandWR_IDBASE:
 		return "WR_IDBASE"
-	case COMMON_COMMAND_RD_IDBASE:
+	case CommonCommandRD_IDBASE:
 		return "RD_IDBASE"
-	case COMMON_COMMAND_WR_REPEATER:
+	case CommonCommandWR_REPEATER:
 		return "WR_REPEATER"
-	case COMMON_COMMAND_RD_REPEATER:
+	case CommonCommandRD_REPEATER:
 		return "RD_REPEATER"
-	case COMMON_COMMAND_WR_FILTER_ADD:
+	case CommonCommandWR_FILTER_ADD:
 		return "WR_FILTER_ADD"
-	case COMMON_COMMAND_WR_FILTER_DEL:
+	case CommonCommandWR_FILTER_DEL:
 		return "WR_FILTER_DEL"
-	case COMMON_COMMAND_WR_FILTER_DEL_ALL:
+	case CommonCommandWR_FILTER_DEL_ALL:
 		return "WR_FILTER_DEL_ALL"
-	case COMMON_COMMAND_WR_FILTER_ENABLE:
+	case CommonCommandWR_FILTER_ENABLE:
 		return "WR_FILTER_ENABLE"
-	case COMMON_COMMAND_RD_FILTER:
+	case CommonCommandRD_FILTER:
 		return "RD_FILTER"
-	case COMMON_COMMAND_WR_WAIT_MATURITY:
+	case CommonCommandWR_WAIT_MATURITY:
 		return "WR_WAIT_MATURITY"
-	case COMMON_COMMAND_WR_SUBTEL:
+	case CommonCommandWR_SUBTEL:
 		return "WR_SUBTEL"
-	case COMMON_COMMAND_WR_MEM:
+	case CommonCommandWR_MEM:
 		return "WR_MEM"
-	case COMMON_COMMAND_RD_MEM:
+	case CommonCommandRD_MEM:
 		return "RD_MEM"
-	case COMMON_COMMAND_RD_MEM_ADDRESS:
+	case CommonCommandRD_MEM_ADDRESS:
 		return "RD_MEM_ADDRESS"
-	case COMMON_COMMAND_RD_SECURITY:
+	case CommonCommandRD_SECURITY:
 		return "RD_SECURITY"
-	case COMMON_COMMAND_WR_SECURITY:
+	case CommonCommandWR_SECURITY:
 		return "WR_SECURITY"
-	case COMMON_COMMAND_WR_LEARNMODE:
+	case CommonCommandWR_LEARNMODE:
 		return "WR_LEARNMODE"
-	case COMMON_COMMAND_RD_LEARNMODE:
+	case CommonCommandRD_LEARNMODE:
 		return "RD_LEARNMODE"
-	case COMMON_COMMAND_WR_SECUREDEVICE_ADD:
+	case CommonCommandWR_SECUREDEVICE_ADD:
 		return "WR_SECUREDEVICE_ADD"
-	case COMMON_COMMAND_WR_SECUREDEVICE_DEL:
+	case CommonCommandWR_SECUREDEVICE_DEL:
 		return "WR_SECUREDEVICE_DEL"
-	case COMMON_COMMAND_RD_SECUREDEVICE_BY_INDEX:
+	case CommonCommandRD_SECUREDEVICE_BY_INDEX:
 		return "RD_SECUREDEVICE_BY_INDEX"
-	case COMMON_COMMAND_WR_MODE:
+	case CommonCommandWR_MODE:
 		return "WR_MODE"
-	case COMMON_COMMAND_RD_NUMSECUREDEVICES:
+	case CommonCommandRD_NUMSECUREDEVICES:
 		return "RD_NUMSECUREDEVICES"
-	case COMMON_COMMAND_RD_SECUREDEVICE_BY_ID:
+	case CommonCommandRD_SECUREDEVICE_BY_ID:
 		return "RD_SECUREDEVICE_BY_ID"
-	case COMMON_COMMAND_WR_SECUREDEVICE_ADD_PSK:
+	case CommonCommandWR_SECUREDEVICE_ADD_PSK:
 		return "WR_SECUREDEVICE_ADD_PSK"
-	case COMMON_COMMAND_WR_SECUREDEVICE_SENDTEACHIN:
+	case CommonCommandWR_SECUREDEVICE_SENDTEACHIN:
 		return "WR_SECUREDEVICE_SENDTEACHIN"
-	case COMMON_COMMAND_WR_TEMPORARY_RLC_WINDOW:
+	case CommonCommandWR_TEMPORARY_RLC_WINDOW:
 		return "WR_TEMPORARY_RLC_WINDOW"
-	case COMMON_COMMAND_RD_SECUREDEVICE_PSK:
+	case CommonCommandRD_SECUREDEVICE_PSK:
 		return "RD_SECUREDEVICE_PSK"
-	case COMMON_COMMAND_RD_DUTYCYCLE_LIMIT:
+	case CommonCommandRD_DUTYCYCLE_LIMIT:
 		return "RD_DUTYCYCLE_LIMIT"
-	case COMMON_COMMAND_SET_BAUDRATE:
+	case CommonCommandSET_BAUDRATE:
 		return "SET_BAUDRATE"
-	case COMMON_COMMAND_GET_FREQUENCY_INFO:
+	case CommonCommandGET_FREQUENCY_INFO:
 		return "GET_FREQUENCY_INFO"
-	case COMMON_COMMAND_GET_STEPCODE:
+	case CommonCommandGET_STEPCODE:
 		return "GET_STEPCODE"
-	case COMMON_COMMAND_WR_REMAN_CODE:
+	case CommonCommandWR_REMAN_CODE:
 		return "WR_REMAN_CODE"
-	case COMMON_COMMAND_WR_STARTUP_DELAY:
+	case CommonCommandWR_STARTUP_DELAY:
 		return "WR_STARTUP_DELAY"
-	case COMMON_COMMAND_WR_REMAN_REPEATING:
+	case CommonCommandWR_REMAN_REPEATING:
 		return "WR_REMAN_REPEATING"
-	case COMMON_COMMAND_RD_REMAN_REPEATING:
+	case CommonCommandRD_REMAN_REPEATING:
 		return "RD_REMAN_REPEATING"
-	case COMMON_COMMAND_SET_NOISETHRESHOLD:
+	case CommonCommandSET_NOISETHRESHOLD:
 		return "SET_NOISETHRESHOLD"
-	case COMMON_COMMAND_GET_NOISETHRESHOLD:
+	case CommonCommandGET_NOISETHRESHOLD:
 		return "GET_NOISETHRESHOLD"
-	case COMMON_COMMAND_WR_RLC_SAVE_PERIOD:
+	case CommonCommandWR_RLC_SAVE_PERIOD:
 		return "WR_RLC_SAVE_PERIOD"
-	case COMMON_COMMAND_WR_RLC_LEGACY_MODE:
+	case CommonCommandWR_RLC_LEGACY_MODE:
 		return "WR_RLC_LEGACY_MODE"
-	case COMMON_COMMAND_WR_SECUREDEVICEV2_ADD:
+	case CommonCommandWR_SECUREDEVICEV2_ADD:
 		return "WR_SECUREDEVICEV2_ADD"
-	case COMMON_COMMAND_RD_SECUREDEVICEV2_BY_INDEX:
+	case CommonCommandRD_SECUREDEVICEV2_BY_INDEX:
 		return "RD_SECUREDEVICEV2_BY_INDEX"
-	case COMMON_COMMAND_WR_RSSITEST_MODE:
+	case CommonCommandWR_RSSITEST_MODE:
 		return "WR_RSSITEST_MODE"
-	case COMMON_COMMAND_RD_RSSITEST_MODE:
+	case CommonCommandRD_RSSITEST_MODE:
 		return "RD_RSSITEST_MODE"
-	case COMMON_COMMAND_WR_SECUREDEVICE_MAINTENANCEKEY:
+	case CommonCommandWR_SECUREDEVICE_MAINTENANCEKEY:
 		return "WR_SECUREDEVICE_MAINTENANCEKEY"
-	case COMMON_COMMAND_RD_SECUREDEVICE_MAINTENANCEKEY:
+	case CommonCommandRD_SECUREDEVICE_MAINTENANCEKEY:
 		return "RD_SECUREDEVICE_MAINTENANCEKEY"
-	case COMMON_COMMAND_WR_TRANSPARENT_MODE:
+	case CommonCommandWR_TRANSPARENT_MODE:
 		return "WR_TRANSPARENT_MODE"
-	case COMMON_COMMAND_RD_TRANSPARENT_MODE:
+	case CommonCommandRD_TRANSPARENT_MODE:
 		return "RD_TRANSPARENT_MODE"
-	case COMMON_COMMAND_WR_TX_ONLY_MODE:
+	case CommonCommandWR_TX_ONLY_MODE:
 		return "WR_TX_ONLY_MODE"
-	case COMMON_COMMAND_RD_TX_ONLY_MODE:
+	case CommonCommandRD_TX_ONLY_MODE:
 		return "RD_TX_ONLY_MODE"
 	default:
 		return "UNKNOWN"

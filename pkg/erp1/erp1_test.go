@@ -12,7 +12,7 @@ import (
 func TestNewErp1PacketFromEsp3(t *testing.T) {
 	t.Run("successfully creates Erp1Packet from valid ESP3 telegram", func(t *testing.T) {
 		telegram := esp3.Esp3Telegram{
-			PacketType: enums.PACKET_TYPE_RADIO_ERP1,
+			PacketType: enums.PacketTypeRADIO_ERP1,
 			Data:       []byte{0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80},
 			OptData:    []byte{0x03, 0x12, 0x34, 0x56, 0x78, 0xff, 0x00},
 		}
@@ -62,7 +62,7 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 
 	t.Run("returns error for invalid packet type", func(t *testing.T) {
 		telegram := esp3.Esp3Telegram{
-			PacketType: enums.PACKET_TYPE_RESPONSE,
+			PacketType: enums.PacketTypeRESPONSE,
 			Data:       []byte{0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80},
 			OptData:    []byte{0x03, 0x12, 0x34, 0x56, 0x78, 0xff, 0x00},
 		}
@@ -80,7 +80,7 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 
 	t.Run("returns error for data too short", func(t *testing.T) {
 		telegram := esp3.Esp3Telegram{
-			PacketType: enums.PACKET_TYPE_RADIO_ERP1,
+			PacketType: enums.PacketTypeRADIO_ERP1,
 			Data:       []byte{0xd2, 0x12, 0x34, 0x56},
 			OptData:    []byte{0x03, 0x12, 0x34, 0x56, 0x78, 0xff, 0x00},
 		}
@@ -98,7 +98,7 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 
 	t.Run("returns error for optData too short for destination ID", func(t *testing.T) {
 		telegram := esp3.Esp3Telegram{
-			PacketType: enums.PACKET_TYPE_RADIO_ERP1,
+			PacketType: enums.PacketTypeRADIO_ERP1,
 			Data:       []byte{0xd2, 0x12, 0x34, 0x56, 0x78, 0x85},
 			OptData:    []byte{0x03, 0x12, 0x34},
 		}
@@ -116,7 +116,7 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 
 	t.Run("handles minimum data length correctly", func(t *testing.T) {
 		telegram := esp3.Esp3Telegram{
-			PacketType: enums.PACKET_TYPE_RADIO_ERP1,
+			PacketType: enums.PacketTypeRADIO_ERP1,
 			Data:       []byte{0xd2, 0x12, 0x34, 0x56, 0x78, 0x85},
 			OptData:    []byte{0x03, 0x12, 0x34, 0x56, 0x78, 0xff, 0x00},
 		}
@@ -134,7 +134,7 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 
 	t.Run("handles edge case with exact minimum lengths", func(t *testing.T) {
 		telegram := esp3.Esp3Telegram{
-			PacketType: enums.PACKET_TYPE_RADIO_ERP1,
+			PacketType: enums.PacketTypeRADIO_ERP1,
 			Data:       []byte{0xd2, 0x12, 0x34, 0x56, 0x78, 0x85},
 			OptData:    []byte{0x03, 0x12, 0x34, 0x56, 0x78, 0xff, 0x00},
 		}
@@ -178,7 +178,7 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 
 	t.Run("handles case with maximum data lengths", func(t *testing.T) {
 		telegram := esp3.Esp3Telegram{
-			PacketType: enums.PACKET_TYPE_RADIO_ERP1,
+			PacketType: enums.PacketTypeRADIO_ERP1,
 			Data:       []byte{0xd2, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x12, 0x34, 0x56, 0x78, 0x85},
 			OptData:    []byte{0x03, 0x12, 0x34, 0x56, 0x78, 0xff, 0x00},
 		}
@@ -205,7 +205,7 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 
 	t.Run("handles case with different rorg values", func(t *testing.T) {
 		telegram := esp3.Esp3Telegram{
-			PacketType: enums.PACKET_TYPE_RADIO_ERP1,
+			PacketType: enums.PacketTypeRADIO_ERP1,
 			Data:       []byte{0xa5, 0x12, 0x34, 0x56, 0x78, 0x85},
 			OptData:    []byte{0x03, 0x12, 0x34, 0x56, 0x78, 0xff, 0x00},
 		}
@@ -222,7 +222,7 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 
 	t.Run("handles case with different status values", func(t *testing.T) {
 		telegram := esp3.Esp3Telegram{
-			PacketType: enums.PACKET_TYPE_RADIO_ERP1,
+			PacketType: enums.PacketTypeRADIO_ERP1,
 			Data:       []byte{0xd2, 0x12, 0x34, 0x56, 0x78, 0xff},
 			OptData:    []byte{0x03, 0x12, 0x34, 0x56, 0x78, 0xff, 0x00},
 		}
@@ -239,7 +239,7 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 
 	t.Run("handles case with different subTelNum values", func(t *testing.T) {
 		telegram := esp3.Esp3Telegram{
-			PacketType: enums.PACKET_TYPE_RADIO_ERP1,
+			PacketType: enums.PacketTypeRADIO_ERP1,
 			Data:       []byte{0xd2, 0x12, 0x34, 0x56, 0x78, 0x85},
 			OptData:    []byte{0x05, 0x12, 0x34, 0x56, 0x78, 0xff, 0x00},
 		}
@@ -273,8 +273,8 @@ func TestErp1Packet_ToEsp3(t *testing.T) {
 
 		telegram := packet.ToEsp3()
 
-		if telegram.PacketType != enums.PACKET_TYPE_RADIO_ERP1 {
-			t.Errorf("expected PacketType %v, got %v", enums.PACKET_TYPE_RADIO_ERP1, telegram.PacketType)
+		if telegram.PacketType != enums.PacketTypeRADIO_ERP1 {
+			t.Errorf("expected PacketType %v, got %v", enums.PacketTypeRADIO_ERP1, telegram.PacketType)
 		}
 
 		expectedData := []byte{0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0xff, 0x82, 0x00, 0x85, 0x85}
