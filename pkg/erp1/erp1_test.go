@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	device_id "github.com/edlundin/enocean-esp3/pkg/device-id"
+	device_id "github.com/edlundin/enocean-esp3/pkg/device_id"
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 	"github.com/edlundin/enocean-esp3/pkg/esp3"
 )
