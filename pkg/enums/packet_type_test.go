@@ -7,7 +7,7 @@ import (
 func TestParsePacketTypeFromByte(t *testing.T) {
 	t.Run("parses all valid packet types correctly", func(t *testing.T) {
 		testCases := []struct {
-			input    uint8
+			input    byte
 			expected PacketType
 		}{
 			{0x01, PacketTypeRADIO_ERP1},
@@ -39,7 +39,7 @@ func TestParsePacketTypeFromByte(t *testing.T) {
 	})
 
 	t.Run("returns error for invalid packet type", func(t *testing.T) {
-		invalidInputs := []uint8{0x00, 0x08, 0x0d, 0x0e, 0x0f, 0x12, 0x13, 0xff}
+		invalidInputs := []byte{0x00, 0x08, 0x0d, 0x0e, 0x0f, 0x12, 0x13, 0xff}
 
 		for _, input := range invalidInputs {
 			t.Run(t.Name(), func(t *testing.T) {
@@ -99,6 +99,32 @@ func TestPacketType_String(t *testing.T) {
 					t.Errorf("expected 'UNKNOWN' for input %v, got '%s'", input, result)
 				}
 			})
+		}
+	})
+}
+
+func TestPacketTypeValid(t *testing.T) {
+	t.Run("PacketType_Valid", func(t *testing.T) {
+		// Test valid packet types
+		validTypes := []PacketType{
+			PacketTypeRADIO_ERP1,
+			PacketTypeRESPONSE,
+			PacketTypeRADIO_SUB_TEL,
+			PacketTypeEVENT,
+			PacketTypeCOMMON_COMMAND,
+		}
+		for _, pt := range validTypes {
+			if !pt.Valid() {
+				t.Errorf("PacketType %v should be valid", pt)
+			}
+		}
+
+		// Test invalid packet types
+		invalidTypes := []PacketType{0x08, 0x0D, 0x0E, 0x0F, 0x12}
+		for _, pt := range invalidTypes {
+			if pt.Valid() {
+				t.Errorf("PacketType %v should not be valid", pt)
+			}
 		}
 	})
 }

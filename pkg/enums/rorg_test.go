@@ -7,7 +7,7 @@ import (
 func TestParseRorgFromByte(t *testing.T) {
 	t.Run("parses all valid rorg types correctly", func(t *testing.T) {
 		testCases := []struct {
-			input    uint8
+			input    byte
 			expected Rorg
 		}{
 			{0xf6, RorgRPS},
@@ -41,7 +41,7 @@ func TestParseRorgFromByte(t *testing.T) {
 	})
 
 	t.Run("returns error for invalid rorg type", func(t *testing.T) {
-		invalidInputs := []uint8{0x00, 0x01, 0x02, 0x10, 0x20, 0x40, 0x80, 0xff}
+		invalidInputs := []byte{0x00, 0x01, 0x02, 0x10, 0x20, 0x40, 0x80, 0xff}
 
 		for _, input := range invalidInputs {
 			t.Run(t.Name(), func(t *testing.T) {
@@ -103,6 +103,32 @@ func TestRorgString(t *testing.T) {
 					t.Errorf("expected 'UNKNOWN' for input %v, got '%s'", input, result)
 				}
 			})
+		}
+	})
+}
+
+func TestRorgValid(t *testing.T) {
+	t.Run("Rorg_Valid", func(t *testing.T) {
+		// Test valid rorg types
+		validRorgs := []Rorg{
+			RorgRPS,
+			Rorg1BS,
+			Rorg4BS,
+			RorgVLD,
+			RorgMSC,
+		}
+		for _, rorg := range validRorgs {
+			if !rorg.Valid() {
+				t.Errorf("Rorg %v should be valid", rorg)
+			}
+		}
+
+		// Test invalid rorg types
+		invalidRorgs := []Rorg{0x00, 0x01, 0x02, 0xFF}
+		for _, rorg := range invalidRorgs {
+			if rorg.Valid() {
+				t.Errorf("Rorg %v should not be valid", rorg)
+			}
 		}
 	})
 }

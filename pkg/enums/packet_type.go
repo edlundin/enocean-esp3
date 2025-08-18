@@ -2,7 +2,7 @@ package enums
 
 import "errors"
 
-type PacketType uint8
+type PacketType byte
 
 const (
 	PacketTypeRADIO_ERP1         PacketType = 0x01
@@ -20,8 +20,8 @@ const (
 	PacketTypeCOMMAND_2_4        PacketType = 0x11
 )
 
-func ParsePacketTypeFromByte(byte uint8) (PacketType, error) {
-	switch byte {
+func ParsePacketTypeFromByte(b byte) (PacketType, error) {
+	switch b {
 	case 0x01:
 		return PacketTypeRADIO_ERP1, nil
 	case 0x02:
@@ -83,5 +83,26 @@ func (packetType PacketType) String() string {
 		return "COMMAND_2_4"
 	default:
 		return "UNKNOWN"
+	}
+}
+
+func (packetType PacketType) Valid() bool {
+	switch packetType {
+	case PacketTypeRADIO_ERP1,
+		PacketTypeRESPONSE,
+		PacketTypeRADIO_SUB_TEL,
+		PacketTypeEVENT,
+		PacketTypeCOMMON_COMMAND,
+		PacketTypeSMART_ACK_COMMAND,
+		PacketTypeREMOTE_MAN_COMMAND,
+		PacketTypeRADIO_MESSAGE,
+		PacketTypeRADIO_ERP2,
+		PacketTypeCONFIG_COMMAND,
+		PacketTypeCOMMAND_ACCEPTED,
+		PacketTypeRADIO_802_15_4,
+		PacketTypeCOMMAND_2_4:
+		return true
+	default:
+		return false
 	}
 }

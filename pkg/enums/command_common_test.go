@@ -7,7 +7,7 @@ import (
 func TestParseCommonCommandFromByte(t *testing.T) {
 	t.Run("parses all valid common commands correctly", func(t *testing.T) {
 		testCases := []struct {
-			input    uint8
+			input    byte
 			expected CommonCommand
 		}{
 			{0x01, CommonCommandWR_SLEEP},
@@ -82,7 +82,7 @@ func TestParseCommonCommandFromByte(t *testing.T) {
 	})
 
 	t.Run("returns error for invalid common command", func(t *testing.T) {
-		invalidInputs := []uint8{0x00, 0x26, 0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x34, 0x35, 0x42, 0xff}
+		invalidInputs := []byte{0x00, 0x26, 0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x34, 0x35, 0x42, 0xff}
 
 		for _, input := range invalidInputs {
 			t.Run(t.Name(), func(t *testing.T) {
@@ -194,6 +194,32 @@ func TestCommonCommand_String(t *testing.T) {
 		expected := "RD_TRANSPARENT_MODE"
 		if result != expected {
 			t.Errorf("expected '%s', got '%s'", expected, result)
+		}
+	})
+}
+
+func TestCommonCommandValid(t *testing.T) {
+	t.Run("CommonCommand_Valid", func(t *testing.T) {
+		// Test valid commands
+		validCommands := []CommonCommand{
+			CommonCommandWR_SLEEP,
+			CommonCommandWR_RESET,
+			CommonCommandRD_VERSION,
+			CommonCommandWR_SYS_LOG,
+			CommonCommandWR_BIST,
+		}
+		for _, cmd := range validCommands {
+			if !cmd.Valid() {
+				t.Errorf("CommonCommand %v should be valid", cmd)
+			}
+		}
+
+		// Test invalid commands
+		invalidCommands := []CommonCommand{0x42, 0x99, 0xFF}
+		for _, cmd := range invalidCommands {
+			if cmd.Valid() {
+				t.Errorf("CommonCommand %v should not be valid", cmd)
+			}
 		}
 	})
 }

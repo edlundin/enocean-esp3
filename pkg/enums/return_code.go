@@ -15,8 +15,8 @@ const (
 	ReturnCodeNO_FREE_BUFFER
 )
 
-func ParseReturnCodeFromByte(byte uint8) (ReturnCode, error) {
-	switch byte {
+func ParseReturnCodeFromByte(b byte) (ReturnCode, error) {
+	switch b {
 	case 0x00:
 		return ReturnCodeSUCCESS, nil
 	case 0x01:
@@ -58,5 +58,21 @@ func (returnCode ReturnCode) String() string {
 		return "NO_FREE_BUFFER"
 	default:
 		return "UNKNOWN"
+	}
+}
+
+func (returnCode ReturnCode) Valid() bool {
+	switch returnCode {
+	case ReturnCodeSUCCESS,
+		ReturnCodeERROR,
+		ReturnCodeNOT_SUPPORTED,
+		ReturnCodeWRONG_ARGUMENT,
+		ReturnCodeOPERATION_DENIED,
+		ReturnCodeLOCK_SET,
+		ReturnCodeBUFFER_TO_SMALL,
+		ReturnCodeNO_FREE_BUFFER:
+		return true
+	default:
+		return false
 	}
 }

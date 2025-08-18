@@ -32,7 +32,7 @@ func TestReturnCodeConstants(t *testing.T) {
 func TestParseReturnCodeFromByte(t *testing.T) {
 	tests := []struct {
 		name        string
-		input       uint8
+		input       byte
 		expected    ReturnCode
 		expectError bool
 	}{
@@ -113,7 +113,7 @@ func TestReturnCodeRoundTrip(t *testing.T) {
 
 	for _, code := range codes {
 		t.Run(code.String(), func(t *testing.T) {
-			parsed, err := ParseReturnCodeFromByte(uint8(code))
+			parsed, err := ParseReturnCodeFromByte(byte(code))
 			if err != nil {
 				t.Errorf("ParseReturnCodeFromByte(%d) failed: %v", byte(code), err)
 			}
@@ -148,4 +148,30 @@ func TestReturnCodeStringRoundTrip(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestReturnCodeValid(t *testing.T) {
+	t.Run("ReturnCode_Valid", func(t *testing.T) {
+		// Test valid return codes
+		validCodes := []ReturnCode{
+			ReturnCodeSUCCESS,
+			ReturnCodeERROR,
+			ReturnCodeNOT_SUPPORTED,
+			ReturnCodeWRONG_ARGUMENT,
+			ReturnCodeOPERATION_DENIED,
+		}
+		for _, rc := range validCodes {
+			if !rc.Valid() {
+				t.Errorf("ReturnCode %v should be valid", rc)
+			}
+		}
+
+		// Test invalid return codes
+		invalidCodes := []ReturnCode{0x08, 0x09, 0x0A, 0xFF}
+		for _, rc := range invalidCodes {
+			if rc.Valid() {
+				t.Errorf("ReturnCode %v should not be valid", rc)
+			}
+		}
+	})
 }

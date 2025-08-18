@@ -2,7 +2,7 @@ package enums
 
 import "errors"
 
-type Rorg uint8
+type Rorg byte
 
 const (
 	RorgRPS        Rorg = 0xf6
@@ -22,8 +22,8 @@ const (
 	RorgUTE        Rorg = 0xd4
 )
 
-func ParseRorgFromByte(byte uint8) (Rorg, error) {
-	switch byte {
+func ParseRorgFromByte(b byte) (Rorg, error) {
+	switch b {
 	case 0xf6:
 		return RorgRPS, nil
 	case 0xd5:
@@ -93,5 +93,28 @@ func (rorg Rorg) String() string {
 		return "UTE"
 	default:
 		return "UNKNOWN"
+	}
+}
+
+func (rorg Rorg) Valid() bool {
+	switch rorg {
+	case RorgRPS,
+		Rorg1BS,
+		Rorg4BS,
+		RorgVLD,
+		RorgMSC,
+		RorgADT,
+		RorgSM_LRN_REQ,
+		RorgSM_LRN_ANS,
+		RorgSM_REC,
+		RorgSYS_EX,
+		RorgSEC,
+		RorgSEC_ENCAPS,
+		RorgSEC_MAN,
+		RorgSIGNAL,
+		RorgUTE:
+		return true
+	default:
+		return false
 	}
 }

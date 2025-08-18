@@ -2,7 +2,7 @@ package enums
 
 import "errors"
 
-type CommonCommand uint8
+type CommonCommand byte
 
 const (
 	CommonCommandWR_SLEEP                       CommonCommand = 0x01
@@ -63,8 +63,8 @@ const (
 	CommonCommandRD_TX_ONLY_MODE                CommonCommand = 0x41
 )
 
-func ParseCommonCommandFromByte(byte uint8) (CommonCommand, error) {
-	switch byte {
+func ParseCommonCommandFromByte(b byte) (CommonCommand, error) {
+	switch b {
 	case 0x01:
 		return CommonCommandWR_SLEEP, nil
 	case 0x02:
@@ -298,5 +298,69 @@ func (command CommonCommand) String() string {
 		return "RD_TX_ONLY_MODE"
 	default:
 		return "UNKNOWN"
+	}
+}
+
+func (command CommonCommand) Valid() bool {
+	switch command {
+	case CommonCommandWR_SLEEP,
+		CommonCommandWR_RESET,
+		CommonCommandRD_VERSION,
+		CommonCommandRD_SYS_LOG,
+		CommonCommandWR_SYS_LOG,
+		CommonCommandWR_BIST,
+		CommonCommandWR_IDBASE,
+		CommonCommandRD_IDBASE,
+		CommonCommandWR_REPEATER,
+		CommonCommandRD_REPEATER,
+		CommonCommandWR_FILTER_ADD,
+		CommonCommandWR_FILTER_DEL,
+		CommonCommandWR_FILTER_DEL_ALL,
+		CommonCommandWR_FILTER_ENABLE,
+		CommonCommandRD_FILTER,
+		CommonCommandWR_WAIT_MATURITY,
+		CommonCommandWR_SUBTEL,
+		CommonCommandWR_MEM,
+		CommonCommandRD_MEM,
+		CommonCommandRD_MEM_ADDRESS,
+		CommonCommandRD_SECURITY,
+		CommonCommandWR_SECURITY,
+		CommonCommandWR_LEARNMODE,
+		CommonCommandRD_LEARNMODE,
+		CommonCommandWR_SECUREDEVICE_ADD,
+		CommonCommandWR_SECUREDEVICE_DEL,
+		CommonCommandRD_SECUREDEVICE_BY_INDEX,
+		CommonCommandWR_MODE,
+		CommonCommandRD_NUMSECUREDEVICES,
+		CommonCommandRD_SECUREDEVICE_BY_ID,
+		CommonCommandWR_SECUREDEVICE_ADD_PSK,
+		CommonCommandWR_SECUREDEVICE_SENDTEACHIN,
+		CommonCommandWR_TEMPORARY_RLC_WINDOW,
+		CommonCommandRD_SECUREDEVICE_PSK,
+		CommonCommandRD_DUTYCYCLE_LIMIT,
+		CommonCommandSET_BAUDRATE,
+		CommonCommandGET_FREQUENCY_INFO,
+		CommonCommandGET_STEPCODE,
+		CommonCommandWR_REMAN_CODE,
+		CommonCommandWR_STARTUP_DELAY,
+		CommonCommandWR_REMAN_REPEATING,
+		CommonCommandRD_REMAN_REPEATING,
+		CommonCommandSET_NOISETHRESHOLD,
+		CommonCommandGET_NOISETHRESHOLD,
+		CommonCommandWR_RLC_SAVE_PERIOD,
+		CommonCommandWR_RLC_LEGACY_MODE,
+		CommonCommandWR_SECUREDEVICEV2_ADD,
+		CommonCommandRD_SECUREDEVICEV2_BY_INDEX,
+		CommonCommandWR_RSSITEST_MODE,
+		CommonCommandRD_RSSITEST_MODE,
+		CommonCommandWR_SECUREDEVICE_MAINTENANCEKEY,
+		CommonCommandRD_SECUREDEVICE_MAINTENANCEKEY,
+		CommonCommandWR_TRANSPARENT_MODE,
+		CommonCommandRD_TRANSPARENT_MODE,
+		CommonCommandWR_TX_ONLY_MODE,
+		CommonCommandRD_TX_ONLY_MODE:
+		return true
+	default:
+		return false
 	}
 }
