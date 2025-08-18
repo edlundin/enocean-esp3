@@ -1,3 +1,6 @@
+CMAC
+CSMA
+DUTYCYCLE
 edlundin
 enocean
 github
@@ -5,3 +8,5 @@ rorg
 Rorg
 rssi
 Rssi
+SECUREDEVICES
+UART
