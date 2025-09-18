@@ -13,6 +13,8 @@ const (
 	ReturnCodeLOCK_SET
 	ReturnCodeBUFFER_TO_SMALL
 	ReturnCodeNO_FREE_BUFFER
+	ReturnCodeBASEID_OUT_OF_RANGE ReturnCode = 0x90
+	ReturnCodeBASEID_MAX_REACHED  ReturnCode = 0x91
 )
 
 func ParseReturnCodeFromByte(b byte) (ReturnCode, error) {
@@ -33,6 +35,10 @@ func ParseReturnCodeFromByte(b byte) (ReturnCode, error) {
 		return ReturnCodeBUFFER_TO_SMALL, nil
 	case 0x07:
 		return ReturnCodeNO_FREE_BUFFER, nil
+	case 0x90:
+		return ReturnCodeBASEID_OUT_OF_RANGE, nil
+	case 0x91:
+		return ReturnCodeBASEID_MAX_REACHED, nil
 	default:
 		return ReturnCodeERROR, errors.New("invalid return code")
 	}
@@ -56,6 +62,10 @@ func (returnCode ReturnCode) String() string {
 		return "BUFFER_TO_SMALL"
 	case ReturnCodeNO_FREE_BUFFER:
 		return "NO_FREE_BUFFER"
+	case ReturnCodeBASEID_OUT_OF_RANGE:
+		return "BASEID_OUT_OF_RANGE"
+	case ReturnCodeBASEID_MAX_REACHED:
+		return "BASEID_MAX_REACHED"
 	default:
 		return "UNKNOWN"
 	}
@@ -70,7 +80,9 @@ func (returnCode ReturnCode) Valid() bool {
 		ReturnCodeOPERATION_DENIED,
 		ReturnCodeLOCK_SET,
 		ReturnCodeBUFFER_TO_SMALL,
-		ReturnCodeNO_FREE_BUFFER:
+		ReturnCodeNO_FREE_BUFFER,
+		ReturnCodeBASEID_OUT_OF_RANGE,
+		ReturnCodeBASEID_MAX_REACHED:
 		return true
 	default:
 		return false
