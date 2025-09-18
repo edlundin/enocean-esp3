@@ -14,7 +14,7 @@ func TestParseCommonCommandFromByte(t *testing.T) {
 			{0x02, CommonCommandWR_RESET},
 			{0x03, CommonCommandRD_VERSION},
 			{0x04, CommonCommandRD_SYS_LOG},
-			{0x05, CommonCommandWR_SYS_LOG},
+			{0x05, CommonCommandRESET_SYS_LOG},
 			{0x06, CommonCommandWR_BIST},
 			{0x07, CommonCommandWR_IDBASE},
 			{0x08, CommonCommandRD_IDBASE},
@@ -111,7 +111,7 @@ func TestCommonCommand_String(t *testing.T) {
 			{CommonCommandWR_RESET, "WR_RESET"},
 			{CommonCommandRD_VERSION, "RD_VERSION"},
 			{CommonCommandRD_SYS_LOG, "RD_SYS_LOG"},
-			{CommonCommandWR_SYS_LOG, "WR_SYS_LOG"},
+			{CommonCommandRESET_SYS_LOG, "RESET_SYS_LOG"},
 			{CommonCommandWR_BIST, "WR_BIST"},
 			{CommonCommandWR_IDBASE, "WR_IDBASE"},
 			{CommonCommandRD_IDBASE, "RD_IDBASE"},
@@ -205,7 +205,7 @@ func TestCommonCommandValid(t *testing.T) {
 			CommonCommandWR_SLEEP,
 			CommonCommandWR_RESET,
 			CommonCommandRD_VERSION,
-			CommonCommandWR_SYS_LOG,
+			CommonCommandRESET_SYS_LOG,
 			CommonCommandWR_BIST,
 		}
 		for _, cmd := range validCommands {
