@@ -205,7 +205,7 @@ func parser(ctx context.Context, serialPort serial.Port) {
 					// Parsing done, packet valid, calling callback
 					if parserByte == parserCrc {
 						telegram :=
-							esp3.NewEsp3TelegramFromData(enums.PacketType(parserPacketType), parserBuffer[:parserDataLen], parserBuffer[parserDataLen:]) //TODO: check packet type
+							esp3.NewTelegramFromData(enums.PacketType(parserPacketType), parserBuffer[:parserDataLen], parserBuffer[parserDataLen:]) //TODO: check packet type
 
 						fmt.Println(telegram)
 					}

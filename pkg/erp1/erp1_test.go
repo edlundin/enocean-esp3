@@ -11,13 +11,13 @@ import (
 
 func TestNewErp1PacketFromEsp3(t *testing.T) {
 	t.Run("successfully creates Erp1Packet from valid ESP3 telegram", func(t *testing.T) {
-		telegram := esp3.Esp3Telegram{
+		telegram := esp3.Telegram{
 			PacketType: enums.PacketTypeRADIO_ERP1,
 			Data:       []byte{0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80},
 			OptData:    []byte{0x03, 0x12, 0x34, 0x56, 0x78, 0xff, 0x00},
 		}
 
-		packet, err := NewErp1PacketFromEsp3(telegram)
+		packet, err := NewPacketFromEsp3(telegram)
 		if err != nil {
 			t.Errorf("expected no error, got: %s", err)
 		}
@@ -61,13 +61,13 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 	})
 
 	t.Run("returns error for invalid packet type", func(t *testing.T) {
-		telegram := esp3.Esp3Telegram{
+		telegram := esp3.Telegram{
 			PacketType: enums.PacketTypeRESPONSE,
 			Data:       []byte{0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80},
 			OptData:    []byte{0x03, 0x12, 0x34, 0x56, 0x78, 0xff, 0x00},
 		}
 
-		_, err := NewErp1PacketFromEsp3(telegram)
+		_, err := NewPacketFromEsp3(telegram)
 		if err == nil {
 			t.Errorf("expected error, got nil")
 		}
@@ -79,13 +79,13 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 	})
 
 	t.Run("returns error for data too short", func(t *testing.T) {
-		telegram := esp3.Esp3Telegram{
+		telegram := esp3.Telegram{
 			PacketType: enums.PacketTypeRADIO_ERP1,
 			Data:       []byte{0xd2, 0x12, 0x34, 0x56},
 			OptData:    []byte{0x03, 0x12, 0x34, 0x56, 0x78, 0xff, 0x00},
 		}
 
-		_, err := NewErp1PacketFromEsp3(telegram)
+		_, err := NewPacketFromEsp3(telegram)
 		if err == nil {
 			t.Errorf("expected error, got nil")
 		}
@@ -97,13 +97,13 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 	})
 
 	t.Run("returns error for optData too short for destination ID", func(t *testing.T) {
-		telegram := esp3.Esp3Telegram{
+		telegram := esp3.Telegram{
 			PacketType: enums.PacketTypeRADIO_ERP1,
 			Data:       []byte{0xd2, 0x12, 0x34, 0x56, 0x78, 0x85},
 			OptData:    []byte{0x03, 0x12, 0x34},
 		}
 
-		_, err := NewErp1PacketFromEsp3(telegram)
+		_, err := NewPacketFromEsp3(telegram)
 		if err == nil {
 			t.Errorf("expected error, got nil")
 		}
@@ -115,13 +115,13 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 	})
 
 	t.Run("handles minimum data length correctly", func(t *testing.T) {
-		telegram := esp3.Esp3Telegram{
+		telegram := esp3.Telegram{
 			PacketType: enums.PacketTypeRADIO_ERP1,
 			Data:       []byte{0xd2, 0x12, 0x34, 0x56, 0x78, 0x85},
 			OptData:    []byte{0x03, 0x12, 0x34, 0x56, 0x78, 0xff, 0x00},
 		}
 
-		packet, err := NewErp1PacketFromEsp3(telegram)
+		packet, err := NewPacketFromEsp3(telegram)
 
 		if err != nil {
 			t.Errorf("expected no error, got: %s", err)
@@ -133,13 +133,13 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 	})
 
 	t.Run("handles edge case with exact minimum lengths", func(t *testing.T) {
-		telegram := esp3.Esp3Telegram{
+		telegram := esp3.Telegram{
 			PacketType: enums.PacketTypeRADIO_ERP1,
 			Data:       []byte{0xd2, 0x12, 0x34, 0x56, 0x78, 0x85},
 			OptData:    []byte{0x03, 0x12, 0x34, 0x56, 0x78, 0xff, 0x00},
 		}
 
-		packet, err := NewErp1PacketFromEsp3(telegram)
+		packet, err := NewPacketFromEsp3(telegram)
 		if err != nil {
 			t.Errorf("expected no error, got: %s", err)
 		}
@@ -177,13 +177,13 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 	})
 
 	t.Run("handles case with maximum data lengths", func(t *testing.T) {
-		telegram := esp3.Esp3Telegram{
+		telegram := esp3.Telegram{
 			PacketType: enums.PacketTypeRADIO_ERP1,
 			Data:       []byte{0xd2, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x12, 0x34, 0x56, 0x78, 0x85},
 			OptData:    []byte{0x03, 0x12, 0x34, 0x56, 0x78, 0xff, 0x00},
 		}
 
-		packet, err := NewErp1PacketFromEsp3(telegram)
+		packet, err := NewPacketFromEsp3(telegram)
 		if err != nil {
 			t.Errorf("expected no error, got: %s", err)
 		}
@@ -204,13 +204,13 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 	})
 
 	t.Run("handles case with different rorg values", func(t *testing.T) {
-		telegram := esp3.Esp3Telegram{
+		telegram := esp3.Telegram{
 			PacketType: enums.PacketTypeRADIO_ERP1,
 			Data:       []byte{0xa5, 0x12, 0x34, 0x56, 0x78, 0x85},
 			OptData:    []byte{0x03, 0x12, 0x34, 0x56, 0x78, 0xff, 0x00},
 		}
 
-		packet, err := NewErp1PacketFromEsp3(telegram)
+		packet, err := NewPacketFromEsp3(telegram)
 		if err != nil {
 			t.Errorf("expected no error, got: %s", err)
 		}
@@ -221,13 +221,13 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 	})
 
 	t.Run("handles case with different status values", func(t *testing.T) {
-		telegram := esp3.Esp3Telegram{
+		telegram := esp3.Telegram{
 			PacketType: enums.PacketTypeRADIO_ERP1,
 			Data:       []byte{0xd2, 0x12, 0x34, 0x56, 0x78, 0xff},
 			OptData:    []byte{0x03, 0x12, 0x34, 0x56, 0x78, 0xff, 0x00},
 		}
 
-		packet, err := NewErp1PacketFromEsp3(telegram)
+		packet, err := NewPacketFromEsp3(telegram)
 		if err != nil {
 			t.Errorf("expected no error, got: %s", err)
 		}
@@ -238,13 +238,13 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 	})
 
 	t.Run("handles case with different subTelNum values", func(t *testing.T) {
-		telegram := esp3.Esp3Telegram{
+		telegram := esp3.Telegram{
 			PacketType: enums.PacketTypeRADIO_ERP1,
 			Data:       []byte{0xd2, 0x12, 0x34, 0x56, 0x78, 0x85},
 			OptData:    []byte{0x05, 0x12, 0x34, 0x56, 0x78, 0xff, 0x00},
 		}
 
-		packet, err := NewErp1PacketFromEsp3(telegram)
+		packet, err := NewPacketFromEsp3(telegram)
 		if err != nil {
 			t.Errorf("expected no error, got: %s", err)
 		}
@@ -260,7 +260,7 @@ func TestErp1Packet_ToEsp3(t *testing.T) {
 		destID, _ := device_id.FromByteArray([]byte{0x12, 0x34, 0x56, 0x78})
 		senderID, _ := device_id.FromByteArray([]byte{0xff, 0x82, 0x00, 0x85})
 
-		packet := Erp1Packet{
+		packet := Packet{
 			DestinationID: destID,
 			Rorg:          enums.Rorg(0xd2),
 			Rssi:          0x80,
@@ -292,7 +292,7 @@ func TestErp1Packet_ToEsp3(t *testing.T) {
 		destinationID, _ := device_id.FromByteArray([]byte{0x12, 0x34, 0x56, 0x78})
 		senderID, _ := device_id.FromByteArray([]byte{0xff, 0x82, 0x00, 0x85})
 
-		packet := Erp1Packet{
+		packet := Packet{
 			DestinationID: destinationID,
 			Rorg:          enums.Rorg(0xd2),
 			Rssi:          0x80,
@@ -312,7 +312,7 @@ func TestErp1Packet_ToEsp3(t *testing.T) {
 	})
 
 	t.Run("handles broadcast destination ID correctly", func(t *testing.T) {
-		packet := Erp1Packet{
+		packet := Packet{
 			DestinationID: device_id.BroadcastId(),
 			Rorg:          enums.Rorg(0xd2),
 			Rssi:          0x80,
@@ -337,7 +337,7 @@ func TestErp1Packet_Serialize(t *testing.T) {
 		destinationID, _ := device_id.FromByteArray([]byte{0x12, 0x34, 0x56, 0x78})
 		senderID, _ := device_id.FromByteArray([]byte{0xff, 0x82, 0x00, 0x85})
 
-		packet := Erp1Packet{
+		packet := Packet{
 			DestinationID: destinationID,
 			Rorg:          enums.Rorg(0xd2),
 			Rssi:          0x80,
@@ -365,7 +365,7 @@ func TestErp1Packet_Serialize(t *testing.T) {
 	})
 
 	t.Run("serializes packet with empty UserData", func(t *testing.T) {
-		packet := Erp1Packet{
+		packet := Packet{
 			DestinationID: device_id.DeviceID(0x12345678),
 			Rorg:          enums.Rorg(0xd2),
 			Rssi:          0x80,

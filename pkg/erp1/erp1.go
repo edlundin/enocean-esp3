@@ -8,7 +8,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/esp3"
 )
 
-type Erp1Packet struct {
+type Packet struct {
 	DestinationID device_id.DeviceID
 	Rorg          enums.Rorg
 	Rssi          byte
@@ -19,7 +19,7 @@ type Erp1Packet struct {
 	UserData      []byte
 }
 
-func NewErp1PacketFromEsp3(telegram esp3.Esp3Telegram) (Erp1Packet, error) {
+func NewPacketFromEsp3(telegram esp3.Telegram) (Packet, error) {
 	const minDataLen = 6    // 1 rorg + 4 sender ID + 1 status
 	const minOptDataLen = 7 // 1 subTelNum + 4 destination ID + 1 rssi + 1 security level
 	const destinationIdOffset = 1
@@ -33,15 +33,15 @@ func NewErp1PacketFromEsp3(telegram esp3.Esp3Telegram) (Erp1Packet, error) {
 	senderIdOffset := statusOffset - device_id.DeviceIDSize
 
 	if telegram.PacketType != enums.PacketTypeRADIO_ERP1 {
-		return Erp1Packet{}, errors.New("invalid packet type")
+		return Packet{}, errors.New("invalid packet type")
 	}
 
 	if len(telegram.Data) < minDataLen {
-		return Erp1Packet{}, errors.New("data too short")
+		return Packet{}, errors.New("data too short")
 	}
 
 	if len(telegram.OptData) < minOptDataLen {
-		return Erp1Packet{}, errors.New("optData too short for destination ID")
+		return Packet{}, errors.New("optData too short for destination ID")
 	}
 
 	destinationId, _ := device_id.FromByteArray(telegram.OptData[destinationIdOffset : destinationIdOffset+device_id.DeviceIDSize])
@@ -54,7 +54,7 @@ func NewErp1PacketFromEsp3(telegram esp3.Esp3Telegram) (Erp1Packet, error) {
 	subTelNum := telegram.OptData[subTelNumOffset]
 	userData := telegram.Data[userDataOffset:senderIdOffset]
 
-	return Erp1Packet{
+	return Packet{
 		DestinationID: destinationId,
 		Rorg:          rorg,
 		Rssi:          rssi,
@@ -66,7 +66,7 @@ func NewErp1PacketFromEsp3(telegram esp3.Esp3Telegram) (Erp1Packet, error) {
 	}, nil
 }
 
-func (p Erp1Packet) ToEsp3() esp3.Esp3Telegram {
+func (p Packet) ToEsp3() esp3.Telegram {
 	senderID := p.SenderID.ToArray()
 	destinationID := p.DestinationID.ToArray()
 
@@ -82,13 +82,13 @@ func (p Erp1Packet) ToEsp3() esp3.Esp3Telegram {
 	optData = append(optData, 0xff)
 	optData = append(optData, 0x03)
 
-	return esp3.Esp3Telegram{
+	return esp3.Telegram{
 		PacketType: enums.PacketTypeRADIO_ERP1,
 		Data:       data,
 		OptData:    optData,
 	}
 }
 
-func (p Erp1Packet) Serialize() []byte {
+func (p Packet) Serialize() []byte {
 	return p.ToEsp3().Serialize()
 }
