@@ -3,19 +3,19 @@ package erp1
 import (
 	"errors"
 
-	device_id "github.com/edlundin/enocean-esp3/pkg/device_id"
+	"github.com/edlundin/enocean-esp3/pkg/deviceid"
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 	"github.com/edlundin/enocean-esp3/pkg/esp3"
 )
 
 type Packet struct {
-	DestinationID device_id.DeviceID
+	DestinationID deviceid.DeviceID
 	Rorg          enums.Rorg
 	Rssi          byte
 	SecurityLevel byte
 	Status        byte
 	SubTelNum     byte
-	SenderID      device_id.DeviceID
+	SenderID      deviceid.DeviceID
 	UserData      []byte
 }
 
@@ -30,7 +30,7 @@ func NewPacketFromEsp3(telegram esp3.Telegram) (Packet, error) {
 	const userDataOffset = 1
 
 	statusOffset := len(telegram.Data) - 1
-	senderIdOffset := statusOffset - device_id.DeviceIDSize
+	senderIdOffset := statusOffset - deviceid.DeviceIDSize
 
 	if telegram.PacketType != enums.PacketTypeRADIO_ERP1 {
 		return Packet{}, errors.New("invalid packet type")
@@ -44,8 +44,8 @@ func NewPacketFromEsp3(telegram esp3.Telegram) (Packet, error) {
 		return Packet{}, errors.New("optData too short for destination ID")
 	}
 
-	destinationId, _ := device_id.FromByteArray(telegram.OptData[destinationIdOffset : destinationIdOffset+device_id.DeviceIDSize])
-	senderId, _ := device_id.FromByteArray(telegram.Data[senderIdOffset : senderIdOffset+device_id.DeviceIDSize])
+	destinationId, _ := deviceid.FromByteArray(telegram.OptData[destinationIdOffset : destinationIdOffset+deviceid.DeviceIDSize])
+	senderId, _ := deviceid.FromByteArray(telegram.Data[senderIdOffset : senderIdOffset+deviceid.DeviceIDSize])
 
 	rorg := enums.Rorg(telegram.Data[rorgOffset])
 	rssi := telegram.OptData[rssiOffset]
@@ -70,13 +70,13 @@ func (p Packet) ToEsp3() esp3.Telegram {
 	senderID := p.SenderID.ToArray()
 	destinationID := p.DestinationID.ToArray()
 
-	data := make([]byte, 0, 1+len(p.UserData)+device_id.DeviceIDSize+1)
+	data := make([]byte, 0, 1+len(p.UserData)+deviceid.DeviceIDSize+1)
 	data = append(data, byte(p.Rorg))
 	data = append(data, p.UserData...)
 	data = append(data, senderID[:]...)
 	data = append(data, p.Status)
 
-	optData := make([]byte, 0, 3+device_id.DeviceIDSize)
+	optData := make([]byte, 0, 3+deviceid.DeviceIDSize)
 	optData = append(optData, p.SubTelNum)
 	optData = append(optData, destinationID[:]...)
 	optData = append(optData, 0xff)

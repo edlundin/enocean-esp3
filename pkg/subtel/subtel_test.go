@@ -1,10 +1,10 @@
-package radiosubtel
+package subtel
 
 import (
 	"reflect"
 	"testing"
 
-	device_id "github.com/edlundin/enocean-esp3/pkg/device_id"
+	"github.com/edlundin/enocean-esp3/pkg/deviceid"
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 	"github.com/edlundin/enocean-esp3/pkg/esp3"
 )
@@ -25,8 +25,8 @@ func TestNewPacketFromEsp3(t *testing.T) {
 		}
 
 		// Verify the packet was created correctly
-		expectedDestinationID, _ := device_id.FromByteArray([]byte{0xaa, 0xbb, 0xcc, 0xdd})
-		expectedSenderID, _ := device_id.FromByteArray([]byte{0xfe, 0xff, 0x00, 0x01})
+		expectedDestinationID, _ := deviceid.FromByteArray([]byte{0xaa, 0xbb, 0xcc, 0xdd})
+		expectedSenderID, _ := deviceid.FromByteArray([]byte{0xfe, 0xff, 0x00, 0x01})
 
 		if packet.DestinationID != expectedDestinationID {
 			t.Errorf("expected destination ID %v, got %v", expectedDestinationID, packet.DestinationID)
@@ -207,8 +207,8 @@ func TestNewPacketFromEsp3(t *testing.T) {
 
 func TestPacket_ToEsp3(t *testing.T) {
 	t.Run("converts packet back to ESP3 telegram", func(t *testing.T) {
-		destinationID, _ := device_id.FromByteArray([]byte{0xaa, 0xbb, 0xcc, 0xdd})
-		senderID, _ := device_id.FromByteArray([]byte{0x11, 0x22, 0x33, 0x44})
+		destinationID, _ := deviceid.FromByteArray([]byte{0xaa, 0xbb, 0xcc, 0xdd})
+		senderID, _ := deviceid.FromByteArray([]byte{0x11, 0x22, 0x33, 0x44})
 		userData := []byte{0x01, 0x02, 0x03, 0x04}
 		subTels := []SubTel{
 			{Tick: 0x01, Rssi: 0x02, Status: 0x03},
@@ -249,8 +249,8 @@ func TestPacket_ToEsp3(t *testing.T) {
 	})
 
 	t.Run("handles packet with empty user data and no SubTels", func(t *testing.T) {
-		destinationID, _ := device_id.FromByteArray([]byte{0xaa, 0xbb, 0xcc, 0xdd})
-		senderID, _ := device_id.FromByteArray([]byte{0x11, 0x22, 0x33, 0x44})
+		destinationID, _ := deviceid.FromByteArray([]byte{0xaa, 0xbb, 0xcc, 0xdd})
+		senderID, _ := deviceid.FromByteArray([]byte{0x11, 0x22, 0x33, 0x44})
 
 		packet := Packet{
 			DestinationID: destinationID,
@@ -283,8 +283,8 @@ func TestPacket_ToEsp3(t *testing.T) {
 
 func TestPacket_Serialize(t *testing.T) {
 	t.Run("serializes packet to byte array", func(t *testing.T) {
-		destinationID, _ := device_id.FromByteArray([]byte{0xaa, 0xbb, 0xcc, 0xdd})
-		senderID, _ := device_id.FromByteArray([]byte{0x11, 0x22, 0x33, 0x44})
+		destinationID, _ := deviceid.FromByteArray([]byte{0xaa, 0xbb, 0xcc, 0xdd})
+		senderID, _ := deviceid.FromByteArray([]byte{0x11, 0x22, 0x33, 0x44})
 		userData := []byte{0x01, 0x02, 0x03, 0x04}
 
 		packet := Packet{

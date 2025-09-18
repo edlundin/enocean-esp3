@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	device_id "github.com/edlundin/enocean-esp3/pkg/device_id"
+	"github.com/edlundin/enocean-esp3/pkg/deviceid"
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 	"github.com/edlundin/enocean-esp3/pkg/esp3"
 )
@@ -22,8 +22,8 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 			t.Errorf("expected no error, got: %s", err)
 		}
 
-		expectedDestID, _ := device_id.FromByteArray([]byte{0x12, 0x34, 0x56, 0x78})
-		expectedSenderID, _ := device_id.FromByteArray([]byte{0xff, 0x82, 0x00, 0x85})
+		expectedDestID, _ := deviceid.FromByteArray([]byte{0x12, 0x34, 0x56, 0x78})
+		expectedSenderID, _ := deviceid.FromByteArray([]byte{0xff, 0x82, 0x00, 0x85})
 
 		if packet.DestinationID != expectedDestID {
 			t.Errorf("expected DestinationID %v, got %v", expectedDestID, packet.DestinationID)
@@ -49,7 +49,7 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 			t.Errorf("expected SubTelNum %v, got %v", byte(0x03), packet.SubTelNum)
 		}
 
-		expectedSenderID, _ = device_id.FromByteArray([]byte{0xff, 0x82, 0x00, 0x85})
+		expectedSenderID, _ = deviceid.FromByteArray([]byte{0xff, 0x82, 0x00, 0x85})
 		if packet.SenderID != expectedSenderID {
 			t.Errorf("expected SenderID %v, got %v", expectedSenderID, packet.SenderID)
 		}
@@ -144,8 +144,8 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 			t.Errorf("expected no error, got: %s", err)
 		}
 
-		expectedDestID, _ := device_id.FromByteArray([]byte{0x12, 0x34, 0x56, 0x78})
-		expectedSenderID, _ := device_id.FromByteArray([]byte{0x12, 0x34, 0x56, 0x78})
+		expectedDestID, _ := deviceid.FromByteArray([]byte{0x12, 0x34, 0x56, 0x78})
+		expectedSenderID, _ := deviceid.FromByteArray([]byte{0x12, 0x34, 0x56, 0x78})
 
 		if packet.DestinationID != expectedDestID {
 			t.Errorf("expected DestinationID %v, got %v", expectedDestID, packet.DestinationID)
@@ -193,7 +193,7 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 			t.Errorf("expected UserData %v, got %v", expectedUserData, packet.UserData)
 		}
 
-		expectedSenderID, _ := device_id.FromByteArray([]byte{0x12, 0x34, 0x56, 0x78})
+		expectedSenderID, _ := deviceid.FromByteArray([]byte{0x12, 0x34, 0x56, 0x78})
 		if packet.SenderID != expectedSenderID {
 			t.Errorf("expected SenderID %v, got %v", expectedSenderID, packet.SenderID)
 		}
@@ -257,8 +257,8 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 
 func TestErp1Packet_ToEsp3(t *testing.T) {
 	t.Run("converts Erp1Packet to ESP3 telegram correctly", func(t *testing.T) {
-		destID, _ := device_id.FromByteArray([]byte{0x12, 0x34, 0x56, 0x78})
-		senderID, _ := device_id.FromByteArray([]byte{0xff, 0x82, 0x00, 0x85})
+		destID, _ := deviceid.FromByteArray([]byte{0x12, 0x34, 0x56, 0x78})
+		senderID, _ := deviceid.FromByteArray([]byte{0xff, 0x82, 0x00, 0x85})
 
 		packet := Packet{
 			DestinationID: destID,
@@ -289,8 +289,8 @@ func TestErp1Packet_ToEsp3(t *testing.T) {
 	})
 
 	t.Run("handles empty UserData correctly", func(t *testing.T) {
-		destinationID, _ := device_id.FromByteArray([]byte{0x12, 0x34, 0x56, 0x78})
-		senderID, _ := device_id.FromByteArray([]byte{0xff, 0x82, 0x00, 0x85})
+		destinationID, _ := deviceid.FromByteArray([]byte{0x12, 0x34, 0x56, 0x78})
+		senderID, _ := deviceid.FromByteArray([]byte{0xff, 0x82, 0x00, 0x85})
 
 		packet := Packet{
 			DestinationID: destinationID,
@@ -313,13 +313,13 @@ func TestErp1Packet_ToEsp3(t *testing.T) {
 
 	t.Run("handles broadcast destination ID correctly", func(t *testing.T) {
 		packet := Packet{
-			DestinationID: device_id.BroadcastId(),
+			DestinationID: deviceid.BroadcastId(),
 			Rorg:          enums.Rorg(0xd2),
 			Rssi:          0x80,
 			SecurityLevel: 0x00,
 			Status:        0x85,
 			SubTelNum:     0x03,
-			SenderID:      device_id.DeviceID(0x12345678),
+			SenderID:      deviceid.DeviceID(0x12345678),
 			UserData:      []byte{0x01, 0x02, 0x03},
 		}
 
@@ -334,8 +334,8 @@ func TestErp1Packet_ToEsp3(t *testing.T) {
 
 func TestErp1Packet_Serialize(t *testing.T) {
 	t.Run("serializes Erp1Packet to byte array", func(t *testing.T) {
-		destinationID, _ := device_id.FromByteArray([]byte{0x12, 0x34, 0x56, 0x78})
-		senderID, _ := device_id.FromByteArray([]byte{0xff, 0x82, 0x00, 0x85})
+		destinationID, _ := deviceid.FromByteArray([]byte{0x12, 0x34, 0x56, 0x78})
+		senderID, _ := deviceid.FromByteArray([]byte{0xff, 0x82, 0x00, 0x85})
 
 		packet := Packet{
 			DestinationID: destinationID,
@@ -366,13 +366,13 @@ func TestErp1Packet_Serialize(t *testing.T) {
 
 	t.Run("serializes packet with empty UserData", func(t *testing.T) {
 		packet := Packet{
-			DestinationID: device_id.DeviceID(0x12345678),
+			DestinationID: deviceid.DeviceID(0x12345678),
 			Rorg:          enums.Rorg(0xd2),
 			Rssi:          0x80,
 			SecurityLevel: 0x00,
 			Status:        0x85,
 			SubTelNum:     0x03,
-			SenderID:      device_id.DeviceID(0x87654321),
+			SenderID:      deviceid.DeviceID(0x87654321),
 			UserData:      []byte{},
 		}
 

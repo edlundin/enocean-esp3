@@ -1,4 +1,4 @@
-package device_id
+package deviceid
 
 import (
 	"fmt"

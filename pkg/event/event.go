@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 
-	"github.com/edlundin/enocean-esp3/pkg/device_id"
+	"github.com/edlundin/enocean-esp3/pkg/deviceid"
 	"github.com/edlundin/enocean-esp3/pkg/eep"
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 	"github.com/edlundin/enocean-esp3/pkg/esp3"
@@ -57,7 +57,7 @@ type COEventSecureDevice struct {
 	Packet
 
 	Cause    enums.SecureDeviceEventCause
-	DeviceID device_id.DeviceID
+	DeviceID deviceid.DeviceID
 }
 
 type CODutyCycleLimit struct {
