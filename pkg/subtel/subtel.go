@@ -66,14 +66,17 @@ func NewPacketFromEsp3(telegram esp3.Telegram) (Packet, error) {
 	subTelNum := telegram.OptData[subTelNumOffset]
 	userData := telegram.Data[userDataOffset:senderIdOffset]
 
-	subTelsOffset := len(telegram.OptData) - (timestampOffset + timestampSize)
-	subTels := make([]SubTel, subTelsOffset/subTelSize)
-	for i := subTelsOffset; i < len(telegram.OptData); i += subTelSize {
-		subTels = append(subTels, SubTel{
-			Tick:   telegram.OptData[i],
-			Rssi:   telegram.OptData[i+1],
-			Status: telegram.OptData[i+2],
-		})
+	subTelsOffset := timestampOffset + timestampSize
+	subTelsData := telegram.OptData[subTelsOffset:]
+	subTels := make([]SubTel, 0, len(subTelsData)/subTelSize)
+	for i := 0; i < len(subTelsData); i += subTelSize {
+		if i+2 < len(subTelsData) {
+			subTels = append(subTels, SubTel{
+				Tick:   subTelsData[i],
+				Rssi:   subTelsData[i+1],
+				Status: subTelsData[i+2],
+			})
+		}
 	}
 
 	return Packet{
@@ -105,7 +108,7 @@ func (p Packet) ToEsp3() esp3.Telegram {
 	optData = append(optData, destinationID[:]...)
 	optData = append(optData, 0xff)
 	optData = append(optData, 0x03)
-	optData = append(optData, byte(p.Timestamp&0xFF00>>8), byte(p.Timestamp&0x00FF))
+	optData = append(optData, byte(p.Timestamp>>8), byte(p.Timestamp&0xFF))
 
 	for _, subTel := range p.SubTels {
 		optData = append(optData, subTel.Tick, subTel.Rssi, subTel.Status)
