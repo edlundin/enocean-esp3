@@ -85,6 +85,10 @@ func NewPacketFromEsp3(telegram esp3.Telegram) (Event, error) {
 		return Packet{}, errors.New("invalid packet type")
 	}
 
+	if len(telegram.Data) == 0 {
+		return Packet{}, errors.New("data too short")
+	}
+
 	data := make([]byte, 0, len(telegram.Data)+len(telegram.OptData))
 	data = append(data, telegram.Data...)
 	data = append(data, telegram.OptData...)
@@ -189,5 +193,5 @@ func NewPacketFromEsp3(telegram esp3.Telegram) (Event, error) {
 
 func decodeBinary(data []byte, out any) error {
 	buf := bytes.NewReader(data)
-	return binary.Read(buf, binary.LittleEndian, out)
+	return binary.Read(buf, binary.BigEndian, out)
 }

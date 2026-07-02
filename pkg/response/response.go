@@ -19,6 +19,9 @@ func NewPacketFromEsp3(telegram esp3.Telegram) (Packet, error) {
 	}
 
 	const returnCodeOffset = 0
+	if len(telegram.Data) == 0 {
+		return Packet{}, errors.New("data too short")
+	}
 
 	returnCode, err := enums.ParseReturnCodeFromByte(telegram.Data[returnCodeOffset])
 	if err != nil {
