@@ -26,7 +26,7 @@ func TestNewPacketFromEsp3(t *testing.T) {
 
 		// Verify the packet was created correctly
 		expectedDestinationID, _ := deviceid.FromByteArray([]byte{0xaa, 0xbb, 0xcc, 0xdd})
-		expectedSenderID, _ := deviceid.FromByteArray([]byte{0xfe, 0xff, 0x00, 0x01})
+		expectedSenderID, _ := deviceid.FromByteArray([]byte{0xfb, 0xfc, 0xfd, 0xfe})
 
 		if packet.DestinationID != expectedDestinationID {
 			t.Errorf("expected destination ID %v, got %v", expectedDestinationID, packet.DestinationID)
@@ -61,14 +61,14 @@ func TestNewPacketFromEsp3(t *testing.T) {
 		}
 
 		// Check user data (should be data[1:statusOffset])
-		expectedUserData := telegram.Data[1 : len(telegram.Data)-1]
+		expectedUserData := telegram.Data[1 : len(telegram.Data)-5]
 		if !reflect.DeepEqual(packet.UserData, expectedUserData) {
 			t.Errorf("expected user data %v, got %v", expectedUserData, packet.UserData)
 		}
 
 		// Check SubTels
-		if len(packet.SubTels) != 1 {
-			t.Errorf("expected 1 SubTel, got %d", len(packet.SubTels))
+		if len(packet.SubTels) != 2 {
+			t.Errorf("expected 2 SubTels, got %d", len(packet.SubTels))
 		}
 
 		if packet.SubTels[0].Tick != 0x01 {
@@ -154,9 +154,9 @@ func TestNewPacketFromEsp3(t *testing.T) {
 			t.Errorf("expected no error, got: %s", err)
 		}
 
-		// Should have 2 SubTels
-		if len(packet.SubTels) != 2 {
-			t.Errorf("expected 2 SubTels, got %d", len(packet.SubTels))
+		// Should have 3 SubTels
+		if len(packet.SubTels) != 3 {
+			t.Errorf("expected 3 SubTels, got %d", len(packet.SubTels))
 		}
 
 		// First SubTel
