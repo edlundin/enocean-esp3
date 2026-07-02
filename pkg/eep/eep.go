@@ -13,7 +13,7 @@ const (
 	minRorg = 0x00
 	maxRorg = 0xff
 	minFunc = 0x00
-	maxFunc = 0x60
+	maxFunc = 0xb0
 	minType = 0x00
 	maxType = 0x7f
 )
