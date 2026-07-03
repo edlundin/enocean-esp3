@@ -9,8 +9,12 @@ import (
 
 	"github.com/edlundin/enocean-esp3/pkg/deviceid"
 	"github.com/edlundin/enocean-esp3/pkg/enums"
+	"github.com/edlundin/enocean-esp3/pkg/erp1"
 	"github.com/edlundin/enocean-esp3/pkg/esp3"
+	"github.com/edlundin/enocean-esp3/pkg/gp"
 	"github.com/edlundin/enocean-esp3/pkg/reman"
+	"github.com/edlundin/enocean-esp3/pkg/response"
+	"github.com/edlundin/enocean-esp3/pkg/smartack"
 	"go.bug.st/serial"
 )
 
@@ -123,5 +127,111 @@ func TestParserSkipsInvalidPacketType(t *testing.T) {
 	case got := <-channels.ESP3:
 		t.Fatalf("unexpected telegram: %+v", got)
 	case <-time.After(20 * time.Millisecond):
+	}
+}
+
+func TestParserDropsBadCRC8HThenResyncs(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	bad := esp3.NewTelegramFromData(enums.PacketTypeRESPONSE, []byte{byte(enums.ReturnCodeSUCCESS)}, nil).Serialize()
+	bad[5] ^= 0xff
+	want := esp3.NewTelegramFromData(enums.PacketTypeRESPONSE, []byte{byte(enums.ReturnCodeERROR)}, nil)
+	set, channels := newChannelSet(4)
+
+	go parser(ctx, &fakePort{reads: [][]byte{append(bad, want.Serialize()...)}}, set)
+
+	select {
+	case got := <-channels.Response:
+		if got.Code != enums.ReturnCodeERROR {
+			t.Fatalf("got response code %s", got.Code)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("timed out waiting for parser resync")
+	}
+}
+
+func TestParseTelegramResponseAndUnparsed(t *testing.T) {
+	remanMessages := newReManAssembler(time.Second)
+	resp := esp3.NewTelegramFromData(enums.PacketTypeRESPONSE, []byte{byte(enums.ReturnCodeSUCCESS), 1, 2}, []byte{3})
+	msgs := parseTelegram(remanMessages, resp)
+	if len(msgs) != 2 || msgs[0].Kind != "esp3" || msgs[1].Kind != "response" {
+		t.Fatalf("messages = %#v", msgs)
+	}
+	if got := msgs[1].Data.(response.Packet); got.Code != enums.ReturnCodeSUCCESS || !reflect.DeepEqual(got.Data, []byte{1, 2}) || !reflect.DeepEqual(got.OptData, []byte{3}) {
+		t.Fatalf("response = %#v", got)
+	}
+
+	unknown := esp3.NewTelegramFromData(enums.PacketTypeCOMMON_COMMAND, []byte{1}, nil)
+	msgs = parseTelegram(remanMessages, unknown)
+	if len(msgs) != 2 || msgs[1].Kind != "unparsed" {
+		t.Fatalf("unparsed messages = %#v", msgs)
+	}
+}
+
+func TestParseTelegramReportsParseErrors(t *testing.T) {
+	cases := []esp3.Telegram{
+		esp3.NewTelegramFromData(enums.PacketTypeRESPONSE, nil, nil),
+		esp3.NewTelegramFromData(enums.PacketTypeRADIO_ERP1, []byte{0xd2}, nil),
+	}
+	for _, tc := range cases {
+		msgs := parseTelegram(newReManAssembler(time.Second), tc)
+		if msgs[len(msgs)-1].Kind != "parse_error" || msgs[len(msgs)-1].Err == nil {
+			t.Fatalf("messages = %#v", msgs)
+		}
+	}
+}
+
+func TestParseERP1SmartAckAndGPHeader(t *testing.T) {
+	sa := smartack.DataReclaim{MailboxIndex: 3}.ERP1(deviceid.DeviceID(1))
+	msgs := parseERP1(newReManAssembler(time.Second), sa.ToEsp3(), sa)
+	if len(msgs) != 1 || msgs[0].Kind != "smart_ack" || msgs[0].Data.(smartack.DataReclaim).MailboxIndex != 3 {
+		t.Fatalf("smart ack messages = %#v", msgs)
+	}
+
+	header, err := gp.EncodeRequestHeader(gp.RequestHeader{ManufacturerID: 0x123, Bidirectional: true, Purpose: gp.PurposeTeachIn})
+	if err != nil {
+		t.Fatal(err)
+	}
+	gpPacket := erp1.Packet{Rorg: enums.RorgGP_TI, UserData: header}
+	msgs = parseERP1(newReManAssembler(time.Second), gpPacket.ToEsp3(), gpPacket)
+	if len(msgs) != 1 || msgs[0].Kind != "gp_header" {
+		t.Fatalf("GP messages = %#v", msgs)
+	}
+	if got := msgs[0].Data.(gp.RequestHeader); got.ManufacturerID != 0x123 || !got.Bidirectional || got.Purpose != gp.PurposeTeachIn {
+		t.Fatalf("GP header = %#v", got)
+	}
+}
+
+func TestPublishDispatchesTypedChannels(t *testing.T) {
+	set, channels := newChannelSet(2)
+	msg := Message{Kind: "response", Data: response.Packet{Code: enums.ReturnCodeSUCCESS}}
+	if !publish(context.Background(), set, []Message{msg}) {
+		t.Fatal("publish returned false")
+	}
+	if (<-channels.All).Kind != "response" {
+		t.Fatal("all channel missed message")
+	}
+	if (<-channels.Response).Code != enums.ReturnCodeSUCCESS {
+		t.Fatal("response channel missed message")
+	}
+}
+
+func TestPublishStopsWhenContextCancelled(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	set, _ := newChannelSet(0)
+	if publish(ctx, set, []Message{{Kind: "esp3", Data: esp3.Telegram{}}}) {
+		t.Fatal("publish should stop on canceled context")
+	}
+}
+
+func TestSendDropsWhenChannelFull(t *testing.T) {
+	ch := make(chan int, 1)
+	ch <- 1
+	if !send(context.Background(), ch, 2) {
+		t.Fatal("send should drop instead of blocking")
+	}
+	if got := <-ch; got != 1 {
+		t.Fatalf("got %d", got)
 	}
 }
