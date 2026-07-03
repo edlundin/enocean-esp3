@@ -8,5 +8,6 @@ tasks:
     desc: Run tests and generate coverage report
     cmds:
       - mkdir -p coverage
-      - go test ./... -coverprofile=coverage/coverage.out
+      - go test ./... -coverprofile=coverage/coverage.raw.out
+      - grep -v '/profiles_gen.go:' coverage/coverage.raw.out > coverage/coverage.out
       - go tool cover -html=coverage/coverage.out -o coverage/coverage.html
