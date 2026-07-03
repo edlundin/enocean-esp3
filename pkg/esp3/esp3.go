@@ -38,7 +38,7 @@ func crcTable() [256]byte {
 	}
 }
 
-type Esp3Telegram struct {
+type Telegram struct {
 	PacketType enums.PacketType
 	Data       []byte
 	OptData    []byte
@@ -58,7 +58,7 @@ func ComputeCrcSlice(slice []byte) byte {
 	return crc
 }
 
-func (telegram Esp3Telegram) Serialize() []byte {
+func (telegram Telegram) Serialize() []byte {
 	dataLen := len(telegram.Data)
 
 	header := []byte{byte(dataLen >> 8), byte(dataLen), byte(len(telegram.OptData)), byte(telegram.PacketType)}
@@ -68,34 +68,34 @@ func (telegram Esp3Telegram) Serialize() []byte {
 	return slices.Concat([]byte{syncByte}, header, []byte{crc8h}, telegram.Data, telegram.OptData, []byte{crc8d})
 }
 
-func NewEsp3TelegramFromData(packetType enums.PacketType, data []byte, optData []byte) Esp3Telegram {
-	return Esp3Telegram{
+func NewTelegramFromData(packetType enums.PacketType, data []byte, optData []byte) Telegram {
+	return Telegram{
 		PacketType: packetType,
 		Data:       data,
 		OptData:    optData,
 	}
 }
 
-func NewEsp3TelegramFromHexString(hexStr string) (Esp3Telegram, error) {
+func NewEsp3TelegramFromHexString(hexStr string) (Telegram, error) {
 	const minHexStringLen = 7
 
 	if len(hexStr)%2 != 0 {
 		hexStr = strings.Repeat("0", 1) + hexStr
 	}
 
-	telegram := Esp3Telegram{}
+	telegram := Telegram{}
 	bytes, err := hex.DecodeString(hexStr)
 
 	if err != nil {
-		return Esp3Telegram{}, fmt.Errorf("invalid hex string: %s", err)
+		return Telegram{}, fmt.Errorf("invalid hex string: %s", err)
 	}
 
 	if len(bytes) < minHexStringLen {
-		return Esp3Telegram{}, errors.New("hex string too short")
+		return Telegram{}, errors.New("hex string too short")
 	}
 
 	if bytes[0] != 0x55 {
-		return Esp3Telegram{}, errors.New("sync byte missing")
+		return Telegram{}, errors.New("sync byte missing")
 	}
 
 	crc8h := bytes[5]
@@ -106,7 +106,7 @@ func NewEsp3TelegramFromHexString(hexStr string) (Esp3Telegram, error) {
 	}
 
 	if crc != crc8h {
-		return Esp3Telegram{}, fmt.Errorf("invalid CRC8H (got:0x%x, valid:0x%x)", crc8h, crc)
+		return Telegram{}, fmt.Errorf("invalid CRC8H (got:0x%x, valid:0x%x)", crc8h, crc)
 	}
 
 	crc8dIndex := len(bytes) - 1
@@ -118,7 +118,7 @@ func NewEsp3TelegramFromHexString(hexStr string) (Esp3Telegram, error) {
 	}
 
 	if crc != crc8d {
-		return Esp3Telegram{}, fmt.Errorf("invalid CRC8D (got:0x%x, valid:0x%x)", crc8d, crc)
+		return Telegram{}, fmt.Errorf("invalid CRC8D (got:0x%x, valid:0x%x)", crc8d, crc)
 	}
 
 	dataLen := binary.BigEndian.Uint16(bytes[1:3])
@@ -126,7 +126,7 @@ func NewEsp3TelegramFromHexString(hexStr string) (Esp3Telegram, error) {
 	packetType, err := enums.ParsePacketTypeFromByte(bytes[4])
 
 	if err != nil {
-		return Esp3Telegram{}, err
+		return Telegram{}, err
 	}
 
 	telegram.PacketType = packetType

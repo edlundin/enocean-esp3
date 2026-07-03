@@ -2,58 +2,80 @@ package enums
 
 import "errors"
 
-type Rorg uint8
+type Rorg byte
 
 const (
-	RORG_RPS        Rorg = 0xf6
-	RORG_1BS        Rorg = 0xd5
-	RORG_4BS        Rorg = 0xa5
-	RORG_VLD        Rorg = 0xd2
-	RORG_MSC        Rorg = 0xd1
-	RORG_ADT        Rorg = 0xa6
-	RORG_SM_LRN_REQ Rorg = 0xc6
-	RORG_SM_LRN_ANS Rorg = 0xc7
-	RORG_SM_REC     Rorg = 0xa7
-	RORG_SYS_EX     Rorg = 0xc5
-	RORG_SEC        Rorg = 0x30
-	RORG_SEC_ENCAPS Rorg = 0x31
-	RORG_SEC_MAN    Rorg = 0x34
-	RORG_SIGNAL     Rorg = 0xd0
-	RORG_UTE        Rorg = 0xd4
+	RorgRPS        Rorg = 0xf6
+	Rorg1BS        Rorg = 0xd5
+	Rorg4BS        Rorg = 0xa5
+	RorgVLD        Rorg = 0xd2
+	RorgMSC        Rorg = 0xd1
+	RorgADT        Rorg = 0xa6
+	RorgGP_TI      Rorg = 0xb0
+	RorgGP_TR      Rorg = 0xb1
+	RorgGP_CD      Rorg = 0xb2
+	RorgGP_SD      Rorg = 0xb3
+	RorgSM_LRN_REQ Rorg = 0xc6
+	RorgSM_LRN_ANS Rorg = 0xc7
+	RorgSM_REC     Rorg = 0xa7
+	RorgSYS_EX     Rorg = 0xc5
+	RorgSEC        Rorg = 0x30
+	RorgSEC_R      Rorg = 0x31
+	RorgSEC_ENCAPS Rorg = RorgSEC_R
+	RorgSEC_D      Rorg = 0x32
+	RorgSEC_CDM    Rorg = 0x33
+	RorgSEC_MAN    Rorg = 0x34
+	RorgSEC_TI     Rorg = 0x35
+	RorgSIGNAL     Rorg = 0xd0
+	RorgUTE        Rorg = 0xd4
 )
 
-func ParseRorgFromByte(byte uint8) (Rorg, error) {
-	switch byte {
+func ParseRorgFromByte(b byte) (Rorg, error) {
+	switch b {
 	case 0xf6:
-		return RORG_RPS, nil
+		return RorgRPS, nil
 	case 0xd5:
-		return RORG_1BS, nil
+		return Rorg1BS, nil
 	case 0xa5:
-		return RORG_4BS, nil
+		return Rorg4BS, nil
 	case 0xd2:
-		return RORG_VLD, nil
+		return RorgVLD, nil
 	case 0xd1:
-		return RORG_MSC, nil
+		return RorgMSC, nil
 	case 0xa6:
-		return RORG_ADT, nil
+		return RorgADT, nil
+	case 0xb0:
+		return RorgGP_TI, nil
+	case 0xb1:
+		return RorgGP_TR, nil
+	case 0xb2:
+		return RorgGP_CD, nil
+	case 0xb3:
+		return RorgGP_SD, nil
 	case 0xc6:
-		return RORG_SM_LRN_REQ, nil
+		return RorgSM_LRN_REQ, nil
 	case 0xc7:
-		return RORG_SM_LRN_ANS, nil
+		return RorgSM_LRN_ANS, nil
 	case 0xa7:
-		return RORG_SM_REC, nil
+		return RorgSM_REC, nil
 	case 0xc5:
-		return RORG_SYS_EX, nil
+		return RorgSYS_EX, nil
 	case 0x30:
-		return RORG_SEC, nil
+		return RorgSEC, nil
 	case 0x31:
-		return RORG_SEC_ENCAPS, nil
+		return RorgSEC_R, nil
+	case 0x32:
+		return RorgSEC_D, nil
+	case 0x33:
+		return RorgSEC_CDM, nil
 	case 0x34:
-		return RORG_SEC_MAN, nil
+		return RorgSEC_MAN, nil
+	case 0x35:
+		return RorgSEC_TI, nil
 	case 0xd0:
-		return RORG_SIGNAL, nil
+		return RorgSIGNAL, nil
 	case 0xd4:
-		return RORG_UTE, nil
+		return RorgUTE, nil
 	default:
 		return 0, errors.New("invalid rorg")
 	}
@@ -61,37 +83,81 @@ func ParseRorgFromByte(byte uint8) (Rorg, error) {
 
 func (rorg Rorg) String() string {
 	switch rorg {
-	case RORG_RPS:
+	case RorgRPS:
 		return "RPS"
-	case RORG_1BS:
+	case Rorg1BS:
 		return "1BS"
-	case RORG_4BS:
+	case Rorg4BS:
 		return "4BS"
-	case RORG_VLD:
+	case RorgVLD:
 		return "VLD"
-	case RORG_MSC:
+	case RorgMSC:
 		return "MSC"
-	case RORG_ADT:
+	case RorgADT:
 		return "ADT"
-	case RORG_SM_LRN_REQ:
+	case RorgGP_TI:
+		return "GP_TI"
+	case RorgGP_TR:
+		return "GP_TR"
+	case RorgGP_CD:
+		return "GP_CD"
+	case RorgGP_SD:
+		return "GP_SD"
+	case RorgSM_LRN_REQ:
 		return "SM_LRN_REQ"
-	case RORG_SM_LRN_ANS:
+	case RorgSM_LRN_ANS:
 		return "SM_LRN_ANS"
-	case RORG_SM_REC:
+	case RorgSM_REC:
 		return "SM_REC"
-	case RORG_SYS_EX:
+	case RorgSYS_EX:
 		return "SYS_EX"
-	case RORG_SEC:
+	case RorgSEC:
 		return "SEC"
-	case RORG_SEC_ENCAPS:
-		return "SEC_ENCAPS"
-	case RORG_SEC_MAN:
+	case RorgSEC_R:
+		return "SEC_R"
+	case RorgSEC_D:
+		return "SEC_D"
+	case RorgSEC_CDM:
+		return "SEC_CDM"
+	case RorgSEC_MAN:
 		return "SEC_MAN"
-	case RORG_SIGNAL:
+	case RorgSEC_TI:
+		return "SEC_TI"
+	case RorgSIGNAL:
 		return "SIGNAL"
-	case RORG_UTE:
+	case RorgUTE:
 		return "UTE"
 	default:
 		return "UNKNOWN"
+	}
+}
+
+func (rorg Rorg) Valid() bool {
+	switch rorg {
+	case RorgRPS,
+		Rorg1BS,
+		Rorg4BS,
+		RorgVLD,
+		RorgMSC,
+		RorgADT,
+		RorgGP_TI,
+		RorgGP_TR,
+		RorgGP_CD,
+		RorgGP_SD,
+		RorgSM_LRN_REQ,
+		RorgSM_LRN_ANS,
+		RorgSM_REC,
+		RorgSYS_EX,
+		RorgSEC,
+		RorgSEC_R,
+		RorgSEC_D,
+		RorgSEC_CDM,
+		RorgSEC_MAN,
+		RorgSEC_TI,
+		RorgSIGNAL,
+		RorgUTE:
+		return true
+	default:
+		return false
 	}
 }

@@ -1,0 +1,450 @@
+package enums
+
+import "errors"
+
+type EventCode byte
+
+const (
+	EventCodeSA_RECLAIM_NOT_SUCCESSFUL EventCode = iota + 1
+	EventCodeSA_CONFIRM_LEARN
+	EventCodeSA_LEARN_ACK
+	EventCodeCO_READY
+	EventCodeCO_EVENT_SECUREDEVICES
+	EventCodeCO_DUTYCYCLE_LIMIT
+	EventCodeCO_TRANSMIT_FAILED
+	EventCodeCO_TX_DONE
+	EventCodeCO_LRN_MODE_DISABLED
+)
+
+func ParseEventCodeFromByte(b byte) (EventCode, error) {
+	switch b {
+	case 0x01:
+		return EventCodeSA_RECLAIM_NOT_SUCCESSFUL, nil
+	case 0x02:
+		return EventCodeSA_CONFIRM_LEARN, nil
+	case 0x03:
+		return EventCodeSA_LEARN_ACK, nil
+	case 0x04:
+		return EventCodeCO_READY, nil
+	case 0x05:
+		return EventCodeCO_EVENT_SECUREDEVICES, nil
+	case 0x06:
+		return EventCodeCO_DUTYCYCLE_LIMIT, nil
+	case 0x07:
+		return EventCodeCO_TRANSMIT_FAILED, nil
+	case 0x08:
+		return EventCodeCO_TX_DONE, nil
+	case 0x09:
+		return EventCodeCO_LRN_MODE_DISABLED, nil
+	default:
+		return 0, errors.New("invalid event code")
+	}
+}
+
+func (eventCode EventCode) String() string {
+	switch eventCode {
+	case EventCodeSA_RECLAIM_NOT_SUCCESSFUL:
+		return "SA_RECLAIM_NOT_SUCCESSFUL"
+	case EventCodeSA_CONFIRM_LEARN:
+		return "SA_CONFIRM_LEARN"
+	case EventCodeSA_LEARN_ACK:
+		return "SA_LEARN_ACK"
+	case EventCodeCO_READY:
+		return "CO_READY"
+	case EventCodeCO_EVENT_SECUREDEVICES:
+		return "CO_EVENT_SECUREDEVICES"
+	case EventCodeCO_DUTYCYCLE_LIMIT:
+		return "CO_DUTYCYCLE_LIMIT"
+	case EventCodeCO_TRANSMIT_FAILED:
+		return "CO_TRANSMIT_FAILED"
+	case EventCodeCO_TX_DONE:
+		return "CO_TX_DONE"
+	case EventCodeCO_LRN_MODE_DISABLED:
+		return "CO_LRN_MODE_DISABLED"
+	default:
+		return "UNKNOWN"
+	}
+}
+
+func (eventCode EventCode) Valid() bool {
+	switch eventCode {
+	case EventCodeSA_RECLAIM_NOT_SUCCESSFUL,
+		EventCodeSA_CONFIRM_LEARN,
+		EventCodeSA_LEARN_ACK,
+		EventCodeCO_READY,
+		EventCodeCO_EVENT_SECUREDEVICES,
+		EventCodeCO_DUTYCYCLE_LIMIT,
+		EventCodeCO_TRANSMIT_FAILED,
+		EventCodeCO_TX_DONE,
+		EventCodeCO_LRN_MODE_DISABLED:
+		return true
+	default:
+		return false
+	}
+}
+
+type LearnAckConfirmCode byte
+
+const (
+	LearnAckConfirmCodeLRN_IN                 LearnAckConfirmCode = 0x00
+	LearnAckConfirmCodeEEP_NOT_ACCEPTED       LearnAckConfirmCode = 0x11
+	LearnAckConfirmCodeNO_PLACE_IN_PM         LearnAckConfirmCode = 0x12
+	LearnAckConfirmCodeNO_PLACE_IN_CONTROLLER LearnAckConfirmCode = 0x13
+	LearnAckConfirmCodeRSSI_NOT_GOOD_ENOUGH   LearnAckConfirmCode = 0x14
+	LearnAckConfirmCodeLRN_OUT                LearnAckConfirmCode = 0x20
+	LearnAckConfirmCodeFUNCTION_NOT_SUPPORTED LearnAckConfirmCode = 0xff
+)
+
+func ParseLearnAckConfirmCodeFromByte(b byte) (LearnAckConfirmCode, error) {
+	switch b {
+	case 0x00:
+		return LearnAckConfirmCodeLRN_IN, nil
+	case 0x11:
+		return LearnAckConfirmCodeEEP_NOT_ACCEPTED, nil
+	case 0x12:
+		return LearnAckConfirmCodeNO_PLACE_IN_PM, nil
+	case 0x13:
+		return LearnAckConfirmCodeNO_PLACE_IN_CONTROLLER, nil
+	case 0x14:
+		return LearnAckConfirmCodeRSSI_NOT_GOOD_ENOUGH, nil
+	case 0x20:
+		return LearnAckConfirmCodeLRN_OUT, nil
+	case 0xff:
+		return LearnAckConfirmCodeFUNCTION_NOT_SUPPORTED, nil
+	default:
+		return 0, errors.New("invalid learn ack confirm code")
+	}
+}
+
+func (learnAckConfirmCode LearnAckConfirmCode) String() string {
+	switch learnAckConfirmCode {
+	case LearnAckConfirmCodeLRN_IN:
+		return "LRN_IN"
+	case LearnAckConfirmCodeEEP_NOT_ACCEPTED:
+		return "EEP_NOT_ACCEPTED"
+	case LearnAckConfirmCodeNO_PLACE_IN_PM:
+		return "NO_PLACE_IN_PM"
+	case LearnAckConfirmCodeNO_PLACE_IN_CONTROLLER:
+		return "NO_PLACE_IN_CONTROLLER"
+	case LearnAckConfirmCodeRSSI_NOT_GOOD_ENOUGH:
+		return "RSSI_NOT_GOOD_ENOUGH"
+	case LearnAckConfirmCodeLRN_OUT:
+		return "LRN_OUT"
+	case LearnAckConfirmCodeFUNCTION_NOT_SUPPORTED:
+		return "FUNCTION_NOT_SUPPORTED"
+	default:
+		return "UNKNOWN"
+	}
+}
+
+func (learnAckConfirmCode LearnAckConfirmCode) Valid() bool {
+	switch learnAckConfirmCode {
+	case LearnAckConfirmCodeLRN_IN,
+		LearnAckConfirmCodeEEP_NOT_ACCEPTED,
+		LearnAckConfirmCodeNO_PLACE_IN_PM,
+		LearnAckConfirmCodeNO_PLACE_IN_CONTROLLER,
+		LearnAckConfirmCodeRSSI_NOT_GOOD_ENOUGH,
+		LearnAckConfirmCodeLRN_OUT,
+		LearnAckConfirmCodeFUNCTION_NOT_SUPPORTED:
+		return true
+	default:
+		return false
+	}
+}
+
+type WakeUpCause byte
+
+const (
+	WakeUpCauseVOLTAGE_SUPPLY_DROP WakeUpCause = iota
+	WakeUpCauseRESET_BY_RESET_PIN
+	WakeUpCauseWATCHDOG_TIMEOUT
+	WakeUpCauseFLYWHEEL_TIMEOUT
+	WakeUpCausePARITY_ERROR
+	WakeUpCauseHARDWARE_PARITY_ERROR_IN_MEMORY
+	WakeUpCauseREQUESTED_MEMORY_LOCATION_NOT_FOUND
+	WakeUpCauseTRIGGER_PIN0
+	WakeUpCauseTRIGGER_PIN1
+	WakeUpCauseUNKNOWN_RESET_SOURCE
+	WakeUpCauseUART_WAKE_UP
+)
+
+func ParseWakeUpCauseFromByte(b byte) (WakeUpCause, error) {
+	switch b {
+	case 0x00:
+		return WakeUpCauseVOLTAGE_SUPPLY_DROP, nil
+	case 0x01:
+		return WakeUpCauseRESET_BY_RESET_PIN, nil
+	case 0x02:
+		return WakeUpCauseWATCHDOG_TIMEOUT, nil
+	case 0x03:
+		return WakeUpCauseFLYWHEEL_TIMEOUT, nil
+	case 0x04:
+		return WakeUpCausePARITY_ERROR, nil
+	case 0x05:
+		return WakeUpCauseHARDWARE_PARITY_ERROR_IN_MEMORY, nil
+	case 0x06:
+		return WakeUpCauseREQUESTED_MEMORY_LOCATION_NOT_FOUND, nil
+	case 0x07:
+		return WakeUpCauseTRIGGER_PIN0, nil
+	case 0x08:
+		return WakeUpCauseTRIGGER_PIN1, nil
+	case 0x09:
+		return WakeUpCauseUNKNOWN_RESET_SOURCE, nil
+	case 0x0a:
+		return WakeUpCauseUART_WAKE_UP, nil
+	default:
+		return 0, errors.New("invalid wake up cause")
+	}
+}
+
+func (wakeUpCause WakeUpCause) String() string {
+	switch wakeUpCause {
+	case WakeUpCauseVOLTAGE_SUPPLY_DROP:
+		return "VOLTAGE_SUPPLY_DROP"
+	case WakeUpCauseRESET_BY_RESET_PIN:
+		return "RESET_BY_RESET_PIN"
+	case WakeUpCauseWATCHDOG_TIMEOUT:
+		return "WATCHDOG_TIMEOUT"
+	case WakeUpCauseFLYWHEEL_TIMEOUT:
+		return "FLYWHEEL_TIMEOUT"
+	case WakeUpCausePARITY_ERROR:
+		return "PARITY_ERROR"
+	case WakeUpCauseHARDWARE_PARITY_ERROR_IN_MEMORY:
+		return "HARDWARE_PARITY_ERROR_IN_MEMORY"
+	case WakeUpCauseREQUESTED_MEMORY_LOCATION_NOT_FOUND:
+		return "REQUESTED_MEMORY_LOCATION_NOT_FOUND"
+	case WakeUpCauseTRIGGER_PIN0:
+		return "TRIGGER_PIN0"
+	case WakeUpCauseTRIGGER_PIN1:
+		return "TRIGGER_PIN1"
+	case WakeUpCauseUNKNOWN_RESET_SOURCE:
+		return "UNKNOWN_RESET_SOURCE"
+	case WakeUpCauseUART_WAKE_UP:
+		return "UART_WAKE_UP"
+	default:
+		return "UNKNOWN"
+	}
+}
+
+func (wakeUpCause WakeUpCause) Valid() bool {
+	switch wakeUpCause {
+	case WakeUpCauseVOLTAGE_SUPPLY_DROP,
+		WakeUpCauseRESET_BY_RESET_PIN,
+		WakeUpCauseWATCHDOG_TIMEOUT,
+		WakeUpCauseFLYWHEEL_TIMEOUT,
+		WakeUpCausePARITY_ERROR,
+		WakeUpCauseHARDWARE_PARITY_ERROR_IN_MEMORY,
+		WakeUpCauseREQUESTED_MEMORY_LOCATION_NOT_FOUND,
+		WakeUpCauseTRIGGER_PIN0,
+		WakeUpCauseTRIGGER_PIN1,
+		WakeUpCauseUNKNOWN_RESET_SOURCE,
+		WakeUpCauseUART_WAKE_UP:
+		return true
+	default:
+		return false
+	}
+}
+
+type WakeUpMode byte
+
+const (
+	WakeUpModeSTANDARD_SECURITY WakeUpMode = iota
+	WakeUpModeEXTENDED_SECURITY
+)
+
+func ParseWakeUpModeFromByte(b byte) (WakeUpMode, error) {
+	switch b {
+	case 0x00:
+		return WakeUpModeSTANDARD_SECURITY, nil
+	case 0x01:
+		return WakeUpModeEXTENDED_SECURITY, nil
+	default:
+		return 0, errors.New("invalid wake up mode")
+	}
+}
+
+func (wakeUpMode WakeUpMode) String() string {
+	switch wakeUpMode {
+	case WakeUpModeSTANDARD_SECURITY:
+		return "STANDARD_SECURITY"
+	case WakeUpModeEXTENDED_SECURITY:
+		return "EXTENDED_SECURITY"
+	default:
+		return "UNKNOWN"
+	}
+}
+
+func (wakeUpMode WakeUpMode) Valid() bool {
+	switch wakeUpMode {
+	case WakeUpModeSTANDARD_SECURITY,
+		WakeUpModeEXTENDED_SECURITY:
+		return true
+	default:
+		return false
+	}
+}
+
+type SecureDeviceEventCause byte
+
+const (
+	COEventSecureSECURE_LINK_TABLE_FULL   SecureDeviceEventCause = iota
+	COEventSecureRESYNC_WRONG_PRIVATE_KEY SecureDeviceEventCause = iota + 1
+	COEventSecureWRONG_CMAC_TELEGRAM_THRESHOLD_HIT
+	COEventSecureTEACH_IN_TELEGRAM_CORRUPTED
+	COEventSecureTEACH_IN_PSK_FAILED_NO_PSK_SET
+	COEventSecureTEACH_IN_PSK_FAILED_NO_PSK_GIVEN
+	COEventSecureINCORRECT_CMAC_OR_RKC
+	COEventSecureRECEIVED_TELEGRAM_FROM_DEVICE_IN_SECURE_LINK_TABLE
+	COEventSecureTEACH_IN_SUCCESSFUL
+	COEventSecureVALID_RLC_SYNC_RECEIVED_VIA_TEACH_IN
+)
+
+func ParseCOEventSecureFromByte(b byte) (SecureDeviceEventCause, error) {
+	switch b {
+	case 0x00:
+		return COEventSecureSECURE_LINK_TABLE_FULL, nil
+	case 0x01:
+		return COEventSecureRESYNC_WRONG_PRIVATE_KEY, nil
+	case 0x02:
+		return COEventSecureWRONG_CMAC_TELEGRAM_THRESHOLD_HIT, nil
+	case 0x03:
+		return COEventSecureTEACH_IN_TELEGRAM_CORRUPTED, nil
+	case 0x04:
+		return COEventSecureTEACH_IN_PSK_FAILED_NO_PSK_SET, nil
+	case 0x05:
+		return COEventSecureTEACH_IN_PSK_FAILED_NO_PSK_GIVEN, nil
+	case 0x06:
+		return COEventSecureINCORRECT_CMAC_OR_RKC, nil
+	case 0x07:
+		return COEventSecureRECEIVED_TELEGRAM_FROM_DEVICE_IN_SECURE_LINK_TABLE, nil
+	case 0x08:
+		return COEventSecureTEACH_IN_SUCCESSFUL, nil
+	case 0x09:
+		return COEventSecureVALID_RLC_SYNC_RECEIVED_VIA_TEACH_IN, nil
+	default:
+		return 0, errors.New("invalid co event secure")
+	}
+}
+
+func (coEventSecure SecureDeviceEventCause) String() string {
+	switch coEventSecure {
+	case COEventSecureSECURE_LINK_TABLE_FULL:
+		return "SECURE_LINK_TABLE_FULL"
+	case COEventSecureRESYNC_WRONG_PRIVATE_KEY:
+		return "RESYNC_WRONG_PRIVATE_KEY"
+	case COEventSecureWRONG_CMAC_TELEGRAM_THRESHOLD_HIT:
+		return "WRONG_CMAC_TELEGRAM_THRESHOLD_HIT"
+	case COEventSecureTEACH_IN_TELEGRAM_CORRUPTED:
+		return "TEACH_IN_TELEGRAM_CORRUPTED"
+	case COEventSecureTEACH_IN_PSK_FAILED_NO_PSK_SET:
+		return "TEACH_IN_PSK_FAILED_NO_PSK_SET"
+	case COEventSecureTEACH_IN_PSK_FAILED_NO_PSK_GIVEN:
+		return "TEACH_IN_PSK_FAILED_NO_PSK_GIVEN"
+	case COEventSecureINCORRECT_CMAC_OR_RKC:
+		return "INCORRECT_CMAC_OR_RKC"
+	case COEventSecureRECEIVED_TELEGRAM_FROM_DEVICE_IN_SECURE_LINK_TABLE:
+		return "RECEIVED_TELEGRAM_FROM_DEVICE_IN_SECURE_LINK_TABLE"
+	case COEventSecureTEACH_IN_SUCCESSFUL:
+		return "TEACH_IN_SUCCESSFUL"
+	case COEventSecureVALID_RLC_SYNC_RECEIVED_VIA_TEACH_IN:
+		return "VALID_RLC_SYNC_RECEIVED_VIA_TEACH_IN"
+	default:
+		return "UNKNOWN"
+	}
+}
+
+func (coEventSecure SecureDeviceEventCause) Valid() bool {
+	switch coEventSecure {
+	case COEventSecureSECURE_LINK_TABLE_FULL,
+		COEventSecureRESYNC_WRONG_PRIVATE_KEY,
+		COEventSecureWRONG_CMAC_TELEGRAM_THRESHOLD_HIT,
+		COEventSecureTEACH_IN_TELEGRAM_CORRUPTED,
+		COEventSecureTEACH_IN_PSK_FAILED_NO_PSK_SET,
+		COEventSecureTEACH_IN_PSK_FAILED_NO_PSK_GIVEN,
+		COEventSecureINCORRECT_CMAC_OR_RKC,
+		COEventSecureRECEIVED_TELEGRAM_FROM_DEVICE_IN_SECURE_LINK_TABLE,
+		COEventSecureTEACH_IN_SUCCESSFUL,
+		COEventSecureVALID_RLC_SYNC_RECEIVED_VIA_TEACH_IN:
+		return true
+	default:
+		return false
+	}
+}
+
+type DutyCycleLimitCause byte
+
+const (
+	DutyCycleLimitCauseNOT_YET_REACHED DutyCycleLimitCause = iota
+	DutyCycleLimitCauseREACHED
+)
+
+func ParseDutyCycleLimitCauseFromByte(b byte) (DutyCycleLimitCause, error) {
+	switch b {
+	case 0x00:
+		return DutyCycleLimitCauseNOT_YET_REACHED, nil
+	case 0x01:
+		return DutyCycleLimitCauseREACHED, nil
+	default:
+		return 0, errors.New("invalid duty cycle limit cause")
+	}
+}
+
+func (dutyCycleLimitCause DutyCycleLimitCause) String() string {
+	switch dutyCycleLimitCause {
+	case DutyCycleLimitCauseNOT_YET_REACHED:
+		return "NOT_YET_REACHED"
+	case DutyCycleLimitCauseREACHED:
+		return "REACHED"
+	default:
+		return "UNKNOWN"
+	}
+}
+
+func (dutyCycleLimitCause DutyCycleLimitCause) Valid() bool {
+	switch dutyCycleLimitCause {
+	case DutyCycleLimitCauseNOT_YET_REACHED,
+		DutyCycleLimitCauseREACHED:
+		return true
+	default:
+		return false
+	}
+}
+
+type TransmitFailedCause byte
+
+const (
+	TransmitFailedCauseCSMA_FAILED_CHANNEL_NOT_FREE TransmitFailedCause = iota
+	TransmitFailedCauseNO_ACK_RECEIVED
+)
+
+func ParseTransmitFailedCauseFromByte(b byte) (TransmitFailedCause, error) {
+	switch b {
+	case 0x00:
+		return TransmitFailedCauseCSMA_FAILED_CHANNEL_NOT_FREE, nil
+	case 0x01:
+		return TransmitFailedCauseNO_ACK_RECEIVED, nil
+	default:
+		return 0, errors.New("invalid transmit failed cause")
+	}
+}
+
+func (transmitFailedCause TransmitFailedCause) String() string {
+	switch transmitFailedCause {
+	case TransmitFailedCauseCSMA_FAILED_CHANNEL_NOT_FREE:
+		return "CSMA_FAILED_CHANNEL_NOT_FREE"
+	case TransmitFailedCauseNO_ACK_RECEIVED:
+		return "NO_ACK_RECEIVED"
+	default:
+		return "UNKNOWN"
+	}
+}
+
+func (transmitFailedCause TransmitFailedCause) Valid() bool {
+	switch transmitFailedCause {
+	case TransmitFailedCauseCSMA_FAILED_CHANNEL_NOT_FREE,
+		TransmitFailedCauseNO_ACK_RECEIVED:
+		return true
+	default:
+		return false
+	}
+}

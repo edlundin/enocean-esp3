@@ -32,3 +32,5 @@ coverage.html
 .idea
 
 .DS_Store
+
+/coverage

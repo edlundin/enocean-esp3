@@ -3,23 +3,23 @@ package erp1
 import (
 	"errors"
 
-	device_id "github.com/edlundin/enocean-esp3/pkg/device-id"
+	"github.com/edlundin/enocean-esp3/pkg/deviceid"
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 	"github.com/edlundin/enocean-esp3/pkg/esp3"
 )
 
-type Erp1Packet struct {
-	DestinationID device_id.DeviceID
+type Packet struct {
+	DestinationID deviceid.DeviceID
 	Rorg          enums.Rorg
 	Rssi          byte
 	SecurityLevel byte
 	Status        byte
 	SubTelNum     byte
-	SenderID      device_id.DeviceID
+	SenderID      deviceid.DeviceID
 	UserData      []byte
 }
 
-func NewErp1PacketFromEsp3(telegram esp3.Esp3Telegram) (Erp1Packet, error) {
+func NewPacketFromEsp3(telegram esp3.Telegram) (Packet, error) {
 	const minDataLen = 6    // 1 rorg + 4 sender ID + 1 status
 	const minOptDataLen = 7 // 1 subTelNum + 4 destination ID + 1 rssi + 1 security level
 	const destinationIdOffset = 1
@@ -30,22 +30,22 @@ func NewErp1PacketFromEsp3(telegram esp3.Esp3Telegram) (Erp1Packet, error) {
 	const userDataOffset = 1
 
 	statusOffset := len(telegram.Data) - 1
-	senderIdOffset := statusOffset - device_id.DeviceIDSize
+	senderIdOffset := statusOffset - deviceid.DeviceIDSize
 
-	if telegram.PacketType != enums.PACKET_TYPE_RADIO_ERP1 {
-		return Erp1Packet{}, errors.New("invalid packet type")
+	if telegram.PacketType != enums.PacketTypeRADIO_ERP1 {
+		return Packet{}, errors.New("invalid packet type")
 	}
 
 	if len(telegram.Data) < minDataLen {
-		return Erp1Packet{}, errors.New("data too short")
+		return Packet{}, errors.New("data too short")
 	}
 
 	if len(telegram.OptData) < minOptDataLen {
-		return Erp1Packet{}, errors.New("optData too short for destination ID")
+		return Packet{}, errors.New("optData too short for destination ID")
 	}
 
-	destinationId, _ := device_id.FromByteArray(telegram.OptData[destinationIdOffset : destinationIdOffset+device_id.DeviceIDSize])
-	senderId, _ := device_id.FromByteArray(telegram.Data[senderIdOffset : senderIdOffset+device_id.DeviceIDSize])
+	destinationId, _ := deviceid.FromByteArray(telegram.OptData[destinationIdOffset : destinationIdOffset+deviceid.DeviceIDSize])
+	senderId, _ := deviceid.FromByteArray(telegram.Data[senderIdOffset : senderIdOffset+deviceid.DeviceIDSize])
 
 	rorg := enums.Rorg(telegram.Data[rorgOffset])
 	rssi := telegram.OptData[rssiOffset]
@@ -54,7 +54,7 @@ func NewErp1PacketFromEsp3(telegram esp3.Esp3Telegram) (Erp1Packet, error) {
 	subTelNum := telegram.OptData[subTelNumOffset]
 	userData := telegram.Data[userDataOffset:senderIdOffset]
 
-	return Erp1Packet{
+	return Packet{
 		DestinationID: destinationId,
 		Rorg:          rorg,
 		Rssi:          rssi,
@@ -66,29 +66,29 @@ func NewErp1PacketFromEsp3(telegram esp3.Esp3Telegram) (Erp1Packet, error) {
 	}, nil
 }
 
-func (p Erp1Packet) ToEsp3() esp3.Esp3Telegram {
+func (p Packet) ToEsp3() esp3.Telegram {
 	senderID := p.SenderID.ToArray()
 	destinationID := p.DestinationID.ToArray()
 
-	data := make([]byte, 0, 1+len(p.UserData)+device_id.DeviceIDSize+1)
+	data := make([]byte, 0, 1+len(p.UserData)+deviceid.DeviceIDSize+1)
 	data = append(data, byte(p.Rorg))
 	data = append(data, p.UserData...)
 	data = append(data, senderID[:]...)
 	data = append(data, p.Status)
 
-	optData := make([]byte, 0, 3+device_id.DeviceIDSize)
+	optData := make([]byte, 0, 3+deviceid.DeviceIDSize)
 	optData = append(optData, p.SubTelNum)
 	optData = append(optData, destinationID[:]...)
 	optData = append(optData, 0xff)
 	optData = append(optData, 0x03)
 
-	return esp3.Esp3Telegram{
-		PacketType: enums.PACKET_TYPE_RADIO_ERP1,
+	return esp3.Telegram{
+		PacketType: enums.PacketTypeRADIO_ERP1,
 		Data:       data,
 		OptData:    optData,
 	}
 }
 
-func (p Erp1Packet) Serialize() []byte {
+func (p Packet) Serialize() []byte {
 	return p.ToEsp3().Serialize()
 }

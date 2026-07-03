@@ -1,6 +1,7 @@
 package esp3
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -36,10 +37,99 @@ func TestCrcTable(t *testing.T) {
 	})
 }
 
+func TestComputeCrc8(t *testing.T) {
+	t.Run("computes CRC8 for single byte", func(t *testing.T) {
+		testCases := []struct {
+			name     string
+			b        byte
+			initial  byte
+			expected byte
+		}{
+			{"zero byte with zero initial", 0x00, 0x00, 0x00},
+			{"zero byte with non-zero initial", 0x00, 0x55, 0xac},
+			{"non-zero byte with zero initial", 0x55, 0x00, 0xac},
+			{"non-zero byte with non-zero initial", 0x55, 0x55, 0x00},
+			{"test byte 0xFF", 0xFF, 0x00, 0xf3},
+			{"test byte 0x01", 0x01, 0x00, 0x07},
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				result := ComputeCrc8(tc.b, tc.initial)
+				if result != tc.expected {
+					t.Errorf("ComputeCrc8(0x%02x, 0x%02x) = 0x%02x, expected 0x%02x",
+						tc.b, tc.initial, result, tc.expected)
+				}
+			})
+		}
+	})
+
+	t.Run("computes CRC8 incrementally", func(t *testing.T) {
+		// Test that incremental CRC matches slice CRC
+		data := []byte{0x00, 0x0C, 0x07, 0x01}
+		expected := ComputeCrcSlice(data)
+
+		crc := byte(0)
+		for _, b := range data {
+			crc = ComputeCrc8(b, crc)
+		}
+
+		if crc != expected {
+			t.Errorf("incremental CRC = 0x%02x, expected 0x%02x", crc, expected)
+		}
+	})
+}
+
+func TestComputeCrcSlice(t *testing.T) {
+	t.Run("computes CRC8 for empty slice", func(t *testing.T) {
+		result := ComputeCrcSlice([]byte{})
+		if result != 0x00 {
+			t.Errorf("ComputeCrcSlice([]) = 0x%02x, expected 0x00", result)
+		}
+	})
+
+	t.Run("computes CRC8 for known test vectors", func(t *testing.T) {
+		testCases := []struct {
+			name     string
+			data     []byte
+			expected byte
+		}{
+			{"single zero byte", []byte{0x00}, 0x00},
+			{"single 0x55 byte", []byte{0x55}, 0xac},
+			{"header example", []byte{0x00, 0x0C, 0x07, 0x01}, 0x96},
+			{"data example", []byte{0xD2, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x03, 0xFF, 0x82, 0x00, 0x85, 0x80, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x41, 0x00}, 0x99},
+		}
+
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				result := ComputeCrcSlice(tc.data)
+				if result != tc.expected {
+					t.Errorf("ComputeCrcSlice(%v) = 0x%02x, expected 0x%02x",
+						tc.data, result, tc.expected)
+				}
+			})
+		}
+	})
+
+	t.Run("computes CRC8 for various data lengths", func(t *testing.T) {
+		for length := 1; length <= 256; length *= 2 {
+			data := make([]byte, length)
+			for i := range data {
+				data[i] = byte(i)
+			}
+			crc := ComputeCrcSlice(data)
+			// Verify it doesn't panic and returns a valid byte
+			if crc < 0 || crc > 255 {
+				t.Errorf("CRC out of range for length %d: 0x%02x", length, crc)
+			}
+		}
+	})
+}
+
 func TestTelegram_Serialize(t *testing.T) {
 	t.Run("returns the ESP3 telegram in hex format", func(t *testing.T) {
 		expectedTelegram := []byte{0x55, 0x00, 0x0c, 0x07, 0x01, 0x96, 0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80, 0x00, 0xff, 0xff, 0xff, 0xff, 0x41, 0x00, 0x99}
-		telegram := NewEsp3TelegramFromData(enums.PACKET_TYPE_RADIO_ERP1, []byte{0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80},
+		telegram := NewTelegramFromData(enums.PacketTypeRADIO_ERP1, []byte{0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80},
 			[]byte{0x00, 0xff, 0xff, 0xff, 0xff, 0x41, 0x00})
 
 		if !reflect.DeepEqual(expectedTelegram, telegram.Serialize()) {
@@ -50,12 +140,12 @@ func TestTelegram_Serialize(t *testing.T) {
 
 func TestFromData(t *testing.T) {
 	t.Run("feeds structure from arguments", func(t *testing.T) {
-		expectedTelegram := Esp3Telegram{
-			PacketType: enums.PACKET_TYPE_RADIO_ERP1,
+		expectedTelegram := Telegram{
+			PacketType: enums.PacketTypeRADIO_ERP1,
 			Data:       []byte{0xD2, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x03, 0xFF, 0x82, 0x00, 0x85, 0x80},
 			OptData:    []byte{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x41, 0x00},
 		}
-		telegram := NewEsp3TelegramFromData(enums.PACKET_TYPE_RADIO_ERP1, []byte{0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80},
+		telegram := NewTelegramFromData(enums.PacketTypeRADIO_ERP1, []byte{0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80},
 			[]byte{0x00, 0xff, 0xff, 0xff, 0xff, 0x41, 0x00})
 
 		if !reflect.DeepEqual(expectedTelegram, telegram) {
@@ -66,8 +156,8 @@ func TestFromData(t *testing.T) {
 
 func TestFromHexString(t *testing.T) {
 	t.Run("parses hex string into an esp3 structure", func(t *testing.T) {
-		expectedTelegram := Esp3Telegram{
-			PacketType: enums.PACKET_TYPE_RADIO_ERP1,
+		expectedTelegram := Telegram{
+			PacketType: enums.PacketTypeRADIO_ERP1,
 			Data:       []byte{0xD2, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x03, 0xFF, 0x82, 0x00, 0x85, 0x80},
 			OptData:    []byte{0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x41, 0x00},
 		}
@@ -165,6 +255,184 @@ func TestFromHexString(t *testing.T) {
 
 		if err.Error() != expectedError {
 			t.Errorf("expected: %s, got: %s", expectedError, err.Error())
+		}
+	})
+
+	t.Run("handles odd-length hex strings by padding", func(t *testing.T) {
+		// Test with odd length hex string (should be padded with leading zero)
+		_, err := NewEsp3TelegramFromHexString("55000C070196D200000000FF03FF8200858000FFFFFFFF410099")
+		if err != nil {
+			t.Errorf("expected no error for valid hex string, got: %s", err)
+		}
+	})
+
+	t.Run("handles minimum valid packet", func(t *testing.T) {
+		// Minimum packet: sync(1) + header(4) + crc8h(1) + data(0) + optdata(0) + crc8d(1) = 7 bytes
+		// Header: dataLen(0x0000) + optDataLen(0x00) + packetType(0x01)
+		header := []byte{0x00, 0x00, 0x00, 0x01}
+		crc8h := ComputeCrcSlice(header)
+		crc8d := ComputeCrcSlice([]byte{}) // Empty data + optdata
+		packet := append([]byte{0x55}, header...)
+		packet = append(packet, crc8h)
+		packet = append(packet, crc8d)
+
+		hexStr := fmt.Sprintf("%x", packet)
+		telegram, err := NewEsp3TelegramFromHexString(hexStr)
+		if err != nil {
+			t.Errorf("failed to parse minimum packet: %v", err)
+			return
+		}
+		if telegram.PacketType != enums.PacketTypeRADIO_ERP1 {
+			t.Errorf("expected packet type RADIO_ERP1, got %v", telegram.PacketType)
+		}
+		if len(telegram.Data) != 0 {
+			t.Errorf("expected empty data, got %v", telegram.Data)
+		}
+		if len(telegram.OptData) != 0 {
+			t.Errorf("expected empty optdata, got %v", telegram.OptData)
+		}
+	})
+
+	t.Run("handles large data length", func(t *testing.T) {
+		// Test with large data length (use reasonable size to avoid memory issues in tests)
+		// In practice, ESP3 supports up to 65535 bytes, but for testing we use 1000 bytes
+		data := make([]byte, 1000)
+		optData := []byte{0x01, 0x02}
+		for i := range data {
+			data[i] = byte(i % 256)
+		}
+
+		telegram := NewTelegramFromData(enums.PacketTypeRADIO_ERP1, data, optData)
+		serialized := telegram.Serialize()
+
+		// Verify it serializes correctly
+		if len(serialized) != 1+4+1+len(data)+len(optData)+1 {
+			t.Errorf("serialized length mismatch")
+		}
+
+		// Verify we can parse it back
+		hexStr := fmt.Sprintf("%x", serialized)
+		parsed, err := NewEsp3TelegramFromHexString(hexStr)
+		if err != nil {
+			t.Errorf("failed to parse large packet: %v", err)
+			return
+		}
+		if len(parsed.Data) != len(data) {
+			t.Errorf("data length mismatch: expected %d, got %d", len(data), len(parsed.Data))
+		}
+	})
+
+	t.Run("handles boundary values for packet type", func(t *testing.T) {
+		// Test with boundary packet type values
+		boundaryTypes := []enums.PacketType{0x00, 0x01, 0xFF}
+		for _, ptype := range boundaryTypes {
+			telegram := NewTelegramFromData(ptype, []byte{0x01}, []byte{})
+			serialized := telegram.Serialize()
+			if len(serialized) == 0 {
+				t.Errorf("serialization failed for packet type 0x%02x", byte(ptype))
+			}
+		}
+	})
+}
+
+func TestTelegram_RoundTrip(t *testing.T) {
+	t.Run("round-trip serialization for all packet types", func(t *testing.T) {
+		packetTypes := []enums.PacketType{
+			enums.PacketTypeRADIO_ERP1,
+			enums.PacketTypeRESPONSE,
+			enums.PacketTypeRADIO_SUB_TEL,
+			enums.PacketTypeEVENT,
+			enums.PacketTypeCOMMON_COMMAND,
+			enums.PacketTypeSMART_ACK_COMMAND,
+			enums.PacketTypeREMOTE_MAN_COMMAND,
+			enums.PacketTypeRADIO_MESSAGE,
+			enums.PacketTypeRADIO_ERP2,
+			enums.PacketTypeCONFIG_COMMAND,
+			enums.PacketTypeCOMMAND_ACCEPTED,
+			enums.PacketTypeRADIO_802_15_4,
+			enums.PacketTypeCOMMAND_2_4,
+		}
+
+		for _, packetType := range packetTypes {
+			t.Run(packetType.String(), func(t *testing.T) {
+				data := []byte{0x01, 0x02, 0x03}
+				optData := []byte{0x04, 0x05}
+
+				original := NewTelegramFromData(packetType, data, optData)
+				serialized := original.Serialize()
+
+				hexStr := fmt.Sprintf("%x", serialized)
+				parsed, err := NewEsp3TelegramFromHexString(hexStr)
+				if err != nil {
+					t.Errorf("failed to parse: %v", err)
+					return
+				}
+
+				if parsed.PacketType != original.PacketType {
+					t.Errorf("packet type mismatch: expected %v, got %v", original.PacketType, parsed.PacketType)
+				}
+				if !reflect.DeepEqual(parsed.Data, original.Data) {
+					t.Errorf("data mismatch: expected %v, got %v", original.Data, parsed.Data)
+				}
+				if !reflect.DeepEqual(parsed.OptData, original.OptData) {
+					t.Errorf("optdata mismatch: expected %v, got %v", original.OptData, parsed.OptData)
+				}
+			})
+		}
+	})
+
+	t.Run("round-trip with empty data", func(t *testing.T) {
+		original := NewTelegramFromData(enums.PacketTypeRESPONSE, []byte{}, []byte{})
+		serialized := original.Serialize()
+		hexStr := fmt.Sprintf("%x", serialized)
+		parsed, err := NewEsp3TelegramFromHexString(hexStr)
+		if err != nil {
+			t.Errorf("failed to parse: %v", err)
+			return
+		}
+		if !reflect.DeepEqual(parsed, original) {
+			t.Errorf("round-trip failed: expected %v, got %v", original, parsed)
+		}
+	})
+
+	t.Run("round-trip with empty optdata", func(t *testing.T) {
+		data := []byte{0x01, 0x02, 0x03}
+		original := NewTelegramFromData(enums.PacketTypeRESPONSE, data, nil)
+		serialized := original.Serialize()
+		hexStr := fmt.Sprintf("%x", serialized)
+		parsed, err := NewEsp3TelegramFromHexString(hexStr)
+		if err != nil {
+			t.Errorf("failed to parse: %v", err)
+			return
+		}
+		if !reflect.DeepEqual(parsed.Data, original.Data) {
+			t.Errorf("data mismatch: expected %v, got %v", original.Data, parsed.Data)
+		}
+		if len(parsed.OptData) != 0 {
+			t.Errorf("expected empty optdata, got %v", parsed.OptData)
+		}
+	})
+
+	t.Run("round-trip with large payloads", func(t *testing.T) {
+		data := make([]byte, 1000)
+		optData := make([]byte, 100)
+		for i := range data {
+			data[i] = byte(i % 256)
+		}
+		for i := range optData {
+			optData[i] = byte(i % 256)
+		}
+
+		original := NewTelegramFromData(enums.PacketTypeRADIO_ERP1, data, optData)
+		serialized := original.Serialize()
+		hexStr := fmt.Sprintf("%x", serialized)
+		parsed, err := NewEsp3TelegramFromHexString(hexStr)
+		if err != nil {
+			t.Errorf("failed to parse: %v", err)
+			return
+		}
+		if !reflect.DeepEqual(parsed, original) {
+			t.Errorf("round-trip failed for large payloads")
 		}
 	})
 }

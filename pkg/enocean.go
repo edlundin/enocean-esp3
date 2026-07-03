@@ -7,7 +7,13 @@ import (
 	"time"
 
 	"github.com/edlundin/enocean-esp3/pkg/enums"
+	"github.com/edlundin/enocean-esp3/pkg/erp1"
 	"github.com/edlundin/enocean-esp3/pkg/esp3"
+	"github.com/edlundin/enocean-esp3/pkg/event"
+	"github.com/edlundin/enocean-esp3/pkg/gp"
+	"github.com/edlundin/enocean-esp3/pkg/reman"
+	"github.com/edlundin/enocean-esp3/pkg/response"
+	"github.com/edlundin/enocean-esp3/pkg/smartack"
 	"go.bug.st/serial"
 )
 
@@ -21,7 +27,74 @@ func GetSerialPortList() ([]string, error) {
 	return ports, nil
 }
 
-func OpenSerialPort(ctx context.Context, portPath string) (serial.Port, error) {
+type Message struct {
+	Kind string
+	ESP3 esp3.Telegram
+	ERP1 *erp1.Packet
+	Data any
+	Err  error
+}
+
+type Channels struct {
+	All        <-chan Message
+	ESP3       <-chan esp3.Telegram
+	ERP1       <-chan erp1.Packet
+	Response   <-chan response.Packet
+	Event      <-chan event.Event
+	SmartAck   <-chan smartack.Message
+	ReMan      <-chan reman.Message
+	ReManPart  <-chan reman.Part
+	GPHeader   <-chan any
+	Unparsed   <-chan Message
+	ParseError <-chan Message
+}
+
+type channelSet struct {
+	all        chan Message
+	esp3       chan esp3.Telegram
+	erp1       chan erp1.Packet
+	response   chan response.Packet
+	event      chan event.Event
+	smartAck   chan smartack.Message
+	reman      chan reman.Message
+	remanPart  chan reman.Part
+	gpHeader   chan any
+	unparsed   chan Message
+	parseError chan Message
+}
+
+func newChannelSet(size int) (*channelSet, *Channels) {
+	set := &channelSet{
+		all:        make(chan Message, size),
+		esp3:       make(chan esp3.Telegram, size),
+		erp1:       make(chan erp1.Packet, size),
+		response:   make(chan response.Packet, size),
+		event:      make(chan event.Event, size),
+		smartAck:   make(chan smartack.Message, size),
+		reman:      make(chan reman.Message, size),
+		remanPart:  make(chan reman.Part, size),
+		gpHeader:   make(chan any, size),
+		unparsed:   make(chan Message, size),
+		parseError: make(chan Message, size),
+	}
+	return set, &Channels{All: set.all, ESP3: set.esp3, ERP1: set.erp1, Response: set.response, Event: set.event, SmartAck: set.smartAck, ReMan: set.reman, ReManPart: set.remanPart, GPHeader: set.gpHeader, Unparsed: set.unparsed, ParseError: set.parseError}
+}
+
+func (c *channelSet) close() {
+	close(c.all)
+	close(c.esp3)
+	close(c.erp1)
+	close(c.response)
+	close(c.event)
+	close(c.smartAck)
+	close(c.reman)
+	close(c.remanPart)
+	close(c.gpHeader)
+	close(c.unparsed)
+	close(c.parseError)
+}
+
+func OpenSerialPort(ctx context.Context, portPath string) (serial.Port, *Channels, error) {
 	portSettings := &serial.Mode{
 		BaudRate: 57600,
 		DataBits: 8,
@@ -32,23 +105,23 @@ func OpenSerialPort(ctx context.Context, portPath string) (serial.Port, error) {
 	port, err := serial.Open(portPath, portSettings)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	err = port.SetReadTimeout(time.Second * 2)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	go parser(ctx, port)
+	set, channels := newChannelSet(64)
+	go parser(ctx, port, set)
 
-	//TODO handle channel for esp3 telegrams and add cancel with context
-
-	return port, nil
+	return port, channels, nil
 }
 
-func parser(ctx context.Context, serialPort serial.Port) {
+func parser(ctx context.Context, serialPort serial.Port, channels *channelSet) {
+	defer channels.close()
 	type ParserState uint8
 
 	const (
@@ -76,6 +149,7 @@ func parser(ctx context.Context, serialPort serial.Port) {
 	parserDataLen := uint16(0)
 	parserOptDataLen := uint8(0)
 	parserPacketType := uint8(0)
+	remanMessages := newReManAssembler(5 * time.Second)
 
 	for {
 		select {
@@ -90,7 +164,6 @@ func parser(ctx context.Context, serialPort serial.Port) {
 			}
 
 			if byteReceived == 0 {
-				fmt.Println("no bytes received")
 				continue
 			}
 
@@ -202,12 +275,17 @@ func parser(ctx context.Context, serialPort serial.Port) {
 
 					parserState = ParserStateWaitingForSyncByte
 
-					// Parsing done, packet valid, calling callback
-					if parserByte == parserCrc {
-						telegram :=
-							esp3.NewEsp3TelegramFromData(enums.PacketType(parserPacketType), parserBuffer[:parserDataLen], parserBuffer[parserDataLen:]) //TODO: check packet type
+					if parserByte != parserCrc {
+						break
+					}
 
-						fmt.Println(telegram)
+					packetType, err := enums.ParsePacketTypeFromByte(parserPacketType)
+					if err != nil {
+						break
+					}
+
+					if !publish(ctx, channels, parseTelegram(remanMessages, esp3.NewTelegramFromData(packetType, parserBuffer[:parserDataLen], parserBuffer[parserDataLen:]))) {
+						return
 					}
 				default:
 					parserState = ParserStateWaitingForSyncByte
@@ -216,5 +294,194 @@ func parser(ctx context.Context, serialPort serial.Port) {
 
 			lastByteReceivedTime = time.Now()
 		}
+	}
+}
+
+type remanKey struct {
+	seq          byte
+	source, dest uint32
+}
+
+type remanBuffer struct {
+	parts   []reman.Part
+	updated time.Time
+}
+
+type remanAssembler struct {
+	ttl     time.Duration
+	buffers map[remanKey]remanBuffer
+}
+
+func newReManAssembler(ttl time.Duration) *remanAssembler {
+	return &remanAssembler{ttl: ttl, buffers: map[remanKey]remanBuffer{}}
+}
+
+func (a *remanAssembler) add(part reman.Part) ([]Message, error) {
+	now := time.Now()
+	a.expire(now)
+	key := remanKey{seq: part.Seq, source: uint32(part.SourceID), dest: uint32(part.DestinationID)}
+	buf := a.buffers[key]
+	for _, existing := range buf.parts {
+		if existing.Index == part.Index {
+			delete(a.buffers, key)
+			return nil, fmt.Errorf("duplicate ReMan part index %d", part.Index)
+		}
+	}
+	buf.parts = append(buf.parts, part)
+	buf.updated = now
+
+	msg, ok, err := reman.Merge(append([]reman.Part(nil), buf.parts...))
+	if err != nil {
+		delete(a.buffers, key)
+		return nil, err
+	}
+	if !ok {
+		a.buffers[key] = buf
+		return nil, nil
+	}
+	delete(a.buffers, key)
+	return []Message{{Kind: "reman", Data: msg}}, nil
+}
+
+func (a *remanAssembler) expire(now time.Time) {
+	for key, buf := range a.buffers {
+		if now.Sub(buf.updated) > a.ttl {
+			delete(a.buffers, key)
+		}
+	}
+}
+
+func parseTelegram(remanMessages *remanAssembler, t esp3.Telegram) []Message {
+	messages := []Message{{Kind: "esp3", ESP3: t, Data: t}}
+
+	switch t.PacketType {
+	case enums.PacketTypeRADIO_ERP1:
+		p, err := erp1.NewPacketFromEsp3(t)
+		if err != nil {
+			return append(messages, Message{Kind: "parse_error", ESP3: t, Err: err})
+		}
+		messages = append(messages, Message{Kind: "erp1", ESP3: t, ERP1: &p, Data: p})
+		messages = append(messages, parseERP1(remanMessages, t, p)...)
+	case enums.PacketTypeRESPONSE:
+		p, err := response.NewPacketFromEsp3(t)
+		if err != nil {
+			return append(messages, Message{Kind: "parse_error", ESP3: t, Err: err})
+		}
+		messages = append(messages, Message{Kind: "response", ESP3: t, Data: p})
+	case enums.PacketTypeEVENT:
+		p, err := event.NewPacketFromEsp3(t)
+		if err != nil {
+			return append(messages, Message{Kind: "parse_error", ESP3: t, Err: err})
+		}
+		messages = append(messages, Message{Kind: "event", ESP3: t, Data: p})
+	default:
+		messages = append(messages, Message{Kind: "unparsed", ESP3: t, Data: t})
+	}
+
+	return messages
+}
+
+func parseERP1(remanMessages *remanAssembler, t esp3.Telegram, p erp1.Packet) []Message {
+	switch {
+	case p.Rorg == enums.RorgSYS_EX:
+		part, err := reman.ParsePacket(p)
+		if err != nil {
+			return []Message{{Kind: "parse_error", ESP3: t, ERP1: &p, Err: err}}
+		}
+		out := []Message{{Kind: "reman_part", ESP3: t, ERP1: &p, Data: part}}
+		messages, err := remanMessages.add(part)
+		if err != nil {
+			return append(out, Message{Kind: "parse_error", ESP3: t, ERP1: &p, Err: err})
+		}
+		for i := range messages {
+			messages[i].ESP3 = t
+			messages[i].ERP1 = &p
+		}
+		return append(out, messages...)
+	case gp.IsRorg(p.Rorg):
+		header, err := parseGPHeader(p)
+		if err != nil {
+			return []Message{{Kind: "parse_error", ESP3: t, ERP1: &p, Err: err}}
+		}
+		return []Message{{Kind: "gp_header", ESP3: t, ERP1: &p, Data: header}}
+	default:
+		msg, err := smartack.Parse(p)
+		if err == nil {
+			return []Message{{Kind: "smart_ack", ESP3: t, ERP1: &p, Data: msg}}
+		}
+		return nil
+	}
+}
+
+func parseGPHeader(p erp1.Packet) (any, error) {
+	switch p.Rorg {
+	case enums.RorgGP_TI:
+		return gp.DecodeRequestHeader(p.UserData)
+	case enums.RorgGP_TR:
+		return gp.DecodeResponseHeader(p.UserData)
+	default:
+		return p, nil
+	}
+}
+
+func publish(ctx context.Context, channels *channelSet, messages []Message) bool {
+	for _, msg := range messages {
+		if !send(ctx, channels.all, msg) {
+			return false
+		}
+		switch msg.Kind {
+		case "esp3":
+			if !send(ctx, channels.esp3, msg.Data.(esp3.Telegram)) {
+				return false
+			}
+		case "erp1":
+			if !send(ctx, channels.erp1, msg.Data.(erp1.Packet)) {
+				return false
+			}
+		case "response":
+			if !send(ctx, channels.response, msg.Data.(response.Packet)) {
+				return false
+			}
+		case "event":
+			if !send(ctx, channels.event, msg.Data.(event.Event)) {
+				return false
+			}
+		case "smart_ack":
+			if !send(ctx, channels.smartAck, msg.Data.(smartack.Message)) {
+				return false
+			}
+		case "reman":
+			if !send(ctx, channels.reman, msg.Data.(reman.Message)) {
+				return false
+			}
+		case "reman_part":
+			if !send(ctx, channels.remanPart, msg.Data.(reman.Part)) {
+				return false
+			}
+		case "gp_header":
+			if !send(ctx, channels.gpHeader, msg.Data) {
+				return false
+			}
+		case "unparsed":
+			if !send(ctx, channels.unparsed, msg) {
+				return false
+			}
+		case "parse_error":
+			if !send(ctx, channels.parseError, msg) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func send[T any](ctx context.Context, ch chan<- T, v T) bool {
+	select {
+	case ch <- v:
+		return true
+	case <-ctx.Done():
+		return false
+	default:
+		return true
 	}
 }
