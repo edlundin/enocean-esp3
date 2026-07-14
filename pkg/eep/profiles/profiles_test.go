@@ -10,13 +10,13 @@ import (
 )
 
 func TestBits(t *testing.T) {
-	if got := getBits([]byte{0x80}, 7, 1); got != 1 {
+	if got := getBits([]byte{0x01}, 7, 1); got != 1 {
 		t.Fatal(got)
 	}
-	if got := getBits([]byte{0, 0, 0x80, 0x10}, 16, 8); got != 0x80 {
+	if got := getBits([]byte{0, 0, 0x80, 0x08}, 16, 8); got != 0x80 {
 		t.Fatal(got)
 	}
-	if got := getBits([]byte{0, 0, 0x80, 0x10}, 28, 1); got != 1 {
+	if got := getBits([]byte{0, 0, 0x80, 0x08}, 28, 1); got != 1 {
 		t.Fatal(got)
 	}
 	b := []byte{0, 0}
@@ -27,17 +27,17 @@ func TestBits(t *testing.T) {
 }
 
 func TestProfiles(t *testing.T) {
-	d, err := ParseUserData(mustEEP(enums.Rorg1BS, 0, 1), []byte{0x80}, 0)
-	if err != nil || !d.(D50001).ContactClosed || !d.(D50001).LearnButton {
+	d, err := ParseUserData(mustEEP(enums.Rorg1BS, 0, 1), []byte{0x09}, 0)
+	if err != nil || !d.(D50001).ContactClosed || d.(D50001).LearnButton {
 		t.Fatalf("%#v %v", d, err)
 	}
 
-	f, err := ParseUserData(mustEEP(enums.RorgRPS, 1, 1), []byte{0x08}, 0)
+	f, err := ParseUserData(mustEEP(enums.RorgRPS, 1, 1), []byte{0x10}, 0)
 	if err != nil || !f.(F60101).Pressed {
 		t.Fatalf("%#v %v", f, err)
 	}
 
-	a, err := ParseUserData(mustEEP(enums.Rorg4BS, 2, 1), []byte{0, 0, 128, 0x10}, 0)
+	a, err := ParseUserData(mustEEP(enums.Rorg4BS, 2, 1), []byte{0, 0, 128, 0x08}, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,7 +46,7 @@ func TestProfiles(t *testing.T) {
 		t.Fatalf("%#v", at)
 	}
 	out, _, err := at.MarshalERP1UserData()
-	if err != nil || out[2] != 128 || out[3]&0x10 == 0 {
+	if err != nil || out[2] != 128 || out[3]&0x08 == 0 {
 		t.Fatalf("% x %v", out, err)
 	}
 }

@@ -9,7 +9,7 @@ import (
 func TestGenerateTinyXML(t *testing.T) {
 	dir := t.TempDir()
 	xml := filepath.Join(dir, "eep.xml")
-	if err := os.WriteFile(xml, []byte(`<eep><rorg><number>0xF6</number><title>RPS</title><func><number>0x01</number><title>Switches</title><type><number>0x01</number><title>Rocker</title><case><datafield><data>Push button</data><shortcut>PB</shortcut><bitoffs>3</bitoffs><bitsize>1</bitsize><enum><item><value>0</value><description>released</description></item><item><value>1</value><description>pressed</description></item></enum></datafield></case></type></func></rorg></eep>`), 0o644); err != nil {
+	if err := os.WriteFile(xml, []byte(`<eep><rorg><number>0xF6</number><title>RPS</title><func><number>0x01</number><title>Switches</title><type><number>0x01</number><title>Rocker</title><case><datafield><data>Push button</data><shortcut>PB</shortcut><bitoffs>3</bitoffs><bitsize>1</bitsize><range><min>0</min><max>1</max></range><scale><min>0</min><max>1</max></scale><unit>bool</unit><enum><item><value>0</value><description>released</description></item><item><value>1</value><description>pressed</description></item></enum></datafield></case></type></func></rorg></eep>`), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	out := filepath.Join(dir, "out")
@@ -23,8 +23,8 @@ func TestGenerateTinyXML(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := profiles[0].Fields[0].Enums[1]; got.Description != "pressed" || got.Name != "Pressed" {
-		t.Fatalf("enum = %#v", got)
+	if got := profiles[0].Fields[0]; got.Unit != "bool" || got.Enums[1].Description != "pressed" || got.Enums[1].Name != "Pressed" {
+		t.Fatalf("field = %#v", got)
 	}
 }
 
@@ -79,7 +79,7 @@ func TestLoadRealEEP268(t *testing.T) {
 	assertField(t, byKey["D5-00-01"], "LRN", 4, 1)
 	assertField(t, byKey["F6-01-01"], "PB", 3, 1)
 	assertField(t, byKey["A5-02-01"], "TMP", 16, 8)
-	if got := findField(byKey["A5-02-01"], "TMP"); got.RawMin != 255 || got.RawMax != 0 || got.ScaleMin != -40 || got.ScaleMax != 0 {
+	if got := findField(byKey["A5-02-01"], "TMP"); got.RawMin != 255 || got.RawMax != 0 || got.ScaleMin != -40 || got.ScaleMax != 0 || got.Unit != "°C" {
 		t.Fatalf("A5-02-01 TMP range/scale = %#v", got)
 	}
 	if got := findField(byKey["F6-01-01"], "PB").Enums[1]; got.Description != "Pressed & Hold" || got.Name != "PressedHold" {

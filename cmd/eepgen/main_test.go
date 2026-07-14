@@ -26,7 +26,8 @@ const tinyEEPXML = `<?xml version="1.0"?>
             <bitoffs>8</bitoffs>
             <bitsize>8</bitsize>
             <range><min>0</min><max>255</max></range>
-            <scale><min>-40</min><max>60</max><unit>°C</unit></scale>
+            <scale><min>-40</min><max>60</max></scale>
+            <unit>°C</unit>
             <enum>
               <item><value>0</value><description>Off - disabled</description></item>
               <item><value>1</value><description>On, enabled</description></item>

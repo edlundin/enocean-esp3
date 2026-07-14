@@ -52,6 +52,27 @@ func TestMergeNeedsMoreAndDuplicate(t *testing.T) {
 	if _, _, err := Merge([]Part{p0, p0}); err == nil {
 		t.Fatal("expected duplicate error")
 	}
+	p2, _ := ParsePacket(packets[1])
+	p2.Index = 2
+	if _, done, err := Merge([]Part{p0, p2}); err != nil || done {
+		t.Fatalf("gapped chain done=%v err=%v", done, err)
+	}
+}
+
+func TestPacketsValidateIdentifiers(t *testing.T) {
+	valid := Message{Seq: 1, ManufacturerID: 0x7ff, Function: 0xfff}
+	if _, err := valid.Packets(); err != nil {
+		t.Fatalf("valid identifiers rejected: %v", err)
+	}
+	for _, invalid := range []Message{
+		{Seq: 1, ManufacturerID: 0x800, Function: 1},
+		{Seq: 1, ManufacturerID: 1, Function: 0},
+		{Seq: 1, ManufacturerID: 1, Function: 0x1000},
+	} {
+		if _, err := invalid.Packets(); err == nil {
+			t.Fatalf("invalid message accepted: %#v", invalid)
+		}
+	}
 }
 
 func TestCodePayload(t *testing.T) {

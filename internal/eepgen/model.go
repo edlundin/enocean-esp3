@@ -43,6 +43,7 @@ type Field struct {
 	Shortcut string  `xml:"shortcut"`
 	BitOff   string  `xml:"bitoffs"`
 	BitSize  string  `xml:"bitsize"`
+	Unit     string  `xml:"unit"`
 	Enums    []Enum  `xml:"enum"`
 	Ranges   []Range `xml:"range"`
 	Scales   []Scale `xml:"scale"`
@@ -59,9 +60,8 @@ type Range struct {
 	Max string `xml:"max"`
 }
 type Scale struct {
-	Min  string `xml:"min"`
-	Max  string `xml:"max"`
-	Unit string `xml:"unit"`
+	Min string `xml:"min"`
+	Max string `xml:"max"`
 }
 
 type OutProfile struct {
@@ -133,7 +133,7 @@ func Load(path string) ([]OutProfile, error) {
 							continue
 						}
 						seen[key] = true
-						of := OutField{Name: name, Shortcut: clean(xf.Shortcut), BitOff: bo, BitSize: bs}
+						of := OutField{Name: name, Shortcut: clean(xf.Shortcut), Unit: clean(xf.Unit), BitOff: bo, BitSize: bs}
 						if len(xf.Ranges) > 0 {
 							of.RawMin = atoi64(xf.Ranges[0].Min)
 							of.RawMax = atoi64(xf.Ranges[0].Max)
@@ -141,7 +141,6 @@ func Load(path string) ([]OutProfile, error) {
 						if len(xf.Scales) > 0 {
 							of.ScaleMin = atof(xf.Scales[0].Min)
 							of.ScaleMax = atof(xf.Scales[0].Max)
-							of.Unit = clean(xf.Scales[0].Unit)
 						}
 						for _, en := range xf.Enums {
 							for _, item := range en.Items {

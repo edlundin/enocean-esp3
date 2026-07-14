@@ -258,6 +258,21 @@ func TestFromHexString(t *testing.T) {
 		}
 	})
 
+	t.Run("rejects declared payload length mismatches", func(t *testing.T) {
+		tests := map[string]string{
+			"data longer than available payload": "5500020002d80000",
+			"undeclared optional byte":           "550001000265000107",
+			"missing declared optional byte":     "5500010102700000",
+		}
+		for name, input := range tests {
+			t.Run(name, func(t *testing.T) {
+				if _, err := NewEsp3TelegramFromHexString(input); err == nil {
+					t.Fatal("expected packet length mismatch")
+				}
+			})
+		}
+	})
+
 	t.Run("handles odd-length hex strings by padding", func(t *testing.T) {
 		// Test with odd length hex string (should be padded with leading zero)
 		_, err := NewEsp3TelegramFromHexString("55000C070196D200000000FF03FF8200858000FFFFFFFF410099")

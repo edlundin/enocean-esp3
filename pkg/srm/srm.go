@@ -46,8 +46,11 @@ func (m Message) MarshalSYSEx() ([]byte, error) {
 	if m.ManufacturerID == nil {
 		binary.BigEndian.PutUint16(out[:2], m.Function&0x0fff)
 	} else {
+		if *m.ManufacturerID > 0x07ff {
+			return nil, fmt.Errorf("invalid manufacturer ID 0x%x", *m.ManufacturerID)
+		}
 		out = make([]byte, 3, 3+len(m.Payload))
-		v := uint32(1)<<23 | uint32(*m.ManufacturerID&0x07ff)<<12 | uint32(m.Function&0x0fff)
+		v := uint32(1)<<23 | uint32(*m.ManufacturerID)<<12 | uint32(m.Function&0x0fff)
 		out[0], out[1], out[2] = byte(v>>16), byte(v>>8), byte(v)
 	}
 	out = append(out, m.Payload...)
@@ -59,6 +62,9 @@ func ParseSYSEx(b []byte) (Message, error) {
 		return Message{}, fmt.Errorf("SYS_EX payload too short")
 	}
 	if b[0]&0x80 == 0 {
+		if b[0]&0x70 != 0 {
+			return Message{}, fmt.Errorf("reserved Alliance SYS_EX header bits set")
+		}
 		fn := binary.BigEndian.Uint16(b[:2]) & 0x0fff
 		return Message{Function: fn, Payload: append([]byte(nil), b[2:]...)}, nil
 	}
@@ -86,16 +92,37 @@ func ParseQueryStatusAnswer(b []byte) (QueryStatusAnswer, error) {
 	if len(b) != 3 {
 		return QueryStatusAnswer{}, fmt.Errorf("query status answer length %d, want 3", len(b))
 	}
-	return QueryStatusAnswer{LastFunction: binary.BigEndian.Uint16(b[:2]) & 0x0fff, Return: ReturnCode(b[2])}, nil
+	if b[0]&0xf0 != 0 {
+		return QueryStatusAnswer{}, fmt.Errorf("reserved query status bits set")
+	}
+	return QueryStatusAnswer{LastFunction: binary.BigEndian.Uint16(b[:2]), Return: ReturnCode(b[2])}, nil
 }
+
+type RemoteLearnFlag byte
+
+const (
+	RemoteLearnStart            RemoteLearnFlag = 0x01
+	RemoteLearnNextChannel      RemoteLearnFlag = 0x02
+	RemoteLearnStop             RemoteLearnFlag = 0x03
+	RemoteLearnSmartAckSimple   RemoteLearnFlag = 0x04
+	RemoteLearnSmartAckAdvanced RemoteLearnFlag = 0x05
+	RemoteLearnSmartAckStop     RemoteLearnFlag = 0x06
+)
 
 func PingPayload() []byte                  { return nil }
 func PingResponsePayload(rssi byte) []byte { return []byte{rssi} }
 func RemoteLearnPayload(enable bool) []byte {
 	if enable {
-		return []byte{1}
+		return []byte{byte(RemoteLearnStart)}
 	}
-	return []byte{0}
+	return []byte{byte(RemoteLearnStop)}
+}
+
+func ParseRemoteLearnPayload(b []byte) (RemoteLearnFlag, error) {
+	if len(b) != 1 || b[0] < byte(RemoteLearnStart) || b[0] > byte(RemoteLearnSmartAckStop) {
+		return 0, fmt.Errorf("invalid remote learn payload")
+	}
+	return RemoteLearnFlag(b[0]), nil
 }
 
 func MemoryReadPayload(addr uint32, n byte) []byte {

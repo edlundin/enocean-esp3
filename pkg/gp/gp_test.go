@@ -53,6 +53,19 @@ func TestChannelDefinitions(t *testing.T) {
 		t.Fatalf("decoded data channel = %#v/%d, %v", got, used, err)
 	}
 
+	signed := Channel{Type: ChannelData, SignalType: 0x06, ValueType: ValueCurrent, ResolutionCode: 0x5, EngineeringMin: 0x80, ScalingMin: 1, EngineeringMax: 0xff, ScalingMax: 1}
+	b, bits, err = EncodeChannelDefinition(signed)
+	if err != nil || bits != 40 || hex.EncodeToString(b) != "4195801ff1" {
+		t.Fatalf("signed data channel = %x/%d, %v", b, bits, err)
+	}
+	got, used, err = DecodeChannelDefinition(b, 0)
+	if err != nil || used != 40 || got != signed {
+		t.Fatalf("decoded signed channel = %#v/%d, %v", got, used, err)
+	}
+	if min, max := got.EngineeringRange(); min != -128 || max != -1 {
+		t.Fatalf("signed engineering range = %d..%d", min, max)
+	}
+
 	flag := Channel{Type: ChannelFlag, SignalType: 0x09, ValueType: ValueSetPointAbsolute}
 	b, bits, err = EncodeChannelDefinition(flag)
 	if err != nil || bits != 12 || bitsHex(b, bits) != "826" {

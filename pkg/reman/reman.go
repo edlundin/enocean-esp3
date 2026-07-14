@@ -36,6 +36,12 @@ func (m Message) Packets() ([]erp1.Packet, error) {
 	if m.Seq == 0 || m.Seq > 3 {
 		return nil, fmt.Errorf("invalid seq %d", m.Seq)
 	}
+	if m.ManufacturerID > 0x7ff {
+		return nil, fmt.Errorf("invalid manufacturer ID 0x%x", m.ManufacturerID)
+	}
+	if m.Function == 0 || m.Function > 0xfff {
+		return nil, fmt.Errorf("invalid function 0x%x", m.Function)
+	}
 	if len(m.Payload) > MaxPayload {
 		return nil, fmt.Errorf("payload length %d > %d", len(m.Payload), MaxPayload)
 	}
@@ -85,6 +91,9 @@ func ParsePacket(p erp1.Packet) (Part, error) {
 	part := Part{Seq: seq, Index: idx, SourceID: p.SenderID, DestinationID: p.DestinationID}
 	if idx == 0 {
 		part.Length, part.ManufacturerID, part.Function = getHeader(p.UserData[1:5])
+		if part.Length > MaxPayload || part.Function == 0 {
+			return Part{}, fmt.Errorf("invalid SYS_EX header")
+		}
 		part.Payload = append([]byte(nil), p.UserData[5:9]...)
 	} else {
 		part.Payload = append([]byte(nil), p.UserData[1:9]...)
@@ -101,9 +110,16 @@ func Merge(parts []Part) (Message, bool, error) {
 	if first.Index != 0 {
 		return Message{}, false, nil
 	}
+	expectedParts := 1
+	if first.Length > 4 {
+		expectedParts += (first.Length - 4 + 7) / 8
+	}
+	if len(parts) > expectedParts {
+		return Message{}, false, fmt.Errorf("too many message parts")
+	}
 	seen := map[byte]bool{}
 	payload := []byte{}
-	for _, p := range parts {
+	for i, p := range parts {
 		if p.Seq != first.Seq || p.SourceID != first.SourceID || p.DestinationID != first.DestinationID {
 			return Message{}, false, fmt.Errorf("mixed message parts")
 		}
@@ -111,16 +127,19 @@ func Merge(parts []Part) (Message, bool, error) {
 			return Message{}, false, fmt.Errorf("duplicate index %d", p.Index)
 		}
 		seen[p.Index] = true
+		if p.Index != byte(i) {
+			return Message{}, false, nil
+		}
 		payload = append(payload, p.Payload...)
 	}
-	if len(payload) < first.Length {
+	if len(parts) < expectedParts || len(payload) < first.Length {
 		return Message{}, false, nil
 	}
 	return Message{Seq: first.Seq, ManufacturerID: first.ManufacturerID, Function: first.Function, Payload: payload[:first.Length], SourceID: first.SourceID, DestinationID: first.DestinationID}, true, nil
 }
 
 func putHeader(b []byte, length int, manufacturer, fn uint16) {
-	v := uint32(length&0x1ff)<<23 | uint32(manufacturer&0x7ff)<<12 | uint32(fn&0xfff)
+	v := uint32(length)<<23 | uint32(manufacturer)<<12 | uint32(fn)
 	binary.BigEndian.PutUint32(b, v)
 }
 

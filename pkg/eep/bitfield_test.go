@@ -7,15 +7,20 @@ import (
 )
 
 func TestReadWriteBits(t *testing.T) {
-	if got, err := ReadBits([]byte{0x80}, 7, 1); err != nil || got != 1 {
-		t.Fatalf("ReadBits MSB = %d, %v", got, err)
+	if got, err := ReadBits([]byte{0x01}, 7, 1); err != nil || got != 1 {
+		t.Fatalf("ReadBits offset 7 = %d, %v", got, err)
 	}
-	payload := []byte{0x00, 0x00, 0x80, 0x10}
+	payload := []byte{0x00, 0x00, 0x80, 0x08}
 	if got, err := ReadBits(payload, 16, 8); err != nil || got != 0x80 {
 		t.Fatalf("ReadBits temp = %d, %v", got, err)
 	}
 	if got, err := ReadBits(payload, 28, 1); err != nil || got != 1 {
 		t.Fatalf("ReadBits LRN = %d, %v", got, err)
+	}
+
+	msb := []byte{0}
+	if err := WriteBits(msb, 0, 1, 1); err != nil || msb[0] != 0x80 {
+		t.Fatalf("WriteBits offset 0 = %02x, %v", msb, err)
 	}
 
 	b := []byte{0, 0}

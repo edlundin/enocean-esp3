@@ -35,6 +35,9 @@ type Message struct {
 	Err  error
 }
 
+// Channels contains independent, buffered, best-effort event streams.
+// A message is dropped from an individual stream when that stream's buffer is
+// full; slow consumers do not block serial parsing or other streams.
 type Channels struct {
 	All        <-chan Message
 	ESP3       <-chan esp3.Telegram
@@ -94,6 +97,8 @@ func (c *channelSet) close() {
 	close(c.parseError)
 }
 
+var serialOpen = serial.Open
+
 func OpenSerialPort(ctx context.Context, portPath string) (serial.Port, *Channels, error) {
 	portSettings := &serial.Mode{
 		BaudRate: 57600,
@@ -102,7 +107,7 @@ func OpenSerialPort(ctx context.Context, portPath string) (serial.Port, *Channel
 		StopBits: serial.OneStopBit,
 	}
 
-	port, err := serial.Open(portPath, portSettings)
+	port, err := serialOpen(portPath, portSettings)
 
 	if err != nil {
 		return nil, nil, err
@@ -111,6 +116,7 @@ func OpenSerialPort(ctx context.Context, portPath string) (serial.Port, *Channel
 	err = port.SetReadTimeout(time.Second * 2)
 
 	if err != nil {
+		_ = port.Close()
 		return nil, nil, err
 	}
 
@@ -146,10 +152,10 @@ func parser(ctx context.Context, serialPort serial.Port, channels *channelSet) {
 
 	parserBuffer := make([]uint8, 0)
 	parserCrc := uint8(0)
-	parserDataLen := uint16(0)
-	parserOptDataLen := uint8(0)
+	parserDataLen := 0
+	parserOptDataLen := 0
 	parserPacketType := uint8(0)
-	remanMessages := newReManAssembler(5 * time.Second)
+	remanMessages := newReManAssembler(remanChainPeriod)
 
 	for {
 		select {
@@ -159,8 +165,7 @@ func parser(ctx context.Context, serialPort serial.Port, channels *channelSet) {
 			byteReceived, err := serialPort.Read(readBuffer)
 
 			if err != nil {
-				fmt.Println(fmt.Errorf("error reading from serial port: %w", err))
-				continue
+				return
 			}
 
 			if byteReceived == 0 {
@@ -222,7 +227,7 @@ func parser(ctx context.Context, serialPort serial.Port, channels *channelSet) {
 
 						for i := 0; i < headerLen-syncByteIdx; i++ {
 							tmpBuffer = append(tmpBuffer, parserBuffer[syncByteIdx+i])
-							parserCrc = esp3.ComputeCrc8(parserBuffer[i], parserCrc)
+							parserCrc = esp3.ComputeCrc8(parserBuffer[syncByteIdx+i], parserCrc)
 						}
 
 						parserBuffer = append(tmpBuffer, parserByte)
@@ -236,12 +241,12 @@ func parser(ctx context.Context, serialPort serial.Port, channels *channelSet) {
 						break
 					}
 
-					parserDataLen = binary.BigEndian.Uint16(parserBuffer[dataLengthOffset : dataLengthOffset+dataLengthLen])
-					parserOptDataLen = parserBuffer[optDataLengthOffset]
+					parserDataLen = int(binary.BigEndian.Uint16(parserBuffer[dataLengthOffset : dataLengthOffset+dataLengthLen]))
+					parserOptDataLen = int(parserBuffer[optDataLengthOffset])
 					parserPacketType = parserBuffer[packetTypeOffset]
 
 					// Data length fields are invalid
-					if parserDataLen+uint16(parserOptDataLen) == 0 {
+					if parserDataLen+parserOptDataLen == 0 {
 						if parserByte == syncByte { // Sync already received
 							parserState = ParserStateWaitingForHeader
 							parserBuffer = make([]uint8, 0)
@@ -260,22 +265,17 @@ func parser(ctx context.Context, serialPort serial.Port, channels *channelSet) {
 					parserBuffer = append(parserBuffer, parserByte)
 					parserCrc = esp3.ComputeCrc8(parserByte, parserCrc)
 
-					if uint16(len(parserBuffer)) == parserDataLen+uint16(parserOptDataLen) {
+					if len(parserBuffer) == parserDataLen+parserOptDataLen {
 						parserState = ParserStateWaitingForCrc8D
 					}
 				case ParserStateWaitingForCrc8D:
-					// Parsing done, packet invalid, sync byte already received
-					if parserByte == syncByte {
-						parserState = ParserStateWaitingForHeader
-						parserBuffer = make([]uint8, 0)
-						parserCrc = 0
-
-						break
-					}
-
 					parserState = ParserStateWaitingForSyncByte
-
 					if parserByte != parserCrc {
+						if parserByte == syncByte {
+							parserState = ParserStateWaitingForHeader
+							parserBuffer = make([]uint8, 0)
+							parserCrc = 0
+						}
 						break
 					}
 
@@ -296,6 +296,8 @@ func parser(ctx context.Context, serialPort serial.Port, channels *channelSet) {
 		}
 	}
 }
+
+const remanChainPeriod = time.Second
 
 type remanKey struct {
 	seq          byte
@@ -345,7 +347,7 @@ func (a *remanAssembler) add(part reman.Part) ([]Message, error) {
 
 func (a *remanAssembler) expire(now time.Time) {
 	for key, buf := range a.buffers {
-		if now.Sub(buf.updated) > a.ttl {
+		if now.Sub(buf.updated) >= a.ttl {
 			delete(a.buffers, key)
 		}
 	}

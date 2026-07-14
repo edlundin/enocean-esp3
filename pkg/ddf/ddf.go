@@ -44,6 +44,12 @@ func Parse(r io.Reader) (File, error) {
 	if err := xml.NewDecoder(r).Decode(&f); err != nil {
 		return File{}, err
 	}
+	if strings.TrimSpace(f.Version) == "" {
+		return File{}, fmt.Errorf("schemaVersion is required")
+	}
+	if len(f.Devices) == 0 {
+		return File{}, fmt.Errorf("at least one Device is required")
+	}
 	for _, d := range f.Devices {
 		if !productIDPattern.MatchString(d.ProductID) {
 			return File{}, fmt.Errorf("invalid Product_ID %q", d.ProductID)

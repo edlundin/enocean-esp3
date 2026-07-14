@@ -109,19 +109,20 @@ func NewEsp3TelegramFromHexString(hexStr string) (Telegram, error) {
 		return Telegram{}, fmt.Errorf("invalid CRC8H (got:0x%x, valid:0x%x)", crc8h, crc)
 	}
 
-	crc8dIndex := len(bytes) - 1
-	crc8d := bytes[crc8dIndex]
-	crc = 0
-
-	for _, b := range bytes[6:crc8dIndex] {
-		crc = ComputeCrc8(b, crc)
+	dataLen := int(binary.BigEndian.Uint16(bytes[1:3]))
+	optDataLen := int(bytes[3])
+	expectedLen := minHexStringLen + dataLen + optDataLen
+	if len(bytes) != expectedLen {
+		return Telegram{}, fmt.Errorf("packet length mismatch: got %d bytes, want %d", len(bytes), expectedLen)
 	}
+
+	crc8dIndex := expectedLen - 1
+	crc8d := bytes[crc8dIndex]
+	crc = ComputeCrcSlice(bytes[6:crc8dIndex])
 
 	if crc != crc8d {
 		return Telegram{}, fmt.Errorf("invalid CRC8D (got:0x%x, valid:0x%x)", crc8d, crc)
 	}
-
-	dataLen := binary.BigEndian.Uint16(bytes[1:3])
 
 	packetType, err := enums.ParsePacketTypeFromByte(bytes[4])
 
@@ -130,8 +131,8 @@ func NewEsp3TelegramFromHexString(hexStr string) (Telegram, error) {
 	}
 
 	telegram.PacketType = packetType
-	telegram.Data = bytes[6 : dataLen+6]
-	telegram.OptData = bytes[dataLen+6 : crc8dIndex]
+	telegram.Data = bytes[6 : 6+dataLen]
+	telegram.OptData = bytes[6+dataLen : crc8dIndex]
 
 	return telegram, nil
 }

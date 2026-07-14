@@ -109,10 +109,14 @@ type Channel struct {
 	SignalType     byte
 	ValueType      ValueType
 	ResolutionCode byte
-	EngineeringMin byte
+	EngineeringMin byte // Two's-complement; use EngineeringRange for signed values.
 	ScalingMin     byte
-	EngineeringMax byte
+	EngineeringMax byte // Two's-complement; use EngineeringRange for signed values.
 	ScalingMax     byte
+}
+
+func (c Channel) EngineeringRange() (int8, int8) {
+	return int8(c.EngineeringMin), int8(c.EngineeringMax)
 }
 
 func ResolutionBits(code byte) (int, bool) {

@@ -21,8 +21,20 @@ func TestParseDDF(t *testing.T) {
 	}
 }
 
+func TestRejectMissingRequiredDDFContent(t *testing.T) {
+	for _, input := range []string{
+		`<Enocean_Devices><Device Product_ID="0x001122334455"/></Enocean_Devices>`,
+		`<Enocean_Devices schemaVersion="   "><Device Product_ID="0x001122334455"/></Enocean_Devices>`,
+		`<Enocean_Devices schemaVersion="2.0"/>`,
+	} {
+		if _, err := Parse(strings.NewReader(input)); err == nil {
+			t.Fatalf("invalid DDF accepted: %s", input)
+		}
+	}
+}
+
 func TestRejectBadProductID(t *testing.T) {
-	_, err := Parse(strings.NewReader(`<Enocean_Devices><Device Product_ID="0x1234"/></Enocean_Devices>`))
+	_, err := Parse(strings.NewReader(`<Enocean_Devices schemaVersion="2.0"><Device Product_ID="0x1234"/></Enocean_Devices>`))
 	if err == nil {
 		t.Fatal("expected error")
 	}

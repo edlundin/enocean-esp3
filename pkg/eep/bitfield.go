@@ -7,16 +7,17 @@ import (
 
 var ErrBitfieldOutOfRange = errors.New("bitfield out of range")
 
-// ReadBits reads an eep268.xml bit field. Offsets are zero-based, with bit 0
-// at the least significant bit of data[0], matching the checked-in XML facts.
+// ReadBits reads an eep268.xml bit field. Offset 0 is the first transmitted
+// bit: the most significant bit of data[0].
 func ReadBits(data []byte, bitOffset, bitSize int) (uint64, error) {
 	if bitOffset < 0 || bitSize < 0 || bitSize > 64 || bitOffset+bitSize > len(data)*8 {
 		return 0, ErrBitfieldOutOfRange
 	}
 	var v uint64
 	for i := 0; i < bitSize; i++ {
-		if data[(bitOffset+i)/8]&(1<<uint((bitOffset+i)%8)) != 0 {
-			v |= 1 << uint(i)
+		v <<= 1
+		if data[(bitOffset+i)/8]&(1<<uint(7-(bitOffset+i)%8)) != 0 {
+			v |= 1
 		}
 	}
 	return v, nil
@@ -28,8 +29,8 @@ func WriteBits(data []byte, bitOffset, bitSize int, value uint64) error {
 		return ErrBitfieldOutOfRange
 	}
 	for i := 0; i < bitSize; i++ {
-		mask := byte(1 << uint((bitOffset+i)%8))
-		if value&(1<<uint(i)) != 0 {
+		mask := byte(1 << uint(7-(bitOffset+i)%8))
+		if value&(1<<uint(bitSize-1-i)) != 0 {
 			data[(bitOffset+i)/8] |= mask
 		} else {
 			data[(bitOffset+i)/8] &^= mask

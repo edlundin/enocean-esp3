@@ -278,30 +278,28 @@ func TestParseRdFilterResponseOK(t *testing.T) {
 	})
 
 	t.Run("parses filter response with multiple filters", func(t *testing.T) {
-		// Response: Count(1) + Filters (each filter is Criterion(1) + Value(4) = 5 bytes)
-		// The deserialization reads sequentially, so we provide enough bytes
-		// Note: The exact parsing depends on the serializer.BytesToStruct implementation
-		resp := response.Packet{
-			Code: enums.ReturnCodeSUCCESS,
-			Data: []byte{
-				0x02, // Count = 2
-				// Provide enough bytes for the filters - total needs at least 10 bytes for 2 filters
-				0x00, 0x00, 0x00, 0x00, 0x01, // 5 bytes
-				0x01, 0x00, 0x00, 0x00, 0x02, // 5 bytes
-				0x02, 0x00, 0x00, 0x00, 0x03, // 5 bytes (extra for safety)
-			},
-			OptData: nil,
-		}
-
+		resp := response.Packet{Code: enums.ReturnCodeSUCCESS, Data: []byte{
+			0x02,
+			0x00, 0x00, 0x00, 0x00, 0x01,
+			0x01, 0x00, 0x00, 0x00, 0x02,
+		}}
 		result, err := ParseRdFilterResponseOK(resp)
 		if err != nil {
-			t.Fatalf("expected no error, got: %v", err)
+			t.Fatal(err)
 		}
+		if len(result.Filters) != 2 || result.Filters[0].Value != 1 || result.Filters[1].Value != 2 {
+			t.Fatalf("filters = %#v", result.Filters)
+		}
+	})
 
-		// We expect at least 1 filter (the actual count depends on BytesToStruct behavior with slices)
-		// The test verifies the function runs without error
-		if result.Filters == nil {
-			t.Error("expected non-nil Filters slice")
+	t.Run("rejects filter count mismatches", func(t *testing.T) {
+		for _, data := range [][]byte{
+			{0x02, 0x00, 0, 0, 0, 1},
+			{0x02, 0x00, 0, 0, 0, 1, 0x01, 0, 0, 0, 2, 0x02, 0, 0, 0, 3},
+		} {
+			if _, err := ParseRdFilterResponseOK(response.Packet{Code: enums.ReturnCodeSUCCESS, Data: data}); err == nil {
+				t.Fatalf("count mismatch accepted: %x", data)
+			}
 		}
 	})
 

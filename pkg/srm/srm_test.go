@@ -39,9 +39,34 @@ func TestQueryStatusAnswer(t *testing.T) {
 	}
 }
 
+func TestRejectReservedHeaderBits(t *testing.T) {
+	if _, err := ParseSYSEx([]byte{0x10, 0x06}); err == nil {
+		t.Fatal("reserved Alliance header bits accepted")
+	}
+	if _, err := ParseQueryStatusAnswer([]byte{0xf2, 0x04, 0x00}); err == nil {
+		t.Fatal("reserved query status bits accepted")
+	}
+	mid := uint16(0x800)
+	if _, err := (Message{ManufacturerID: &mid, Function: FuncPing}).MarshalSYSEx(); err == nil {
+		t.Fatal("oversized manufacturer ID accepted")
+	}
+}
+
 func TestRPCPayloads(t *testing.T) {
 	if got := RemoteLearnPayload(true); !bytes.Equal(got, []byte{1}) {
 		t.Fatalf("% x", got)
+	}
+	if got := RemoteLearnPayload(false); !bytes.Equal(got, []byte{3}) {
+		t.Fatalf("% x", got)
+	}
+	for _, tc := range []struct {
+		payload []byte
+		valid   bool
+	}{{[]byte{1}, true}, {[]byte{6}, true}, {[]byte{0}, false}, {[]byte{7}, false}, {nil, false}} {
+		_, err := ParseRemoteLearnPayload(tc.payload)
+		if (err == nil) != tc.valid {
+			t.Fatalf("payload %x valid=%v err=%v", tc.payload, tc.valid, err)
+		}
 	}
 	if got := MemoryReadPayload(0x01020304, 5); !bytes.Equal(got, []byte{1, 2, 3, 4, 5}) {
 		t.Fatalf("% x", got)

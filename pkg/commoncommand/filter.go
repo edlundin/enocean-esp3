@@ -146,6 +146,9 @@ func ParseRdFilterResponseOK(response response.Packet) (RdFilterResponse, error)
 	if err := serializer.BytesToStruct(response.Data, &raw); err != nil {
 		return RdFilterResponse{}, fmt.Errorf("failed to deserialize response: %w", err)
 	}
+	if len(raw.Filters) != int(raw.Count) {
+		return RdFilterResponse{}, fmt.Errorf("filter count %d does not match %d records", raw.Count, len(raw.Filters))
+	}
 
 	return RdFilterResponse{
 		Filters: raw.Filters,
