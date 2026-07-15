@@ -108,7 +108,7 @@ func (p Packet) ToEsp3() esp3.Telegram {
 	optData := make([]byte, 0, 3+deviceid.DeviceIDSize)
 	optData = append(optData, p.SubTelNum)
 	optData = append(optData, destinationID[:]...)
-	optData = append(optData, 0xff)
+	optData = append(optData, 0xff) // RSSI is unknown when transmitting.
 	optData = append(optData, 0x03)
 	optData = append(optData, byte(p.Timestamp>>8), byte(p.Timestamp&0xFF))
 

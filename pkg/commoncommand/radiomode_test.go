@@ -38,7 +38,10 @@ func TestNewWrMode(t *testing.T) {
 // TestWrMode_Serialize verifies WrMode_Serialize behavior.
 func TestWrMode_Serialize(t *testing.T) {
 	t.Run("serializes write mode command", func(t *testing.T) {
-		cmd, _ := NewWrMode(enums.RadioModeERP1)
+		cmd, err := NewWrMode(enums.RadioModeERP1)
+		if err != nil {
+			t.Fatalf("expected no constructor error, got: %v", err)
+		}
 		telegram, err := cmd.Serialize()
 
 		if err != nil {
@@ -47,7 +50,7 @@ func TestWrMode_Serialize(t *testing.T) {
 
 		// Data: Command(1) + Mode(1) = 2 bytes
 		if len(telegram.Data) != 2 {
-			t.Errorf("expected Data length 2, got %d", len(telegram.Data))
+			t.Fatalf("expected Data length 2, got %d", len(telegram.Data))
 		}
 
 		if telegram.Data[0] != byte(enums.CommonCommandWR_MODE) {

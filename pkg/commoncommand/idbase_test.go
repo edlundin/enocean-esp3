@@ -84,7 +84,10 @@ func TestNewWrIDBase(t *testing.T) {
 func TestWrIDBase_Serialize(t *testing.T) {
 	t.Run("serializes write ID base command", func(t *testing.T) {
 		validBaseID := deviceid.DeviceID(0xff800000)
-		cmd, _ := NewWrIDBase(validBaseID)
+		cmd, err := NewWrIDBase(validBaseID)
+		if err != nil {
+			t.Fatalf("expected no constructor error, got: %v", err)
+		}
 		telegram, err := cmd.Serialize()
 
 		if err != nil {
@@ -93,7 +96,7 @@ func TestWrIDBase_Serialize(t *testing.T) {
 
 		// Data: Command(1) + IDBase(4) = 5 bytes
 		if len(telegram.Data) != 5 {
-			t.Errorf("expected Data length 5, got %d", len(telegram.Data))
+			t.Fatalf("expected Data length 5, got %d", len(telegram.Data))
 		}
 
 		if telegram.Data[0] != byte(enums.CommonCommandWR_IDBASE) {
@@ -119,7 +122,10 @@ func TestNewRdIDBase(t *testing.T) {
 // TestRdIDBase_Serialize verifies RdIDBase_Serialize behavior.
 func TestRdIDBase_Serialize(t *testing.T) {
 	t.Run("serializes read ID base command", func(t *testing.T) {
-		cmd, _ := NewRdIDBase()
+		cmd, err := NewRdIDBase()
+		if err != nil {
+			t.Fatalf("expected no constructor error, got: %v", err)
+		}
 		telegram, err := cmd.Serialize()
 
 		if err != nil {
@@ -127,7 +133,7 @@ func TestRdIDBase_Serialize(t *testing.T) {
 		}
 
 		if len(telegram.Data) != 1 {
-			t.Errorf("expected Data length 1, got %d", len(telegram.Data))
+			t.Fatalf("expected Data length 1, got %d", len(telegram.Data))
 		}
 
 		if telegram.Data[0] != byte(enums.CommonCommandRD_IDBASE) {

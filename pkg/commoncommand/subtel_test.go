@@ -38,7 +38,10 @@ func TestNewWrSubTel(t *testing.T) {
 // TestWrSubTel_Serialize verifies WrSubTel_Serialize behavior.
 func TestWrSubTel_Serialize(t *testing.T) {
 	t.Run("serializes write subtel command", func(t *testing.T) {
-		cmd, _ := NewWrSubTel(true)
+		cmd, err := NewWrSubTel(true)
+		if err != nil {
+			t.Fatalf("expected no constructor error, got: %v", err)
+		}
 		telegram, err := cmd.Serialize()
 
 		if err != nil {
@@ -47,7 +50,7 @@ func TestWrSubTel_Serialize(t *testing.T) {
 
 		// Data: Command(1) + Toggle(1) = 2 bytes
 		if len(telegram.Data) != 2 {
-			t.Errorf("expected Data length 2, got %d", len(telegram.Data))
+			t.Fatalf("expected Data length 2, got %d", len(telegram.Data))
 		}
 
 		if telegram.Data[0] != byte(enums.CommonCommandWR_SUBTEL) {
@@ -60,11 +63,17 @@ func TestWrSubTel_Serialize(t *testing.T) {
 	})
 
 	t.Run("serializes write subtel command with false", func(t *testing.T) {
-		cmd, _ := NewWrSubTel(false)
+		cmd, err := NewWrSubTel(false)
+		if err != nil {
+			t.Fatalf("expected no constructor error, got: %v", err)
+		}
 		telegram, err := cmd.Serialize()
 
 		if err != nil {
 			t.Fatalf("expected no error, got: %v", err)
+		}
+		if len(telegram.Data) != 2 {
+			t.Fatalf("expected Data length 2, got %d", len(telegram.Data))
 		}
 
 		if telegram.Data[1] != 0x00 {

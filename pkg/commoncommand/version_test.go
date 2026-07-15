@@ -29,7 +29,10 @@ func TestNewRdVersion(t *testing.T) {
 // TestRdVersion_Serialize verifies RdVersion_Serialize behavior.
 func TestRdVersion_Serialize(t *testing.T) {
 	t.Run("serializes read version command", func(t *testing.T) {
-		cmd, _ := NewRdVersion()
+		cmd, err := NewRdVersion()
+		if err != nil {
+			t.Fatalf("expected no constructor error, got: %v", err)
+		}
 		telegram, err := cmd.Serialize()
 
 		if err != nil {
@@ -37,7 +40,7 @@ func TestRdVersion_Serialize(t *testing.T) {
 		}
 
 		if len(telegram.Data) != 1 {
-			t.Errorf("expected Data length 1, got %d", len(telegram.Data))
+			t.Fatalf("expected Data length 1, got %d", len(telegram.Data))
 		}
 
 		if telegram.Data[0] != byte(enums.CommonCommandRD_VERSION) {

@@ -61,3 +61,12 @@ func TestParsePacketRorgMismatch(t *testing.T) {
 		t.Fatal("expected mismatch error")
 	}
 }
+
+func TestMustEEPRejectsInvalidTriplet(t *testing.T) {
+	defer func() {
+		if recover() == nil {
+			t.Fatal("mustEEP accepted an invalid triplet")
+		}
+	}()
+	mustEEP(enums.RorgRPS, 0xff, 0)
+}

@@ -137,7 +137,7 @@ func DecodeSelectiveData(channels []Channel, data []byte) ([]SelectedValue, erro
 	return out, nil
 }
 
-// operationalChannels returns the number of operational channels.
+// operationalChannels returns the operational channels.
 func operationalChannels(channels []Channel) ([]Channel, error) {
 	out := make([]Channel, 0, len(channels))
 	for _, ch := range channels {

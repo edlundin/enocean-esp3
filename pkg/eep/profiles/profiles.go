@@ -2,6 +2,7 @@ package profiles
 
 import (
 	"errors"
+
 	"github.com/edlundin/enocean-esp3/pkg/eep"
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 	"github.com/edlundin/enocean-esp3/pkg/erp1"
@@ -35,5 +36,11 @@ func ParseUserData(prof eep.EEP, userData []byte, status byte) (Telegram, error)
 	}
 }
 
-// mustEEP parses an EEP or fails the test.
-func mustEEP(r enums.Rorg, f, t byte) eep.EEP { e, _ := eep.FromTriplet(r, f, t); return e }
+// mustEEP parses an EEP or panics.
+func mustEEP(r enums.Rorg, f, t byte) eep.EEP {
+	e, err := eep.FromTriplet(r, f, t)
+	if err != nil {
+		panic(err)
+	}
+	return e
+}
