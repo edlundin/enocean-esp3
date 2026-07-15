@@ -67,126 +67,11 @@ const (
 
 // ParseCommonCommandFromByte parses a CommonCommand from a byte.
 func ParseCommonCommandFromByte(b byte) (CommonCommand, error) {
-	switch b {
-	case 0x01:
-		return CommonCommandWR_SLEEP, nil
-	case 0x02:
-		return CommonCommandWR_RESET, nil
-	case 0x03:
-		return CommonCommandRD_VERSION, nil
-	case 0x04:
-		return CommonCommandRD_SYS_LOG, nil
-	case 0x05:
-		return CommonCommandRESET_SYS_LOG, nil
-	case 0x06:
-		return CommonCommandWR_BIST, nil
-	case 0x07:
-		return CommonCommandWR_IDBASE, nil
-	case 0x08:
-		return CommonCommandRD_IDBASE, nil
-	case 0x09:
-		return CommonCommandWR_REPEATER, nil
-	case 0x0a:
-		return CommonCommandRD_REPEATER, nil
-	case 0x0b:
-		return CommonCommandWR_FILTER_ADD, nil
-	case 0x0c:
-		return CommonCommandWR_FILTER_DEL, nil
-	case 0x0d:
-		return CommonCommandWR_FILTER_DEL_ALL, nil
-	case 0x0e:
-		return CommonCommandWR_FILTER_ENABLE, nil
-	case 0x0f:
-		return CommonCommandRD_FILTER, nil
-	case 0x10:
-		return CommonCommandWR_WAIT_MATURITY, nil
-	case 0x11:
-		return CommonCommandWR_SUBTEL, nil
-	case 0x12:
-		return CommonCommandWR_MEM, nil
-	case 0x13:
-		return CommonCommandRD_MEM, nil
-	case 0x14:
-		return CommonCommandRD_MEM_ADDRESS, nil
-	case 0x15:
-		return CommonCommandRD_SECURITY, nil
-	case 0x16:
-		return CommonCommandWR_SECURITY, nil
-	case 0x17:
-		return CommonCommandWR_LEARNMODE, nil
-	case 0x18:
-		return CommonCommandRD_LEARNMODE, nil
-	case 0x19:
-		return CommonCommandWR_SECUREDEVICE_ADD, nil
-	case 0x1a:
-		return CommonCommandWR_SECUREDEVICE_DEL, nil
-	case 0x1b:
-		return CommonCommandRD_SECUREDEVICE_BY_INDEX, nil
-	case 0x1c:
-		return CommonCommandWR_MODE, nil
-	case 0x1d:
-		return CommonCommandRD_NUMSECUREDEVICES, nil
-	case 0x1e:
-		return CommonCommandRD_SECUREDEVICE_BY_ID, nil
-	case 0x1f:
-		return CommonCommandWR_SECUREDEVICE_ADD_PSK, nil
-	case 0x20:
-		return CommonCommandWR_SECUREDEVICE_SENDTEACHIN, nil
-	case 0x21:
-		return CommonCommandWR_TEMPORARY_RLC_WINDOW, nil
-	case 0x22:
-		return CommonCommandRD_SECUREDEVICE_PSK, nil
-	case 0x23:
-		return CommonCommandRD_DUTYCYCLE_LIMIT, nil
-	case 0x24:
-		return CommonCommandSET_BAUDRATE, nil
-	case 0x25:
-		return CommonCommandGET_FREQUENCY_INFO, nil
-	case 0x27:
-		return CommonCommandGET_STEPCODE, nil
-	case 0x2e:
-		return CommonCommandWR_REMAN_CODE, nil
-	case 0x2f:
-		return CommonCommandWR_STARTUP_DELAY, nil
-	case 0x30:
-		return CommonCommandWR_REMAN_REPEATING, nil
-	case 0x31:
-		return CommonCommandRD_REMAN_REPEATING, nil
-	case 0x32:
-		return CommonCommandSET_NOISETHRESHOLD, nil
-	case 0x33:
-		return CommonCommandGET_NOISETHRESHOLD, nil
-	case 0x34:
-		return CommonCommandSET_CRCMode, nil
-	case 0x35:
-		return CommonCommandGET_CRCMode, nil
-	case 0x36:
-		return CommonCommandWR_RLC_SAVE_PERIOD, nil
-	case 0x37:
-		return CommonCommandWR_RLC_LEGACY_MODE, nil
-	case 0x38:
-		return CommonCommandWR_SECUREDEVICEV2_ADD, nil
-	case 0x39:
-		return CommonCommandRD_SECUREDEVICEV2_BY_INDEX, nil
-	case 0x3a:
-		return CommonCommandWR_RSSITEST_MODE, nil
-	case 0x3b:
-		return CommonCommandRD_RSSITEST_MODE, nil
-	case 0x3c:
-		return CommonCommandWR_SECUREDEVICE_REMAN_KEY, nil
-	case 0x3d:
-		return CommonCommandRD_SECUREDEVICE_REMAN_KEY, nil
-	case 0x3e:
-		return CommonCommandWR_TRANSPARENT_MODE, nil
-	case 0x3f:
-		return CommonCommandRD_TRANSPARENT_MODE, nil
-	case 0x40:
-		return CommonCommandWR_TX_ONLY_MODE, nil
-	case 0x41:
-		return CommonCommandRD_TX_ONLY_MODE, nil
-	default:
+	command := CommonCommand(b)
+	if !command.Valid() {
 		return 0, errors.New("invalid common command")
 	}
+	return command, nil
 }
 
 // String returns the string representation of CommonCommand.
@@ -315,69 +200,9 @@ func (command CommonCommand) String() string {
 
 // Valid reports whether CommonCommand is valid.
 func (command CommonCommand) Valid() bool {
-	switch command {
-	case CommonCommandWR_SLEEP,
-		CommonCommandWR_RESET,
-		CommonCommandRD_VERSION,
-		CommonCommandRD_SYS_LOG,
-		CommonCommandRESET_SYS_LOG,
-		CommonCommandWR_BIST,
-		CommonCommandWR_IDBASE,
-		CommonCommandRD_IDBASE,
-		CommonCommandWR_REPEATER,
-		CommonCommandRD_REPEATER,
-		CommonCommandWR_FILTER_ADD,
-		CommonCommandWR_FILTER_DEL,
-		CommonCommandWR_FILTER_DEL_ALL,
-		CommonCommandWR_FILTER_ENABLE,
-		CommonCommandRD_FILTER,
-		CommonCommandWR_WAIT_MATURITY,
-		CommonCommandWR_SUBTEL,
-		CommonCommandWR_MEM,
-		CommonCommandRD_MEM,
-		CommonCommandRD_MEM_ADDRESS,
-		CommonCommandRD_SECURITY,
-		CommonCommandWR_SECURITY,
-		CommonCommandWR_LEARNMODE,
-		CommonCommandRD_LEARNMODE,
-		CommonCommandWR_SECUREDEVICE_ADD,
-		CommonCommandWR_SECUREDEVICE_DEL,
-		CommonCommandRD_SECUREDEVICE_BY_INDEX,
-		CommonCommandWR_MODE,
-		CommonCommandRD_NUMSECUREDEVICES,
-		CommonCommandRD_SECUREDEVICE_BY_ID,
-		CommonCommandWR_SECUREDEVICE_ADD_PSK,
-		CommonCommandWR_SECUREDEVICE_SENDTEACHIN,
-		CommonCommandWR_TEMPORARY_RLC_WINDOW,
-		CommonCommandRD_SECUREDEVICE_PSK,
-		CommonCommandRD_DUTYCYCLE_LIMIT,
-		CommonCommandSET_BAUDRATE,
-		CommonCommandGET_FREQUENCY_INFO,
-		CommonCommandGET_STEPCODE,
-		CommonCommandWR_REMAN_CODE,
-		CommonCommandWR_STARTUP_DELAY,
-		CommonCommandWR_REMAN_REPEATING,
-		CommonCommandRD_REMAN_REPEATING,
-		CommonCommandSET_NOISETHRESHOLD,
-		CommonCommandGET_NOISETHRESHOLD,
-		CommonCommandSET_CRCMode,
-		CommonCommandGET_CRCMode,
-		CommonCommandWR_RLC_SAVE_PERIOD,
-		CommonCommandWR_RLC_LEGACY_MODE,
-		CommonCommandWR_SECUREDEVICEV2_ADD,
-		CommonCommandRD_SECUREDEVICEV2_BY_INDEX,
-		CommonCommandWR_RSSITEST_MODE,
-		CommonCommandRD_RSSITEST_MODE,
-		CommonCommandWR_SECUREDEVICE_REMAN_KEY,
-		CommonCommandRD_SECUREDEVICE_REMAN_KEY,
-		CommonCommandWR_TRANSPARENT_MODE,
-		CommonCommandRD_TRANSPARENT_MODE,
-		CommonCommandWR_TX_ONLY_MODE,
-		CommonCommandRD_TX_ONLY_MODE:
-		return true
-	default:
-		return false
-	}
+	return command >= CommonCommandWR_SLEEP && command <= CommonCommandGET_FREQUENCY_INFO ||
+		command == CommonCommandGET_STEPCODE ||
+		command >= CommonCommandWR_REMAN_CODE && command <= CommonCommandRD_TX_ONLY_MODE
 }
 
 type TCMBaudrate uint8
@@ -420,18 +245,11 @@ func (baudrate TCMBaudrate) Valid() bool {
 
 // ParseTCMBaudrateFromByte parses a TCMBaudrate from a byte.
 func ParseTCMBaudrateFromByte(b byte) (TCMBaudrate, error) {
-	switch b {
-	case 0x00:
-		return TCMBaudrate57600, nil
-	case 0x01:
-		return TCMBaudrate115200, nil
-	case 0x02:
-		return TCMBaudrate230400, nil
-	case 0x03:
-		return TCMBaudrate460800, nil
-	default:
+	baudrate := TCMBaudrate(b)
+	if !baudrate.Valid() {
 		return 0, errors.New("invalid TCM baud rate")
 	}
+	return baudrate, nil
 }
 
 type TCMFrequency uint8
@@ -550,14 +368,11 @@ func (crcMode CRCMode) Valid() bool {
 
 // ParseCRCModeFromByte parses a CRCMode from a byte.
 func ParseCRCModeFromByte(b byte) (CRCMode, error) {
-	switch b {
-	case 0x00:
-		return CRCMode8BIT, nil
-	case 0x01:
-		return CRCMode7BIT, nil
-	default:
+	mode := CRCMode(b)
+	if !mode.Valid() {
 		return 0, errors.New("invalid TCM CRC mode")
 	}
+	return mode, nil
 }
 
 type RLCMode uint8
@@ -592,14 +407,11 @@ func (rLCMode RLCMode) Valid() bool {
 
 // ParseRLCModeFromByte parses a RLCMode from a byte.
 func ParseRLCModeFromByte(b byte) (RLCMode, error) {
-	switch b {
-	case 0x00:
-		return RLCModeSTANDARD, nil
-	case 0x01:
-		return RLCModeLEGACY, nil
-	default:
+	mode := RLCMode(b)
+	if !mode.Valid() {
 		return 0, errors.New("invalid RLC mode")
 	}
+	return mode, nil
 }
 
 type RSSITestMode uint8
@@ -634,14 +446,11 @@ func (rssiTestMode RSSITestMode) Valid() bool {
 
 // ParseRSSITestModeFromByte parses a RSSITestMode from a byte.
 func ParseRSSITestModeFromByte(b byte) (RSSITestMode, error) {
-	switch b {
-	case 0x00:
-		return RSSITestModeDISABLED, nil
-	case 0x01:
-		return RSSITestModeENABLED, nil
-	default:
+	mode := RSSITestMode(b)
+	if !mode.Valid() {
 		return 0, errors.New("invalid RSSI test mode")
 	}
+	return mode, nil
 }
 
 type TransparentMode uint8
@@ -676,14 +485,11 @@ func (transparentMode TransparentMode) Valid() bool {
 
 // ParseTransparentModeFromByte parses a TransparentMode from a byte.
 func ParseTransparentModeFromByte(b byte) (TransparentMode, error) {
-	switch b {
-	case 0x00:
-		return TransparentModeDISABLED, nil
-	case 0x01:
-		return TransparentModeENABLED, nil
-	default:
+	mode := TransparentMode(b)
+	if !mode.Valid() {
 		return 0, errors.New("invalid transparent mode")
 	}
+	return mode, nil
 }
 
 type TxOnlyMode uint8
@@ -722,14 +528,9 @@ func (txOnlyMode TxOnlyMode) Valid() bool {
 
 // ParseTxOnlyModeFromByte parses a TxOnlyMode from a byte.
 func ParseTxOnlyModeFromByte(b byte) (TxOnlyMode, error) {
-	switch b {
-	case 0x00:
-		return TxOnlyModeDISABLED, nil
-	case 0x01:
-		return TxOnlyModeENABLED_WITHOUT_AUTO_SLEEP, nil
-	case 0x02:
-		return TxOnlyModeENABLED_WITH_AUTO_SLEEP, nil
-	default:
+	mode := TxOnlyMode(b)
+	if !mode.Valid() {
 		return 0, errors.New("invalid tx only mode")
 	}
+	return mode, nil
 }

@@ -79,11 +79,7 @@ func BytesToStruct(data []byte, structPtr any, cfg ...DeserializerConfig) error 
 		return fmt.Errorf("structPtr must point to a struct")
 	}
 
-	var config DeserializerConfig
-	if len(cfg) > 0 {
-		config = mergeDeserializerConfigs(cfg)
-	}
-	config = config.sanitize()
+	config := mergeDeserializerConfigs(cfg).sanitize()
 
 	reader := bytes.NewReader(data)
 	t := v.Type()
@@ -125,107 +121,19 @@ func deserializeValue(reader *bytes.Reader, v reflect.Value, cfg DeserializerCon
 	}
 
 	// Check for custom deserializer in the provided configuration
-	if cfg.Deserializers != nil {
-		if customDeserializer, ok := cfg.Deserializers[v.Type()]; ok {
-			return customDeserializer(reader, v, cfg.ByteOrder)
-		}
+	if customDeserializer, ok := cfg.Deserializers[v.Type()]; ok {
+		return customDeserializer(reader, v, cfg.ByteOrder)
 	}
 
 	switch v.Kind() {
 	case reflect.Struct:
 		return deserializeStruct(reader, v, cfg)
-
 	case reflect.Array:
 		return deserializeArray(reader, v, cfg)
-
 	case reflect.Slice:
 		return deserializeSlice(reader, v, cfg)
-
-	case reflect.Bool:
-		var val uint8
-		if err := binary.Read(reader, cfg.ByteOrder, &val); err != nil {
-			return err
-		}
-		v.SetBool(val != 0)
-		return nil
-
-	case reflect.Int8:
-		var val int8
-		if err := binary.Read(reader, cfg.ByteOrder, &val); err != nil {
-			return err
-		}
-		v.SetInt(int64(val))
-		return nil
-	case reflect.Int16:
-		var val int16
-		if err := binary.Read(reader, cfg.ByteOrder, &val); err != nil {
-			return err
-		}
-		v.SetInt(int64(val))
-		return nil
-	case reflect.Int32:
-		var val int32
-		if err := binary.Read(reader, cfg.ByteOrder, &val); err != nil {
-			return err
-		}
-		v.SetInt(int64(val))
-		return nil
-	case reflect.Int64:
-		var val int64
-		if err := binary.Read(reader, cfg.ByteOrder, &val); err != nil {
-			return err
-		}
-		v.SetInt(val)
-		return nil
-
-	case reflect.Uint8:
-		var val uint8
-		if err := binary.Read(reader, cfg.ByteOrder, &val); err != nil {
-			return err
-		}
-		v.SetUint(uint64(val))
-		return nil
-	case reflect.Uint16:
-		var val uint16
-		if err := binary.Read(reader, cfg.ByteOrder, &val); err != nil {
-			return err
-		}
-		v.SetUint(uint64(val))
-		return nil
-	case reflect.Uint32:
-		var val uint32
-		if err := binary.Read(reader, cfg.ByteOrder, &val); err != nil {
-			return err
-		}
-		v.SetUint(uint64(val))
-		return nil
-	case reflect.Uint64:
-		var val uint64
-		if err := binary.Read(reader, cfg.ByteOrder, &val); err != nil {
-			return err
-		}
-		v.SetUint(val)
-		return nil
-
-	case reflect.Float32:
-		var val float32
-		if err := binary.Read(reader, cfg.ByteOrder, &val); err != nil {
-			return err
-		}
-		v.SetFloat(float64(val))
-		return nil
-	case reflect.Float64:
-		var val float64
-		if err := binary.Read(reader, cfg.ByteOrder, &val); err != nil {
-			return err
-		}
-		v.SetFloat(val)
-		return nil
-
 	default:
-		// Try to use binary.Read for unknown types
-		ptr := v.Addr().Interface()
-		return binary.Read(reader, cfg.ByteOrder, ptr)
+		return binary.Read(reader, cfg.ByteOrder, v.Addr().Interface())
 	}
 }
 

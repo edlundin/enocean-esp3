@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"bytes"
 	"context"
 	"encoding/binary"
 	"fmt"
@@ -18,15 +19,7 @@ import (
 )
 
 // GetSerialPortList returns the available serial port names.
-func GetSerialPortList() ([]string, error) {
-	ports, err := serial.GetPortsList()
-
-	if err != nil {
-		return nil, err
-	}
-
-	return ports, nil
-}
+func GetSerialPortList() ([]string, error) { return serial.GetPortsList() }
 
 type Message struct {
 	Kind string
@@ -199,44 +192,27 @@ func parser(ctx context.Context, serialPort serial.Port, channels *channelSet) {
 						parserState = ParserStateWaitingForCrc8H
 					}
 				case ParserStateWaitingForCrc8H:
-					const syncByteIdxInit = -1
-
 					// CRC8H invalid
 					if parserCrc != parserByte {
-						syncByteIdx := syncByteIdxInit
-
-						for i := 0; i < headerLen; i++ {
-							// Header have a sync byte, indicates the start of the new packet
-							if parserBuffer[i] == syncByte {
-								syncByteIdx = i + 1
-								break
-							}
-						}
+						syncByteIdx := bytes.IndexByte(parserBuffer, syncByte)
 
 						// Header and CRC8H does not contain the sync code, wait for new packet to start
-						if syncByteIdx == syncByteIdxInit && parserByte != syncByte {
+						if syncByteIdx < 0 && parserByte != syncByte {
 							parserState = ParserStateWaitingForSyncByte
 							break
 						}
 
 						// Header does not have sync code but CRC8H does, reset state, this is a new packet
-						if syncByteIdx == syncByteIdxInit && parserByte == syncByte {
+						if syncByteIdx < 0 {
 							parserState = ParserStateWaitingForHeader
 							parserBuffer = make([]uint8, 0)
 							parserCrc = 0
 							break
 						}
 
-						parserCrc = 0
-						tmpBuffer := make([]uint8, 0)
-
-						for i := 0; i < headerLen-syncByteIdx; i++ {
-							tmpBuffer = append(tmpBuffer, parserBuffer[syncByteIdx+i])
-							parserCrc = esp3.ComputeCrc8(parserBuffer[syncByteIdx+i], parserCrc)
-						}
-
-						parserBuffer = append(tmpBuffer, parserByte)
-						parserCrc = esp3.ComputeCrc8(parserByte, parserCrc)
+						parserBuffer = append(parserBuffer[:0], parserBuffer[syncByteIdx+1:]...)
+						parserBuffer = append(parserBuffer, parserByte)
+						parserCrc = esp3.ComputeCrcSlice(parserBuffer)
 
 						if len(parserBuffer) < headerLen {
 							parserState = ParserStateWaitingForHeader
