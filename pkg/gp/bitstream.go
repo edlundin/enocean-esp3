@@ -11,10 +11,9 @@ func readUnsigned(data []byte, bitOffset, bitSize int) (uint64, error) {
 	}
 	var v uint64
 	for i := 0; i < bitSize; i++ {
-		if data[(bitOffset+i)/8]&(1<<uint(7-((bitOffset+i)%8))) != 0 {
-			v = (v << 1) | 1
-		} else {
-			v <<= 1
+		v <<= 1
+		if data[(bitOffset+i)/8]&(1<<uint(7-(bitOffset+i)%8)) != 0 {
+			v |= 1
 		}
 	}
 	return v, nil
@@ -53,10 +52,7 @@ func writeUnsigned(data []byte, bitOffset, bitSize int, value uint64) error {
 
 // writeSigned writes Signed.
 func writeSigned(data []byte, bitOffset, bitSize int, value int64) error {
-	if bitSize == 0 || bitSize == 64 {
-		return writeUnsigned(data, bitOffset, bitSize, uint64(value))
-	}
-	return writeUnsigned(data, bitOffset, bitSize, uint64(value)&((uint64(1)<<uint(bitSize))-1))
+	return writeUnsigned(data, bitOffset, bitSize, uint64(value))
 }
 
 // bytesForBits returns the bytes required for a bit count.

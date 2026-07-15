@@ -18,28 +18,11 @@ const (
 
 // ParseEventCodeFromByte parses a EventCode from a byte.
 func ParseEventCodeFromByte(b byte) (EventCode, error) {
-	switch b {
-	case 0x01:
-		return EventCodeSA_RECLAIM_NOT_SUCCESSFUL, nil
-	case 0x02:
-		return EventCodeSA_CONFIRM_LEARN, nil
-	case 0x03:
-		return EventCodeSA_LEARN_ACK, nil
-	case 0x04:
-		return EventCodeCO_READY, nil
-	case 0x05:
-		return EventCodeCO_EVENT_SECUREDEVICES, nil
-	case 0x06:
-		return EventCodeCO_DUTYCYCLE_LIMIT, nil
-	case 0x07:
-		return EventCodeCO_TRANSMIT_FAILED, nil
-	case 0x08:
-		return EventCodeCO_TX_DONE, nil
-	case 0x09:
-		return EventCodeCO_LRN_MODE_DISABLED, nil
-	default:
+	code := EventCode(b)
+	if !code.Valid() {
 		return 0, errors.New("invalid event code")
 	}
+	return code, nil
 }
 
 // String returns the string representation of EventCode.
@@ -100,24 +83,11 @@ const (
 
 // ParseLearnAckConfirmCodeFromByte parses a LearnAckConfirmCode from a byte.
 func ParseLearnAckConfirmCodeFromByte(b byte) (LearnAckConfirmCode, error) {
-	switch b {
-	case 0x00:
-		return LearnAckConfirmCodeLRN_IN, nil
-	case 0x11:
-		return LearnAckConfirmCodeEEP_NOT_ACCEPTED, nil
-	case 0x12:
-		return LearnAckConfirmCodeNO_PLACE_IN_PM, nil
-	case 0x13:
-		return LearnAckConfirmCodeNO_PLACE_IN_CONTROLLER, nil
-	case 0x14:
-		return LearnAckConfirmCodeRSSI_NOT_GOOD_ENOUGH, nil
-	case 0x20:
-		return LearnAckConfirmCodeLRN_OUT, nil
-	case 0xff:
-		return LearnAckConfirmCodeFUNCTION_NOT_SUPPORTED, nil
-	default:
+	code := LearnAckConfirmCode(b)
+	if !code.Valid() {
 		return 0, errors.New("invalid learn ack confirm code")
 	}
+	return code, nil
 }
 
 // String returns the string representation of LearnAckConfirmCode.
@@ -176,32 +146,11 @@ const (
 
 // ParseWakeUpCauseFromByte parses a WakeUpCause from a byte.
 func ParseWakeUpCauseFromByte(b byte) (WakeUpCause, error) {
-	switch b {
-	case 0x00:
-		return WakeUpCauseVOLTAGE_SUPPLY_DROP, nil
-	case 0x01:
-		return WakeUpCauseRESET_BY_RESET_PIN, nil
-	case 0x02:
-		return WakeUpCauseWATCHDOG_TIMEOUT, nil
-	case 0x03:
-		return WakeUpCauseFLYWHEEL_TIMEOUT, nil
-	case 0x04:
-		return WakeUpCausePARITY_ERROR, nil
-	case 0x05:
-		return WakeUpCauseHARDWARE_PARITY_ERROR_IN_MEMORY, nil
-	case 0x06:
-		return WakeUpCauseREQUESTED_MEMORY_LOCATION_NOT_FOUND, nil
-	case 0x07:
-		return WakeUpCauseTRIGGER_PIN0, nil
-	case 0x08:
-		return WakeUpCauseTRIGGER_PIN1, nil
-	case 0x09:
-		return WakeUpCauseUNKNOWN_RESET_SOURCE, nil
-	case 0x0a:
-		return WakeUpCauseUART_WAKE_UP, nil
-	default:
+	cause := WakeUpCause(b)
+	if !cause.Valid() {
 		return 0, errors.New("invalid wake up cause")
 	}
+	return cause, nil
 }
 
 // String returns the string representation of WakeUpCause.
@@ -263,14 +212,11 @@ const (
 
 // ParseWakeUpModeFromByte parses a WakeUpMode from a byte.
 func ParseWakeUpModeFromByte(b byte) (WakeUpMode, error) {
-	switch b {
-	case 0x00:
-		return WakeUpModeSTANDARD_SECURITY, nil
-	case 0x01:
-		return WakeUpModeEXTENDED_SECURITY, nil
-	default:
+	mode := WakeUpMode(b)
+	if !mode.Valid() {
 		return 0, errors.New("invalid wake up mode")
 	}
+	return mode, nil
 }
 
 // String returns the string representation of WakeUpMode.
@@ -395,14 +341,11 @@ const (
 
 // ParseDutyCycleLimitCauseFromByte parses a DutyCycleLimitCause from a byte.
 func ParseDutyCycleLimitCauseFromByte(b byte) (DutyCycleLimitCause, error) {
-	switch b {
-	case 0x00:
-		return DutyCycleLimitCauseNOT_YET_REACHED, nil
-	case 0x01:
-		return DutyCycleLimitCauseREACHED, nil
-	default:
+	cause := DutyCycleLimitCause(b)
+	if !cause.Valid() {
 		return 0, errors.New("invalid duty cycle limit cause")
 	}
+	return cause, nil
 }
 
 // String returns the string representation of DutyCycleLimitCause.
@@ -437,14 +380,11 @@ const (
 
 // ParseTransmitFailedCauseFromByte parses a TransmitFailedCause from a byte.
 func ParseTransmitFailedCauseFromByte(b byte) (TransmitFailedCause, error) {
-	switch b {
-	case 0x00:
-		return TransmitFailedCauseCSMA_FAILED_CHANNEL_NOT_FREE, nil
-	case 0x01:
-		return TransmitFailedCauseNO_ACK_RECEIVED, nil
-	default:
+	cause := TransmitFailedCause(b)
+	if !cause.Valid() {
 		return 0, errors.New("invalid transmit failed cause")
 	}
+	return cause, nil
 }
 
 // String returns the string representation of TransmitFailedCause.

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-	"unsafe"
 
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 	"github.com/edlundin/enocean-esp3/pkg/esp3"
@@ -73,11 +72,7 @@ func mergeConfigs(configs []SerializerConfig) SerializerConfig {
 // If no config is provided, defaults are used (BigEndian byte order, no custom serializers).
 // If multiple configs are provided, they are merged with later configs overriding earlier ones.
 func CommandToTelegram(cmd any, cfg ...SerializerConfig) (esp3.Telegram, error) {
-	var config SerializerConfig
-	if len(cfg) > 0 {
-		config = mergeConfigs(cfg)
-	}
-	config = config.sanitize()
+	config := mergeConfigs(cfg).sanitize()
 
 	v := reflect.ValueOf(cmd)
 
@@ -164,53 +159,18 @@ func serializeValue(buf *bytes.Buffer, v reflect.Value, cfg SerializerConfig) er
 	}
 
 	// Check for custom serializer in the provided configuration
-	if cfg.Serializers != nil {
-		if customSerializer, ok := cfg.Serializers[v.Type()]; ok {
-			return customSerializer(buf, v, cfg.ByteOrder)
-		}
+	if customSerializer, ok := cfg.Serializers[v.Type()]; ok {
+		return customSerializer(buf, v, cfg.ByteOrder)
 	}
 
 	switch v.Kind() {
 	case reflect.Struct:
 		return serializeStruct(buf, v, cfg)
-
 	case reflect.Array, reflect.Slice:
 		return serializeSequence(buf, v, cfg)
-
-	case reflect.Bool:
-		var val uint8
-		if v.Bool() {
-			val = 1
-		}
-		return binary.Write(buf, cfg.ByteOrder, val)
-
-	case reflect.Int8:
-		return binary.Write(buf, cfg.ByteOrder, int8(v.Int()))
-	case reflect.Int16:
-		return binary.Write(buf, cfg.ByteOrder, int16(v.Int()))
-	case reflect.Int32:
-		return binary.Write(buf, cfg.ByteOrder, int32(v.Int()))
-	case reflect.Int64:
-		return binary.Write(buf, cfg.ByteOrder, int64(v.Int()))
-
-	case reflect.Uint8:
-		return binary.Write(buf, cfg.ByteOrder, uint8(v.Uint()))
-	case reflect.Uint16:
-		return binary.Write(buf, cfg.ByteOrder, uint16(v.Uint()))
-	case reflect.Uint32:
-		return binary.Write(buf, cfg.ByteOrder, uint32(v.Uint()))
-	case reflect.Uint64:
-		return binary.Write(buf, cfg.ByteOrder, uint64(v.Uint()))
-
-	case reflect.Float32:
-		return binary.Write(buf, cfg.ByteOrder, float32(v.Float()))
-	case reflect.Float64:
-		return binary.Write(buf, cfg.ByteOrder, float64(v.Float()))
-
 	case reflect.String:
-		_, err := buf.Write([]byte(v.String()))
+		_, err := buf.WriteString(v.String())
 		return err
-
 	default:
 		return binary.Write(buf, cfg.ByteOrder, v.Interface())
 	}
@@ -260,19 +220,11 @@ func serializeSequence(buf *bytes.Buffer, v reflect.Value, cfg SerializerConfig)
 			return err
 		}
 
-		if v.CanAddr() {
-			ptr := unsafe.Pointer(v.UnsafeAddr())
-			slice := unsafe.Slice((*byte)(ptr), length)
-			_, err := buf.Write(slice)
-
-			return err
+		data := make([]byte, length)
+		for i := range data {
+			data[i] = byte(v.Index(i).Uint())
 		}
-
-		bytes := make([]byte, length)
-		for i := 0; i < length; i++ {
-			bytes[i] = byte(v.Index(i).Uint())
-		}
-		_, err := buf.Write(bytes)
+		_, err := buf.Write(data)
 
 		return err
 	}

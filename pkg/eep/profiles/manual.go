@@ -78,7 +78,7 @@ func parseA50201(data []byte, status byte) (Telegram, error) {
 		return nil, errors.New("A5-02-01 user data too short")
 	}
 	raw := byte(getBits(data, 16, 8))
-	return A50201{TemperatureRaw: raw, TemperatureC: scale(uint64(raw), 255, 0, -40, 0), LearnButton: getBits(data, 28, 1) == 0}, nil
+	return A50201{TemperatureRaw: raw, TemperatureC: eep.ScaleRaw(uint64(raw), 255, 0, -40, 0), LearnButton: getBits(data, 28, 1) == 0}, nil
 }
 
 // EEP returns the EEP associated with A50201.
@@ -89,7 +89,7 @@ func (a A50201) MarshalERP1UserData() ([]byte, byte, error) {
 	b := make([]byte, 4)
 	raw := a.TemperatureRaw
 	if raw == 0 && a.TemperatureC != 0 {
-		raw = byte(unscale(a.TemperatureC, 255, 0, -40, 0))
+		raw = byte(eep.UnscaleRaw(a.TemperatureC, 255, 0, -40, 0))
 	}
 	setBits(b, 16, 8, uint64(raw))
 	if !a.LearnButton {

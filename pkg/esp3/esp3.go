@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"slices"
-	"strings"
 
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 )
@@ -86,10 +85,9 @@ func NewEsp3TelegramFromHexString(hexStr string) (Telegram, error) {
 	const minHexStringLen = 7
 
 	if len(hexStr)%2 != 0 {
-		hexStr = strings.Repeat("0", 1) + hexStr
+		hexStr = "0" + hexStr
 	}
 
-	telegram := Telegram{}
 	bytes, err := hex.DecodeString(hexStr)
 
 	if err != nil {
@@ -105,11 +103,7 @@ func NewEsp3TelegramFromHexString(hexStr string) (Telegram, error) {
 	}
 
 	crc8h := bytes[5]
-	crc := byte(0)
-
-	for _, b := range bytes[1:5] {
-		crc = ComputeCrc8(b, crc)
-	}
+	crc := ComputeCrcSlice(bytes[1:5])
 
 	if crc != crc8h {
 		return Telegram{}, fmt.Errorf("invalid CRC8H (got:0x%x, valid:0x%x)", crc8h, crc)
@@ -136,9 +130,9 @@ func NewEsp3TelegramFromHexString(hexStr string) (Telegram, error) {
 		return Telegram{}, err
 	}
 
-	telegram.PacketType = packetType
-	telegram.Data = bytes[6 : 6+dataLen]
-	telegram.OptData = bytes[6+dataLen : crc8dIndex]
-
-	return telegram, nil
+	return Telegram{
+		PacketType: packetType,
+		Data:       bytes[6 : 6+dataLen],
+		OptData:    bytes[6+dataLen : crc8dIndex],
+	}, nil
 }
