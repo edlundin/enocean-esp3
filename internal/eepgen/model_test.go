@@ -28,6 +28,20 @@ func TestGenerateTinyXML(t *testing.T) {
 	}
 }
 
+func TestParseCompositeNumbers(t *testing.T) {
+	if got, ok := parseRangeMax("100, 255", "Control variable; value 255 = auto"); !ok || got != 100 {
+		t.Fatalf("parseRangeMax() = %d, %t", got, ok)
+	}
+	if got, ok := parseRangeMax("100, 254", "Control variable; value 255 = auto"); ok || got != 0 {
+		t.Fatalf("mismatched parseRangeMax() = %d, %t", got, ok)
+	}
+	for _, value := range []string{"100 or +40", "4095 (409,5)", "20 .. 80"} {
+		if _, ok := parseFloat(value); ok {
+			t.Fatalf("ambiguous value %q parsed as one number", value)
+		}
+	}
+}
+
 func TestEnumNameGeneralizesLongDescriptions(t *testing.T) {
 	if got := enumName(`Button AI: "Switch light on" or "Dim light down" or "Move blind closed"`, 0); got != "ButtonAI" {
 		t.Fatalf("enumName = %q", got)
@@ -84,6 +98,17 @@ func TestLoadRealEEP268(t *testing.T) {
 	}
 	if got := findField(byKey["F6-01-01"], "PB").Enums[1]; got.Description != "Pressed & Hold" || got.Name != "PressedHold" {
 		t.Fatalf("F6-01-01 PB enum 1 = %#v", got)
+	}
+	for _, shortcut := range []string{"POS", "ANG"} {
+		if got := findField(byKey["D2-05-00"], shortcut); got.RawMin != 0 || got.RawMax != 100 || got.ScaleMin != 0 || got.ScaleMax != 100 || got.Unit != "%" || len(got.Enums) != 1 || got.Enums[0].Raw != 127 {
+			t.Fatalf("D2-05-00 %s range/scale/enum = %#v", shortcut, got)
+		}
+	}
+	if got := findField(byKey["A5-20-10"], "CVAR"); got.RawMin != 0 || got.RawMax != 100 || got.ScaleMin != 0 || got.ScaleMax != 100 || got.Unit != "%" || len(got.Enums) != 1 || got.Enums[0].Raw != 255 || got.Enums[0].Name != "Auto" {
+		t.Fatalf("A5-20-10 CVAR range/scale/enum = %#v", got)
+	}
+	if got := findField(byKey["D2-05-00"], "VERT"); len(got.Enums) != 1 || got.Enums[0].Raw != 32767 || got.Enums[0].Name != "NoChange" {
+		t.Fatalf("D2-05-00 VERT enum = %#v", got)
 	}
 }
 

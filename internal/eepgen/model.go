@@ -39,21 +39,26 @@ type Case struct {
 	Fields []Field `xml:"datafield"`
 }
 type Field struct {
-	Data     string  `xml:"data"`
-	Shortcut string  `xml:"shortcut"`
-	BitOff   string  `xml:"bitoffs"`
-	BitSize  string  `xml:"bitsize"`
-	Unit     string  `xml:"unit"`
-	Enums    []Enum  `xml:"enum"`
-	Ranges   []Range `xml:"range"`
-	Scales   []Scale `xml:"scale"`
+	Data        string  `xml:"data"`
+	Shortcut    string  `xml:"shortcut"`
+	Description string  `xml:"description"`
+	BitOff      string  `xml:"bitoffs"`
+	BitSize     string  `xml:"bitsize"`
+	Unit        string  `xml:"unit"`
+	Enums       []Enum  `xml:"enum"`
+	Ranges      []Range `xml:"range"`
+	Scales      []Scale `xml:"scale"`
 }
 type Enum struct {
 	Items []EnumItem `xml:"item"`
 }
 type EnumItem struct {
-	Value       string `xml:"value"`
-	Description string `xml:"description"`
+	Value       string  `xml:"value"`
+	Min         string  `xml:"min"`
+	Max         string  `xml:"max"`
+	Unit        string  `xml:"unit"`
+	Description string  `xml:"description"`
+	Scales      []Scale `xml:"scale"`
 }
 type Range struct {
 	Min string `xml:"min"`
@@ -133,22 +138,39 @@ func Load(path string) ([]OutProfile, error) {
 							continue
 						}
 						seen[key] = true
-						of := OutField{Name: name, Shortcut: clean(xf.Shortcut), Unit: clean(xf.Unit), BitOff: bo, BitSize: bs}
-						if len(xf.Ranges) > 0 {
-							of.RawMin = atoi64(xf.Ranges[0].Min)
-							of.RawMax = atoi64(xf.Ranges[0].Max)
+						ranges, scales, unit := xf.Ranges, xf.Scales, xf.Unit
+						if item, ok := numericEnumItem(xf); ok {
+							if len(ranges) == 0 {
+								ranges = []Range{{Min: item.Min, Max: item.Max}}
+							}
+							if len(scales) == 0 {
+								scales = item.Scales
+							}
+							if strings.TrimSpace(unit) == "" {
+								unit = item.Unit
+							}
 						}
-						if len(xf.Scales) > 0 {
-							of.ScaleMin = atof(xf.Scales[0].Min)
-							of.ScaleMax = atof(xf.Scales[0].Max)
+						of := OutField{Name: name, Shortcut: clean(xf.Shortcut), Unit: clean(unit), BitOff: bo, BitSize: bs}
+						if len(ranges) > 0 {
+							of.RawMin, _ = parseInt(ranges[0].Min)
+							of.RawMax, _ = parseRangeMax(ranges[0].Max, xf.Description)
 						}
+						if len(scales) > 0 {
+							of.ScaleMin, _ = parseFloat(scales[0].Min)
+							of.ScaleMax, _ = parseFloat(scales[0].Max)
+						}
+						seenEnums := map[uint64]bool{}
 						for _, en := range xf.Enums {
 							for _, item := range en.Items {
 								desc := clean(item.Description)
-								if v, err := strconv.ParseUint(strings.TrimSpace(item.Value), 0, 64); err == nil {
+								if v, ok := parseEnumValue(item.Value); ok {
 									of.Enums = append(of.Enums, OutEnum{Raw: v, Name: enumName(desc, v), Description: desc})
+									seenEnums[v] = true
 								}
 							}
+						}
+						if v, desc, ok := describedEnum(xf.Description); ok && !seenEnums[v] {
+							of.Enums = append(of.Enums, OutEnum{Raw: v, Name: enumName(desc, v), Description: desc})
 						}
 						p.Fields = append(p.Fields, of)
 					}
@@ -203,8 +225,79 @@ func hex2(s string) string {
 	n, _ := strconv.ParseUint(strings.TrimSpace(s), 0, 8)
 	return fmt.Sprintf("%02X", n)
 }
-func atoi64(s string) int64 { n, _ := strconv.ParseInt(strings.TrimSpace(s), 0, 64); return n }
-func atof(s string) float64 { f, _ := strconv.ParseFloat(strings.TrimSpace(s), 64); return f }
+func parseInt(s string) (int64, bool) {
+	n, err := strconv.ParseInt(strings.TrimSpace(s), 0, 64)
+	return n, err == nil
+}
+func parseFloat(s string) (float64, bool) {
+	f, err := strconv.ParseFloat(strings.TrimSpace(s), 64)
+	return f, err == nil
+}
+func parseRangeMax(s, description string) (int64, bool) {
+	if max, ok := parseInt(s); ok {
+		return max, true
+	}
+	parts := strings.Split(s, ",")
+	if len(parts) != 2 {
+		return 0, false
+	}
+	max, maxOK := parseInt(parts[0])
+	special, err := strconv.ParseUint(strings.TrimSpace(parts[1]), 0, 64)
+	described, _, describedOK := describedEnum(description)
+	if maxOK && err == nil && describedOK && special == described {
+		return max, true
+	}
+	return 0, false
+}
+func parseEnumValue(s string) (uint64, bool) {
+	s = strings.TrimSpace(s)
+	if i := strings.Index(s, " ("); i >= 0 && strings.HasSuffix(s, ")") {
+		s = s[:i]
+	}
+	v, err := strconv.ParseUint(s, 0, 64)
+	return v, err == nil
+}
+func numericEnumItem(f Field) (EnumItem, bool) {
+	var found EnumItem
+	ok := false
+	for _, enum := range f.Enums {
+		for _, item := range enum.Items {
+			if _, minOK := parseInt(item.Min); !minOK {
+				continue
+			}
+			if _, maxOK := parseInt(item.Max); !maxOK || len(item.Scales) == 0 && strings.TrimSpace(item.Unit) == "" {
+				continue
+			}
+			if ok {
+				return EnumItem{}, false
+			}
+			found, ok = item, true
+		}
+	}
+	return found, ok
+}
+func describedEnum(s string) (uint64, string, bool) {
+	const marker = "value "
+	i := strings.Index(strings.ToLower(s), marker)
+	if i < 0 {
+		return 0, "", false
+	}
+	rest := s[i+len(marker):]
+	eq := strings.Index(rest, "=")
+	if eq < 0 {
+		return 0, "", false
+	}
+	v, err := strconv.ParseUint(strings.TrimSpace(rest[:eq]), 0, 64)
+	if err != nil {
+		return 0, "", false
+	}
+	desc := strings.TrimSpace(rest[eq+1:])
+	if i := strings.IndexAny(desc, ",;."); i >= 0 {
+		desc = desc[:i]
+	}
+	desc = clean(desc)
+	return v, desc, desc != ""
+}
 func enumName(desc string, raw uint64) string {
 	name := desc
 	for _, cut := range []string{":", " or ", " (", " - ", ","} {

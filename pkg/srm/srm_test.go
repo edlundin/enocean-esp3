@@ -43,6 +43,11 @@ func TestRejectReservedHeaderBits(t *testing.T) {
 	if _, err := ParseSYSEx([]byte{0x10, 0x06}); err == nil {
 		t.Fatal("reserved Alliance header bits accepted")
 	}
+	for _, b := range [][]byte{{0x00, 0x00}, {0x80, 0x00, 0x00}} {
+		if _, err := ParseSYSEx(b); err == nil {
+			t.Fatalf("reserved function zero accepted in % x", b)
+		}
+	}
 	if _, err := ParseQueryStatusAnswer([]byte{0xf2, 0x04, 0x00}); err == nil {
 		t.Fatal("reserved query status bits accepted")
 	}

@@ -206,6 +206,26 @@ func TestParserAcceptsCRC8DEqualToSyncByte(t *testing.T) {
 	}
 }
 
+func TestParserStreamsZeroPayloadFrame(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	zero := esp3.NewTelegramFromData(enums.PacketTypeCOMMON_COMMAND, []byte{}, []byte{})
+	next := esp3.NewTelegramFromData(enums.PacketTypeCOMMON_COMMAND, []byte{1}, []byte{})
+	set, channels := newChannelSet(4)
+	go parser(ctx, &fakePort{reads: [][]byte{append(zero.Serialize(), next.Serialize()...)}}, set)
+
+	for _, want := range []esp3.Telegram{zero, next} {
+		select {
+		case got := <-channels.ESP3:
+			if !reflect.DeepEqual(got, want) {
+				t.Fatalf("telegram mismatch: got %+v want %+v", got, want)
+			}
+		case <-time.After(time.Second):
+			t.Fatal("timed out waiting for telegram")
+		}
+	}
+}
+
 func TestParserDropsBadCRC8HThenResyncs(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

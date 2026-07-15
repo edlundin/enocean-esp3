@@ -66,6 +66,9 @@ func ParseSYSEx(b []byte) (Message, error) {
 			return Message{}, fmt.Errorf("reserved Alliance SYS_EX header bits set")
 		}
 		fn := binary.BigEndian.Uint16(b[:2]) & 0x0fff
+		if fn == 0 {
+			return Message{}, fmt.Errorf("invalid function 0x%x", fn)
+		}
 		return Message{Function: fn, Payload: append([]byte(nil), b[2:]...)}, nil
 	}
 	if len(b) < 3 {
@@ -73,7 +76,11 @@ func ParseSYSEx(b []byte) (Message, error) {
 	}
 	v := uint32(b[0])<<16 | uint32(b[1])<<8 | uint32(b[2])
 	mid := uint16((v >> 12) & 0x07ff)
-	return Message{ManufacturerID: &mid, Function: uint16(v & 0x0fff), Payload: append([]byte(nil), b[3:]...)}, nil
+	fn := uint16(v & 0x0fff)
+	if fn == 0 {
+		return Message{}, fmt.Errorf("invalid function 0x%x", fn)
+	}
+	return Message{ManufacturerID: &mid, Function: fn, Payload: append([]byte(nil), b[3:]...)}, nil
 }
 
 type QueryStatusAnswer struct {

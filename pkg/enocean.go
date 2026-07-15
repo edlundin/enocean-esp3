@@ -245,20 +245,10 @@ func parser(ctx context.Context, serialPort serial.Port, channels *channelSet) {
 					parserOptDataLen = int(parserBuffer[optDataLengthOffset])
 					parserPacketType = parserBuffer[packetTypeOffset]
 
-					// Data length fields are invalid
-					if parserDataLen+parserOptDataLen == 0 {
-						if parserByte == syncByte { // Sync already received
-							parserState = ParserStateWaitingForHeader
-							parserBuffer = make([]uint8, 0)
-							parserCrc = 0
-							break
-						}
-
-						parserState = ParserStateWaitingForSyncByte
-						break
-					}
-
 					parserState = ParserStateWaitingForData
+					if parserDataLen+parserOptDataLen == 0 {
+						parserState = ParserStateWaitingForCrc8D
+					}
 					parserBuffer = make([]uint8, 0)
 					parserCrc = 0
 				case ParserStateWaitingForData:
