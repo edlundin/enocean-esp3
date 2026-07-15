@@ -7,6 +7,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/response"
 )
 
+// TestNewWrRemanCode verifies NewWrRemanCode behavior.
 func TestNewWrRemanCode(t *testing.T) {
 	t.Run("creates write reman code command", func(t *testing.T) {
 		cmd, err := NewWrRemanCode(0x12345678)
@@ -35,6 +36,7 @@ func TestNewWrRemanCode(t *testing.T) {
 	})
 }
 
+// TestWrRemanCode_Serialize verifies WrRemanCode_Serialize behavior.
 func TestWrRemanCode_Serialize(t *testing.T) {
 	t.Run("serializes write reman code command", func(t *testing.T) {
 		cmd, _ := NewWrRemanCode(0x12345678)
@@ -55,6 +57,7 @@ func TestWrRemanCode_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewWrRemanRepeating verifies NewWrRemanRepeating behavior.
 func TestNewWrRemanRepeating(t *testing.T) {
 	t.Run("creates write reman repeating command with repetition enabled", func(t *testing.T) {
 		cmd, err := NewWrRemanRepeating(true)
@@ -83,6 +86,7 @@ func TestNewWrRemanRepeating(t *testing.T) {
 	})
 }
 
+// TestWrRemanRepeating_Serialize verifies WrRemanRepeating_Serialize behavior.
 func TestWrRemanRepeating_Serialize(t *testing.T) {
 	t.Run("serializes write reman repeating command", func(t *testing.T) {
 		cmd, _ := NewWrRemanRepeating(true)
@@ -120,6 +124,7 @@ func TestWrRemanRepeating_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewRdRemanRepeating verifies NewRdRemanRepeating behavior.
 func TestNewRdRemanRepeating(t *testing.T) {
 	t.Run("creates read reman repeating command", func(t *testing.T) {
 		cmd, err := NewRdRemanRepeating()
@@ -133,6 +138,7 @@ func TestNewRdRemanRepeating(t *testing.T) {
 	})
 }
 
+// TestRdRemanRepeating_Serialize verifies RdRemanRepeating_Serialize behavior.
 func TestRdRemanRepeating_Serialize(t *testing.T) {
 	t.Run("serializes read reman repeating command", func(t *testing.T) {
 		cmd, _ := NewRdRemanRepeating()
@@ -152,6 +158,7 @@ func TestRdRemanRepeating_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseRdRemanRepeatingResponseOK verifies ParseRdRemanRepeatingResponseOK behavior.
 func TestParseRdRemanRepeatingResponseOK(t *testing.T) {
 	t.Run("parses reman repeating response enabled", func(t *testing.T) {
 		// Response: RemanRepetitionEnabled(1) = 1 byte

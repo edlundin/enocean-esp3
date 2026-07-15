@@ -10,6 +10,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/erp1"
 )
 
+// TestRoundTripMessages verifies RoundTripMessages behavior.
 func TestRoundTripMessages(t *testing.T) {
 	prof, _ := eep.FromTriplet(enums.Rorg4BS, 0x02, 0x01)
 	msgs := []Message{
@@ -32,6 +33,7 @@ func TestRoundTripMessages(t *testing.T) {
 	}
 }
 
+// TestExactPayloads verifies ExactPayloads behavior.
 func TestExactPayloads(t *testing.T) {
 	prof, _ := eep.FromTriplet(enums.Rorg4BS, 2, 1)
 	lr := LearnRequest{RequestCode: RequestDefaultSensor, ManufacturerID: 0x123, EEP: prof, RSSI: 0x44, RepeaterID: 0x01020304}.ERP1(0)
@@ -51,6 +53,7 @@ func TestExactPayloads(t *testing.T) {
 	}
 }
 
+// TestRejectBadPackets verifies RejectBadPackets behavior.
 func TestRejectBadPackets(t *testing.T) {
 	bad := []erp1.Packet{
 		{Rorg: enums.Rorg4BS},
@@ -65,6 +68,7 @@ func TestRejectBadPackets(t *testing.T) {
 	}
 }
 
+// TestAckCodeClass verifies AckCodeClass behavior.
 func TestAckCodeClass(t *testing.T) {
 	if AckCode(0x12).Class() != "failed learn-in" {
 		t.Fatal(AckCode(0x12).Class())

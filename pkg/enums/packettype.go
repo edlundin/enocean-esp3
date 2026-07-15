@@ -20,6 +20,7 @@ const (
 	PacketTypeCOMMAND_2_4        PacketType = 0x11
 )
 
+// ParsePacketTypeFromByte parses a PacketType from a byte.
 func ParsePacketTypeFromByte(b byte) (PacketType, error) {
 	switch b {
 	case 0x01:
@@ -53,6 +54,7 @@ func ParsePacketTypeFromByte(b byte) (PacketType, error) {
 	}
 }
 
+// String returns the string representation of PacketType.
 func (packetType PacketType) String() string {
 	switch packetType {
 	case PacketTypeRADIO_ERP1:
@@ -86,6 +88,7 @@ func (packetType PacketType) String() string {
 	}
 }
 
+// Valid reports whether PacketType is valid.
 func (packetType PacketType) Valid() bool {
 	switch packetType {
 	case PacketTypeRADIO_ERP1,

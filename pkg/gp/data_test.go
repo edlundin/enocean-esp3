@@ -2,6 +2,7 @@ package gp
 
 import "testing"
 
+// TestDataErrors verifies DataErrors behavior.
 func TestDataErrors(t *testing.T) {
 	channels := []Channel{{Type: ChannelTeachInInformation}, {Type: ChannelFlag}, {Type: ChannelData, ResolutionCode: 6}}
 	if _, err := operationalChannels([]Channel{{Type: ChannelData}}); err == nil { t.Fatal("bad resolution accepted") }

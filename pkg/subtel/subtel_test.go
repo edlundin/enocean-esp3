@@ -9,6 +9,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/esp3"
 )
 
+// TestNewPacketFromEsp3 verifies NewPacketFromEsp3 behavior.
 func TestNewPacketFromEsp3(t *testing.T) {
 	t.Run("creates packet from valid ESP3 telegram", func(t *testing.T) {
 		// Create a valid ESP3 telegram with RADIO_ERP1 packet type
@@ -205,6 +206,7 @@ func TestNewPacketFromEsp3(t *testing.T) {
 	})
 }
 
+// TestPacket_ToEsp3 verifies Packet_ToEsp3 behavior.
 func TestPacket_ToEsp3(t *testing.T) {
 	t.Run("converts packet back to ESP3 telegram", func(t *testing.T) {
 		destinationID, _ := deviceid.FromByteArray([]byte{0xaa, 0xbb, 0xcc, 0xdd})
@@ -281,6 +283,7 @@ func TestPacket_ToEsp3(t *testing.T) {
 	})
 }
 
+// TestPacket_Serialize verifies Packet_Serialize behavior.
 func TestPacket_Serialize(t *testing.T) {
 	t.Run("serializes packet to byte array", func(t *testing.T) {
 		destinationID, _ := deviceid.FromByteArray([]byte{0xaa, 0xbb, 0xcc, 0xdd})
@@ -319,6 +322,7 @@ func TestPacket_Serialize(t *testing.T) {
 	})
 }
 
+// TestSubTel verifies SubTel behavior.
 func TestSubTel(t *testing.T) {
 	t.Run("SubTel struct fields are accessible", func(t *testing.T) {
 		subTel := SubTel{

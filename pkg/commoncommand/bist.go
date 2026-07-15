@@ -15,10 +15,12 @@ type WrBist struct {
 	CommandCode enums.CommonCommand `enocean-esp3:"data"`
 }
 
+// Serialize encodes WrBist into its wire representation.
 func (cmd *WrBist) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewBist constructs Bist.
 func NewBist() (WrBist, error) {
 	return WrBist{
 		CommandCode: enums.CommonCommandWR_BIST,
@@ -29,6 +31,7 @@ type WrBistResponse struct {
 	BistResult bool
 }
 
+// ParseWrBistResponseOK parses WrBistResponseOK.
 func ParseWrBistResponseOK(response response.Packet) (WrBistResponse, error) {
 	if response.Code != enums.ReturnCodeSUCCESS {
 		return WrBistResponse{}, errors.New("invalid return code")

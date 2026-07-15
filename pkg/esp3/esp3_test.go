@@ -8,6 +8,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 )
 
+// TestCrcTable verifies CrcTable behavior.
 func TestCrcTable(t *testing.T) {
 	t.Run("returns the CRC table", func(t *testing.T) {
 		expectedTable := [256]byte{
@@ -37,6 +38,7 @@ func TestCrcTable(t *testing.T) {
 	})
 }
 
+// TestComputeCrc8 verifies ComputeCrc8 behavior.
 func TestComputeCrc8(t *testing.T) {
 	t.Run("computes CRC8 for single byte", func(t *testing.T) {
 		testCases := []struct {
@@ -80,6 +82,7 @@ func TestComputeCrc8(t *testing.T) {
 	})
 }
 
+// TestComputeCrcSlice verifies ComputeCrcSlice behavior.
 func TestComputeCrcSlice(t *testing.T) {
 	t.Run("computes CRC8 for empty slice", func(t *testing.T) {
 		result := ComputeCrcSlice([]byte{})
@@ -126,6 +129,7 @@ func TestComputeCrcSlice(t *testing.T) {
 	})
 }
 
+// TestTelegram_Serialize verifies Telegram_Serialize behavior.
 func TestTelegram_Serialize(t *testing.T) {
 	t.Run("returns the ESP3 telegram in hex format", func(t *testing.T) {
 		expectedTelegram := []byte{0x55, 0x00, 0x0c, 0x07, 0x01, 0x96, 0xd2, 0x00, 0x00, 0x00, 0x00, 0xff, 0x03, 0xff, 0x82, 0x00, 0x85, 0x80, 0x00, 0xff, 0xff, 0xff, 0xff, 0x41, 0x00, 0x99}
@@ -138,6 +142,7 @@ func TestTelegram_Serialize(t *testing.T) {
 	})
 }
 
+// TestFromData verifies FromData behavior.
 func TestFromData(t *testing.T) {
 	t.Run("feeds structure from arguments", func(t *testing.T) {
 		expectedTelegram := Telegram{
@@ -154,6 +159,7 @@ func TestFromData(t *testing.T) {
 	})
 }
 
+// TestFromHexString verifies FromHexString behavior.
 func TestFromHexString(t *testing.T) {
 	t.Run("parses hex string into an esp3 structure", func(t *testing.T) {
 		expectedTelegram := Telegram{
@@ -350,6 +356,7 @@ func TestFromHexString(t *testing.T) {
 	})
 }
 
+// TestTelegram_RoundTrip verifies Telegram_RoundTrip behavior.
 func TestTelegram_RoundTrip(t *testing.T) {
 	t.Run("round-trip serialization for all packet types", func(t *testing.T) {
 		packetTypes := []enums.PacketType{

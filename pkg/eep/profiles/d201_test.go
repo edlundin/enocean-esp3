@@ -5,6 +5,7 @@ import (
 	"testing"
 )
 
+// TestD201SetOutput verifies D201SetOutput behavior.
 func TestD201SetOutput(t *testing.T) {
 	for _, test := range []struct {
 		value uint8
@@ -26,6 +27,7 @@ func TestD201SetOutput(t *testing.T) {
 	}
 }
 
+// TestParseD201Status verifies ParseD201Status behavior.
 func TestParseD201Status(t *testing.T) {
 	status, err := ParseD201Status([]byte{0x04, 0x01, 0x64})
 	if err != nil || status.Channel != 1 || status.Output != 100 {

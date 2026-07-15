@@ -25,6 +25,7 @@ type TestStructWithCustomType struct {
 	CustomValue CustomType          `enocean-esp3:"data"`
 }
 
+// TestCommandToTelegram verifies CommandToTelegram behavior.
 func TestCommandToTelegram(t *testing.T) {
 	t.Run("basic serialization", func(t *testing.T) {
 		cmd := TestStruct{
@@ -236,6 +237,7 @@ func TestCommandToTelegram(t *testing.T) {
 	})
 }
 
+// TestCommandToTelegram_CustomSerializer verifies CommandToTelegram_CustomSerializer behavior.
 func TestCommandToTelegram_CustomSerializer(t *testing.T) {
 	t.Run("custom serializer usage", func(t *testing.T) {
 		// Create a custom serializer for CustomType that multiplies by 2
@@ -376,6 +378,7 @@ func TestCommandToTelegram_CustomSerializer(t *testing.T) {
 	})
 }
 
+// TestCommandToTelegram_ByteOrder verifies CommandToTelegram_ByteOrder behavior.
 func TestCommandToTelegram_ByteOrder(t *testing.T) {
 	t.Run("uses big endian by default", func(t *testing.T) {
 		type IntStruct struct {
@@ -448,6 +451,7 @@ func TestCommandToTelegram_ByteOrder(t *testing.T) {
 	})
 }
 
+// TestCommandToTelegram_AllTypes verifies CommandToTelegram_AllTypes behavior.
 func TestCommandToTelegram_AllTypes(t *testing.T) {
 	t.Run("serializes all integer types", func(t *testing.T) {
 		type IntStruct struct {
@@ -936,6 +940,7 @@ func TestCommandToTelegram_AllTypes(t *testing.T) {
 	})
 }
 
+// TestCommandToTelegram_EdgeCases verifies CommandToTelegram_EdgeCases behavior.
 func TestCommandToTelegram_EdgeCases(t *testing.T) {
 	t.Run("handles empty struct", func(t *testing.T) {
 		type EmptyStruct struct{}
@@ -1021,6 +1026,7 @@ func TestCommandToTelegram_EdgeCases(t *testing.T) {
 	})
 }
 
+// TestCommandToTelegram_ErrorPaths verifies CommandToTelegram_ErrorPaths behavior.
 func TestCommandToTelegram_ErrorPaths(t *testing.T) {
 	t.Run("handles error in serializeValue for nested struct", func(t *testing.T) {
 		type ProblematicNested struct {
@@ -1091,6 +1097,7 @@ func TestCommandToTelegram_ErrorPaths(t *testing.T) {
 	})
 }
 
+// TestSerializerConfig_Sanitize verifies SerializerConfig_Sanitize behavior.
 func TestSerializerConfig_Sanitize(t *testing.T) {
 	// Test sanitize indirectly through the public API
 	// Since sanitize is unexported, we test it by verifying that functions
@@ -1200,6 +1207,7 @@ func TestSerializerConfig_Sanitize(t *testing.T) {
 	})
 }
 
+// TestCommandToTelegram_VariadicConfig verifies CommandToTelegram_VariadicConfig behavior.
 func TestCommandToTelegram_VariadicConfig(t *testing.T) {
 	t.Run("works with no config", func(t *testing.T) {
 		type IntStruct struct {

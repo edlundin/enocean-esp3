@@ -7,6 +7,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/response"
 )
 
+// TestNewWrFilterAdd verifies NewWrFilterAdd behavior.
 func TestNewWrFilterAdd(t *testing.T) {
 	t.Run("creates filter add command with forward and repeat", func(t *testing.T) {
 		cmd, err := NewWrFilterAdd(enums.FilterCriterionRSSI, 0x12345678, true, true)
@@ -57,6 +58,7 @@ func TestNewWrFilterAdd(t *testing.T) {
 	})
 }
 
+// TestWrFilterAdd_Serialize verifies WrFilterAdd_Serialize behavior.
 func TestWrFilterAdd_Serialize(t *testing.T) {
 	t.Run("serializes filter add command", func(t *testing.T) {
 		cmd, _ := NewWrFilterAdd(enums.FilterCriterionRSSI, 0x12345678, true, true)
@@ -82,6 +84,7 @@ func TestWrFilterAdd_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewWrFilterDel verifies NewWrFilterDel behavior.
 func TestNewWrFilterDel(t *testing.T) {
 	t.Run("creates filter del command with forward and repeat", func(t *testing.T) {
 		cmd, err := NewWrFilterDel(enums.FilterCriterionDESTINATION_ID, 0x87654321, true, true)
@@ -112,6 +115,7 @@ func TestNewWrFilterDel(t *testing.T) {
 	})
 }
 
+// TestWrFilterDel_Serialize verifies WrFilterDel_Serialize behavior.
 func TestWrFilterDel_Serialize(t *testing.T) {
 	t.Run("serializes filter del command", func(t *testing.T) {
 		cmd, _ := NewWrFilterDel(enums.FilterCriterionRORG, 0xAABBCCDD, false, false)
@@ -132,6 +136,7 @@ func TestWrFilterDel_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewWrFilterDelAll verifies NewWrFilterDelAll behavior.
 func TestNewWrFilterDelAll(t *testing.T) {
 	t.Run("creates filter delete all command", func(t *testing.T) {
 		cmd, err := NewWrFilterDelAll()
@@ -145,6 +150,7 @@ func TestNewWrFilterDelAll(t *testing.T) {
 	})
 }
 
+// TestWrFilterDelAll_Serialize verifies WrFilterDelAll_Serialize behavior.
 func TestWrFilterDelAll_Serialize(t *testing.T) {
 	t.Run("serializes filter del all command", func(t *testing.T) {
 		cmd, _ := NewWrFilterDelAll()
@@ -165,6 +171,7 @@ func TestWrFilterDelAll_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewWrFilterEnable verifies NewWrFilterEnable behavior.
 func TestNewWrFilterEnable(t *testing.T) {
 	t.Run("creates filter enable command with OR_ALL_FILTERS operator", func(t *testing.T) {
 		cmd, err := NewWrFilterEnable(true, enums.FilerOperatorOR_ALL_FILTERS)
@@ -201,6 +208,7 @@ func TestNewWrFilterEnable(t *testing.T) {
 	})
 }
 
+// TestWrFilterEnable_Serialize verifies WrFilterEnable_Serialize behavior.
 func TestWrFilterEnable_Serialize(t *testing.T) {
 	t.Run("serializes filter enable command", func(t *testing.T) {
 		cmd, _ := NewWrFilterEnable(true, enums.FilerOperatorOR_ALL_FILTERS)
@@ -225,6 +233,7 @@ func TestWrFilterEnable_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewRdFilter verifies NewRdFilter behavior.
 func TestNewRdFilter(t *testing.T) {
 	t.Run("creates read filter command", func(t *testing.T) {
 		cmd, err := NewRdFilter()
@@ -238,6 +247,7 @@ func TestNewRdFilter(t *testing.T) {
 	})
 }
 
+// TestRdFilter_Serialize verifies RdFilter_Serialize behavior.
 func TestRdFilter_Serialize(t *testing.T) {
 	t.Run("serializes read filter command", func(t *testing.T) {
 		cmd, _ := NewRdFilter()
@@ -258,6 +268,7 @@ func TestRdFilter_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseRdFilterResponseOK verifies ParseRdFilterResponseOK behavior.
 func TestParseRdFilterResponseOK(t *testing.T) {
 	t.Run("parses filter response with no filters", func(t *testing.T) {
 		// Count = 0, no filter data

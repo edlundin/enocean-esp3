@@ -17,6 +17,7 @@ const (
 	ReturnCodeBASEID_MAX_REACHED  ReturnCode = 0x91
 )
 
+// ParseReturnCodeFromByte parses a ReturnCode from a byte.
 func ParseReturnCodeFromByte(b byte) (ReturnCode, error) {
 	switch b {
 	case 0x00:
@@ -44,6 +45,7 @@ func ParseReturnCodeFromByte(b byte) (ReturnCode, error) {
 	}
 }
 
+// String returns the string representation of ReturnCode.
 func (returnCode ReturnCode) String() string {
 	switch returnCode {
 	case ReturnCodeSUCCESS:
@@ -71,6 +73,7 @@ func (returnCode ReturnCode) String() string {
 	}
 }
 
+// Valid reports whether ReturnCode is valid.
 func (returnCode ReturnCode) Valid() bool {
 	switch returnCode {
 	case ReturnCodeSUCCESS,

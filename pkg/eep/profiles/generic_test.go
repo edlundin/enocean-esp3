@@ -9,6 +9,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/esp3"
 )
 
+// TestGenericDecodeEncodeGeneratedRegistry verifies GenericDecodeEncodeGeneratedRegistry behavior.
 func TestGenericDecodeEncodeGeneratedRegistry(t *testing.T) {
 	prof := mustEEP(enums.RorgRPS, 0x02, 0x01) // generated-only path
 	got, err := ParseUserData(prof, []byte{0x11}, 0)
@@ -31,9 +32,10 @@ func TestGenericDecodeEncodeGeneratedRegistry(t *testing.T) {
 	}
 }
 
-// eep268.xml defines D2-00-01 Message Type A DB_1=01, DB_0=81
-// for MI=1, KP=Presence, and CV=Configuration data valid. The fixed ESP3
-// frame wraps those bytes in a valid ERP1 telegram.
+// TestDecodeD20001SpecVector verifies the D2-00-01 Message Type A vector.
+// eep268.xml defines DB_1=01 and DB_0=81 for MI=1, KP=Presence, and
+// CV=Configuration data valid. The fixed ESP3 frame wraps those bytes in a
+// valid ERP1 telegram.
 func TestDecodeD20001SpecVector(t *testing.T) {
 	profile, err := eep.FromString("D2-00-01")
 	if err != nil {

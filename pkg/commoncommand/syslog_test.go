@@ -7,6 +7,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/response"
 )
 
+// TestNewRdSysLog verifies NewRdSysLog behavior.
 func TestNewRdSysLog(t *testing.T) {
 	t.Run("creates read sys log command", func(t *testing.T) {
 		cmd, err := NewRdSysLog()
@@ -20,6 +21,7 @@ func TestNewRdSysLog(t *testing.T) {
 	})
 }
 
+// TestRdSysLog_Serialize verifies RdSysLog_Serialize behavior.
 func TestRdSysLog_Serialize(t *testing.T) {
 	t.Run("serializes read sys log command", func(t *testing.T) {
 		cmd, _ := NewRdSysLog()
@@ -39,6 +41,7 @@ func TestRdSysLog_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseRdSysLogResponseOK verifies ParseRdSysLogResponseOK behavior.
 func TestParseRdSysLogResponseOK(t *testing.T) {
 	t.Run("parses sys log response", func(t *testing.T) {
 		// Response: ApiLogEntries in Data, AppLogEntries in OptData
@@ -116,6 +119,7 @@ func TestParseRdSysLogResponseOK(t *testing.T) {
 	})
 }
 
+// TestNewResetSysLog verifies NewResetSysLog behavior.
 func TestNewResetSysLog(t *testing.T) {
 	t.Run("creates reset sys log command", func(t *testing.T) {
 		cmd, err := NewResetSysLog()
@@ -129,6 +133,7 @@ func TestNewResetSysLog(t *testing.T) {
 	})
 }
 
+// TestResetSysLog_Serialize verifies ResetSysLog_Serialize behavior.
 func TestResetSysLog_Serialize(t *testing.T) {
 	t.Run("serializes reset sys log command", func(t *testing.T) {
 		cmd, _ := NewResetSysLog()

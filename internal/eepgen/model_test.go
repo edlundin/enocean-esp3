@@ -6,6 +6,7 @@ import (
 	"testing"
 )
 
+// TestGenerateTinyXML verifies GenerateTinyXML behavior.
 func TestGenerateTinyXML(t *testing.T) {
 	dir := t.TempDir()
 	xml := filepath.Join(dir, "eep.xml")
@@ -28,6 +29,7 @@ func TestGenerateTinyXML(t *testing.T) {
 	}
 }
 
+// TestParseCompositeNumbers verifies ParseCompositeNumbers behavior.
 func TestParseCompositeNumbers(t *testing.T) {
 	if got, ok := parseRangeMax("100, 255", "Control variable; value 255 = auto"); !ok || got != 100 {
 		t.Fatalf("parseRangeMax() = %d, %t", got, ok)
@@ -42,6 +44,7 @@ func TestParseCompositeNumbers(t *testing.T) {
 	}
 }
 
+// TestEnumNameGeneralizesLongDescriptions verifies EnumNameGeneralizesLongDescriptions behavior.
 func TestEnumNameGeneralizesLongDescriptions(t *testing.T) {
 	if got := enumName(`Button AI: "Switch light on" or "Dim light down" or "Move blind closed"`, 0); got != "ButtonAI" {
 		t.Fatalf("enumName = %q", got)
@@ -51,6 +54,7 @@ func TestEnumNameGeneralizesLongDescriptions(t *testing.T) {
 	}
 }
 
+// TestLoadRealEEP268 verifies LoadRealEEP268 behavior.
 func TestLoadRealEEP268(t *testing.T) {
 	path := filepath.Join("..", "..", "eep268.xml")
 	if _, err := os.Stat(path); err != nil {
@@ -112,6 +116,7 @@ func TestLoadRealEEP268(t *testing.T) {
 	}
 }
 
+// assertField checks a generated field's bit position and size.
 func assertField(t *testing.T, p OutProfile, shortcut string, off, size int) {
 	t.Helper()
 	f := findField(p, shortcut)
@@ -123,6 +128,7 @@ func assertField(t *testing.T, p OutProfile, shortcut string, off, size int) {
 	}
 }
 
+// findField finds a generated field by shortcut.
 func findField(p OutProfile, shortcut string) OutField {
 	for _, f := range p.Fields {
 		if f.Shortcut == shortcut {

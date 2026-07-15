@@ -38,6 +38,7 @@ type Message struct {
 	Payload        []byte
 }
 
+// MarshalSYSEx marshals SYSEx.
 func (m Message) MarshalSYSEx() ([]byte, error) {
 	if m.Function == 0 || m.Function > 0x0fff {
 		return nil, fmt.Errorf("invalid function 0x%x", m.Function)
@@ -57,6 +58,7 @@ func (m Message) MarshalSYSEx() ([]byte, error) {
 	return out, nil
 }
 
+// ParseSYSEx parses SYSEx.
 func ParseSYSEx(b []byte) (Message, error) {
 	if len(b) < 2 {
 		return Message{}, fmt.Errorf("SYS_EX payload too short")
@@ -88,6 +90,7 @@ type QueryStatusAnswer struct {
 	Return       ReturnCode
 }
 
+// Payload returns the serialized payload.
 func (a QueryStatusAnswer) Payload() []byte {
 	b := make([]byte, 3)
 	binary.BigEndian.PutUint16(b[:2], a.LastFunction&0x0fff)
@@ -95,6 +98,7 @@ func (a QueryStatusAnswer) Payload() []byte {
 	return b
 }
 
+// ParseQueryStatusAnswer parses QueryStatusAnswer.
 func ParseQueryStatusAnswer(b []byte) (QueryStatusAnswer, error) {
 	if len(b) != 3 {
 		return QueryStatusAnswer{}, fmt.Errorf("query status answer length %d, want 3", len(b))
@@ -116,8 +120,13 @@ const (
 	RemoteLearnSmartAckStop     RemoteLearnFlag = 0x06
 )
 
-func PingPayload() []byte                  { return nil }
+// PingPayload builds a ping payload.
+func PingPayload() []byte { return nil }
+
+// PingResponsePayload builds a ping-response payload.
 func PingResponsePayload(rssi byte) []byte { return []byte{rssi} }
+
+// RemoteLearnPayload builds a remote-learn payload.
 func RemoteLearnPayload(enable bool) []byte {
 	if enable {
 		return []byte{byte(RemoteLearnStart)}
@@ -125,6 +134,7 @@ func RemoteLearnPayload(enable bool) []byte {
 	return []byte{byte(RemoteLearnStop)}
 }
 
+// ParseRemoteLearnPayload parses RemoteLearnPayload.
 func ParseRemoteLearnPayload(b []byte) (RemoteLearnFlag, error) {
 	if len(b) != 1 || b[0] < byte(RemoteLearnStart) || b[0] > byte(RemoteLearnSmartAckStop) {
 		return 0, fmt.Errorf("invalid remote learn payload")
@@ -132,6 +142,7 @@ func ParseRemoteLearnPayload(b []byte) (RemoteLearnFlag, error) {
 	return RemoteLearnFlag(b[0]), nil
 }
 
+// MemoryReadPayload builds a memory-read payload.
 func MemoryReadPayload(addr uint32, n byte) []byte {
 	b := make([]byte, 5)
 	binary.BigEndian.PutUint32(b[:4], addr)
@@ -139,6 +150,7 @@ func MemoryReadPayload(addr uint32, n byte) []byte {
 	return b
 }
 
+// MemoryWritePayload builds a memory-write payload.
 func MemoryWritePayload(addr uint32, data []byte) ([]byte, error) {
 	if len(data) > 255 {
 		return nil, fmt.Errorf("memory write length %d > 255", len(data))

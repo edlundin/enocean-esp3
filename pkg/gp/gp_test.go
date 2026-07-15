@@ -9,6 +9,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 )
 
+// TestRorgs verifies Rorgs behavior.
 func TestRorgs(t *testing.T) {
 	for _, r := range []enums.Rorg{enums.RorgGP_TI, enums.RorgGP_TR, enums.RorgGP_CD, enums.RorgGP_SD} {
 		if !IsRorg(r) || !r.Valid() {
@@ -17,6 +18,7 @@ func TestRorgs(t *testing.T) {
 	}
 }
 
+// TestTeachInHeaders verifies TeachInHeaders behavior.
 func TestTeachInHeaders(t *testing.T) {
 	b, err := EncodeRequestHeader(RequestHeader{ManufacturerID: 0x7ff, Bidirectional: true, Purpose: PurposeTeachIn})
 	if err != nil || hex.EncodeToString(b) != "fff0" {
@@ -42,6 +44,7 @@ func TestTeachInHeaders(t *testing.T) {
 	}
 }
 
+// TestChannelDefinitions verifies ChannelDefinitions behavior.
 func TestChannelDefinitions(t *testing.T) {
 	data := Channel{Type: ChannelData, SignalType: 0x06, ValueType: ValueCurrent, ResolutionCode: 0x5, EngineeringMin: 0, ScalingMin: 1, EngineeringMax: 5, ScalingMax: 1}
 	b, bits, err := EncodeChannelDefinition(data)
@@ -77,6 +80,7 @@ func TestChannelDefinitions(t *testing.T) {
 	}
 }
 
+// TestCompleteAndSelectiveData verifies CompleteAndSelectiveData behavior.
 func TestCompleteAndSelectiveData(t *testing.T) {
 	channels := []Channel{
 		{Type: ChannelData, ResolutionCode: 0x5},        // 6 bit
@@ -107,6 +111,7 @@ func TestCompleteAndSelectiveData(t *testing.T) {
 	}
 }
 
+// TestBitstreamSignedAndBounds verifies BitstreamSignedAndBounds behavior.
 func TestBitstreamSignedAndBounds(t *testing.T) {
 	b := []byte{0}
 	if err := writeSigned(b, 0, 4, -2); err != nil {
@@ -123,6 +128,7 @@ func TestBitstreamSignedAndBounds(t *testing.T) {
 	}
 }
 
+// bitsHex formats a bit field as hexadecimal.
 func bitsHex(b []byte, bits int) string {
 	v, _ := readUnsigned(b, 0, bits)
 	return fmt.Sprintf("%0*x", (bits+3)/4, v)

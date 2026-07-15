@@ -24,6 +24,7 @@ type EEP struct {
 	Type byte
 }
 
+// FromTriplet constructs a value from Triplet.
 func FromTriplet(eepRorg enums.Rorg, eepFunc byte, eepType byte) (EEP, error) {
 	if eepFunc < minFunc || eepFunc > maxFunc {
 		return EEP{}, errors.New("invalid FUNC: out of bounds")
@@ -40,13 +41,8 @@ func FromTriplet(eepRorg enums.Rorg, eepFunc byte, eepType byte) (EEP, error) {
 	}, nil
 }
 
-/**
- * Construct an EEP from a string.
- * @param eepString A string of the form 'RR-FF-TT' where
- * - RR represents a valid RORG (one or two hexadecimal digits),
- * - FF represents a valid FUNC (one or two hexadecimal digits), and
- * - TT represents a valid TYPE (one or two hexadecimal digits).
- */
+// FromString constructs an EEP from an RR-FF-TT string, where each component
+// is a one- or two-digit hexadecimal RORG, FUNC, or TYPE value.
 func FromString(str string) (EEP, error) {
 	const (
 		strFieldLen = 3
@@ -95,6 +91,7 @@ func FromString(str string) (EEP, error) {
 	}, nil
 }
 
+// String returns the string representation of EEP.
 func (eep EEP) String() string {
 	return fmt.Sprintf("%02X-%02X-%02X", byte(eep.Rorg), eep.Func, eep.Type)
 }

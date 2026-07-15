@@ -15,11 +15,13 @@ type WrSleep struct {
 	DeepSleepPeriod uint32              `enocean-esp3:"data"`
 }
 
+// Serialize encodes WrSleep into its wire representation.
 func (cmd *WrSleep) Serialize() (esp3.Telegram, error) {
 	cmd.DeepSleepPeriod = slices.Min([]uint32{cmd.DeepSleepPeriod, maxDeepSleepPeriod})
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewWrSleep constructs WrSleep.
 func NewWrSleep(deepSleepPeriod uint32) (WrSleep, error) {
 	return WrSleep{
 		CommandCode:     enums.CommonCommandWR_SLEEP,

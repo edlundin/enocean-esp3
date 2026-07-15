@@ -6,6 +6,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 )
 
+// TestNewWrReset verifies NewWrReset behavior.
 func TestNewWrReset(t *testing.T) {
 	t.Run("creates reset command", func(t *testing.T) {
 		cmd, err := NewWrReset()
@@ -19,6 +20,7 @@ func TestNewWrReset(t *testing.T) {
 	})
 }
 
+// TestWrReset_Serialize verifies WrReset_Serialize behavior.
 func TestWrReset_Serialize(t *testing.T) {
 	t.Run("serializes reset command", func(t *testing.T) {
 		cmd, _ := NewWrReset()

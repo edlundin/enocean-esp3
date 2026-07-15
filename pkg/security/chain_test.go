@@ -5,6 +5,7 @@ import (
 	"testing"
 )
 
+// TestSECCDMChain verifies SECCDMChain behavior.
 func TestSECCDMChain(t *testing.T) {
 	data := bytes.Repeat([]byte{0xab}, 40)
 	packets, err := SplitSEC_CDM(2, data)
@@ -28,6 +29,7 @@ func TestSECCDMChain(t *testing.T) {
 	}
 }
 
+// TestSECCDMMaxLength verifies SECCDMMaxLength behavior.
 func TestSECCDMMaxLength(t *testing.T) {
 	packets, err := SplitSEC_CDM(1, make([]byte, MaxChainData))
 	if err != nil || len(packets) != MaxChainParts {
@@ -38,6 +40,7 @@ func TestSECCDMMaxLength(t *testing.T) {
 	}
 }
 
+// TestSECCDMAppendixA43 verifies SECCDMAppendixA43 behavior.
 func TestSECCDMAppendixA43(t *testing.T) {
 	secure := []byte{0xbb, 0x17, 0xc1, 0x7a, 0x05, 0xca, 0xf5, 0x57, 0x5d, 0xe2, 0x08, 0x30, 0x2f, 0xb5, 0x72, 0xa0, 0xfd, 0x3a, 0x44, 0x34, 0xa4, 0x10, 0x96, 0xf1, 0x02, 0xe6, 0x0d, 0xc2, 0x0d, 0x77, 0x7a, 0x01, 0x02, 0x03, 0x04, 0x3b, 0x4c, 0x38, 0x0f}
 	want := [][]byte{
@@ -57,6 +60,7 @@ func TestSECCDMAppendixA43(t *testing.T) {
 	}
 }
 
+// TestSECCDMNeedsMoreDuplicate verifies SECCDMNeedsMoreDuplicate behavior.
 func TestSECCDMNeedsMoreDuplicate(t *testing.T) {
 	packets, _ := SplitSEC_CDM(1, bytes.Repeat([]byte{1}, 20))
 	p0, _ := ParseSEC_CDM(packets[0])

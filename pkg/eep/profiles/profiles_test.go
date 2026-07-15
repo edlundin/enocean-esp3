@@ -9,6 +9,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/erp1"
 )
 
+// TestBits verifies Bits behavior.
 func TestBits(t *testing.T) {
 	if got := getBits([]byte{0x01}, 7, 1); got != 1 {
 		t.Fatal(got)
@@ -26,6 +27,7 @@ func TestBits(t *testing.T) {
 	}
 }
 
+// TestProfiles verifies Profiles behavior.
 func TestProfiles(t *testing.T) {
 	d, err := ParseUserData(mustEEP(enums.Rorg1BS, 0, 1), []byte{0x09}, 0)
 	if err != nil || !d.(D50001).ContactClosed || d.(D50001).LearnButton {
@@ -51,6 +53,7 @@ func TestProfiles(t *testing.T) {
 	}
 }
 
+// TestParsePacketRorgMismatch verifies ParsePacketRorgMismatch behavior.
 func TestParsePacketRorgMismatch(t *testing.T) {
 	prof, _ := eep.FromTriplet(enums.Rorg4BS, 2, 1)
 	_, err := ParsePacket(erp1.Packet{Rorg: enums.Rorg1BS}, prof)

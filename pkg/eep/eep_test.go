@@ -7,6 +7,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 )
 
+// TestFromTriplet verifies FromTriplet behavior.
 func TestFromTriplet(t *testing.T) {
 	tests := []struct {
 		name string
@@ -32,6 +33,7 @@ func TestFromTriplet(t *testing.T) {
 	}
 }
 
+// TestFromString verifies FromString behavior.
 func TestFromString(t *testing.T) {
 	valid := map[string]EEP{
 		"00-00-00": {Rorg: 0x00, Func: 0x00, Type: 0x00},
@@ -77,6 +79,7 @@ func TestFromString(t *testing.T) {
 	}
 }
 
+// TestEEPString verifies EEPString behavior.
 func TestEEPString(t *testing.T) {
 	e := EEP{Rorg: 0xff, Func: 0xb0, Type: 0x7f}
 	if got := e.String(); got != "FF-B0-7F" {
@@ -91,6 +94,7 @@ func TestEEPString(t *testing.T) {
 	}
 }
 
+// TestEEPConstants verifies EEPConstants behavior.
 func TestEEPConstants(t *testing.T) {
 	if minFunc != 0x00 || maxFunc != 0xb0 || minType != 0x00 || maxType != 0x7f {
 		t.Fatalf("unexpected bounds: func %02x..%02x type %02x..%02x", minFunc, maxFunc, minType, maxType)

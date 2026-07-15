@@ -11,6 +11,7 @@ const (
 	FilterCriterionDESTINATION_ID
 )
 
+// ParseFilterFromByte parses a FilterCriterion from a byte.
 func ParseFilterFromByte(b byte) (FilterCriterion, error) {
 	switch b {
 	case 0x01:
@@ -26,6 +27,7 @@ func ParseFilterFromByte(b byte) (FilterCriterion, error) {
 	}
 }
 
+// String returns the string representation of FilterCriterion.
 func (filterCriterion FilterCriterion) String() string {
 	switch filterCriterion {
 	case FilterCriterionSENDER_ID:
@@ -41,6 +43,7 @@ func (filterCriterion FilterCriterion) String() string {
 	}
 }
 
+// Valid reports whether FilterCriterion is valid.
 func (filterCriterion FilterCriterion) Valid() bool {
 	switch filterCriterion {
 	case FilterCriterionSENDER_ID,
@@ -62,6 +65,7 @@ const (
 	FilterActionREPEAT     FilterActionMask = 0xC0
 )
 
+// ParseFilterActionMaskFromByte parses a FilterActionMask from a byte.
 func ParseFilterActionMaskFromByte(b byte) (FilterActionMask, error) {
 	switch b {
 	case 0x00:
@@ -77,6 +81,7 @@ func ParseFilterActionMaskFromByte(b byte) (FilterActionMask, error) {
 	}
 }
 
+// String returns the string representation of FilterActionMask.
 func (filterActionMask FilterActionMask) String() string {
 	switch filterActionMask {
 	case FilterActionNO_FORWARD:
@@ -92,6 +97,7 @@ func (filterActionMask FilterActionMask) String() string {
 	}
 }
 
+// Valid reports whether FilterActionMask is valid.
 func (filterActionMask FilterActionMask) Valid() bool {
 	switch filterActionMask {
 	case FilterActionNO_FORWARD,
@@ -113,6 +119,7 @@ const (
 	FilerOperatorAND_FOR_RECEIVE_OR_FOR_REPEAT FilerOperator = 0x09
 )
 
+// ParseFilerOperatorFromByte parses a FilerOperator from a byte.
 func ParseFilerOperatorFromByte(b byte) (FilerOperator, error) {
 	switch b {
 	case 0x00:
@@ -128,6 +135,7 @@ func ParseFilerOperatorFromByte(b byte) (FilerOperator, error) {
 	}
 }
 
+// String returns the string representation of FilerOperator.
 func (filerOperator FilerOperator) String() string {
 	switch filerOperator {
 	case FilerOperatorOR_ALL_FILTERS:
@@ -143,6 +151,7 @@ func (filerOperator FilerOperator) String() string {
 	}
 }
 
+// Valid reports whether FilerOperator is valid.
 func (filerOperator FilerOperator) Valid() bool {
 	switch filerOperator {
 	case FilerOperatorOR_ALL_FILTERS,

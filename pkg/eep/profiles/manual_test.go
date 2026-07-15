@@ -2,6 +2,7 @@ package profiles
 
 import "testing"
 
+// TestManualProfilesRoundTrip verifies ManualProfilesRoundTrip behavior.
 func TestManualProfilesRoundTrip(t *testing.T) {
 	cases := []Telegram{D50001{ContactClosed: true, LearnButton: false}, F60101{Pressed: true}, A50201{TemperatureC: -20, LearnButton: false}}
 	for _, in := range cases {

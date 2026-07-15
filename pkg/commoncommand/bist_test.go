@@ -7,6 +7,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/response"
 )
 
+// TestNewBist verifies NewBist behavior.
 func TestNewBist(t *testing.T) {
 	t.Run("creates BIST command successfully", func(t *testing.T) {
 		cmd, err := NewBist()
@@ -20,6 +21,7 @@ func TestNewBist(t *testing.T) {
 	})
 }
 
+// TestWrBist_Serialize verifies WrBist_Serialize behavior.
 func TestWrBist_Serialize(t *testing.T) {
 	t.Run("serializes BIST command successfully", func(t *testing.T) {
 		cmd, _ := NewBist()
@@ -50,6 +52,7 @@ func TestWrBist_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseWrBistResponseOK verifies ParseWrBistResponseOK behavior.
 func TestParseWrBistResponseOK(t *testing.T) {
 	t.Run("parses successful BIST response", func(t *testing.T) {
 		// BIST result: true (1 byte: 0x01)
@@ -118,6 +121,7 @@ func TestParseWrBistResponseOK(t *testing.T) {
 	})
 }
 
+// TestWrBist_Integration verifies WrBist_Integration behavior.
 func TestWrBist_Integration(t *testing.T) {
 	t.Run("full roundtrip: create, serialize, and parse response", func(t *testing.T) {
 		// Create command

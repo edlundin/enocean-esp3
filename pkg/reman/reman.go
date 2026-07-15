@@ -32,6 +32,7 @@ type Message struct {
 	DestinationID  deviceid.DeviceID
 }
 
+// Packets splits the message into ERP1 packets.
 func (m Message) Packets() ([]erp1.Packet, error) {
 	if m.Seq == 0 || m.Seq > 3 {
 		return nil, fmt.Errorf("invalid seq %d", m.Seq)
@@ -77,6 +78,7 @@ type Part struct {
 	SourceID, DestinationID deviceid.DeviceID
 }
 
+// ParsePacket parses Packet.
 func ParsePacket(p erp1.Packet) (Part, error) {
 	if p.Rorg != enums.RorgSYS_EX {
 		return Part{}, fmt.Errorf("not SYS_EX")
@@ -101,6 +103,7 @@ func ParsePacket(p erp1.Packet) (Part, error) {
 	return part, nil
 }
 
+// Merge merges the value.
 func Merge(parts []Part) (Message, bool, error) {
 	if len(parts) == 0 {
 		return Message{}, false, nil
@@ -138,11 +141,13 @@ func Merge(parts []Part) (Message, bool, error) {
 	return Message{Seq: first.Seq, ManufacturerID: first.ManufacturerID, Function: first.Function, Payload: payload[:first.Length], SourceID: first.SourceID, DestinationID: first.DestinationID}, true, nil
 }
 
+// putHeader writes a secure-message header.
 func putHeader(b []byte, length int, manufacturer, fn uint16) {
 	v := uint32(length)<<23 | uint32(manufacturer)<<12 | uint32(fn)
 	binary.BigEndian.PutUint32(b, v)
 }
 
+// getHeader returns Header.
 func getHeader(b []byte) (int, uint16, uint16) {
 	v := binary.BigEndian.Uint32(b)
 	return int(v >> 23), uint16((v >> 12) & 0x7ff), uint16(v & 0xfff)

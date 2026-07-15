@@ -2,6 +2,7 @@ package security
 
 import "crypto/aes"
 
+// cmac computes an AES-CMAC.
 func cmac(key [16]byte, msg []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key[:])
 	if err != nil {
@@ -36,6 +37,7 @@ func cmac(key [16]byte, msg []byte) ([]byte, error) {
 	return x, nil
 }
 
+// dbl doubles a CMAC block in the finite field.
 func dbl(in []byte) []byte {
 	out := make([]byte, 16)
 	carry := byte(0)
@@ -49,6 +51,7 @@ func dbl(in []byte) []byte {
 	return out
 }
 
+// xor returns the byte-wise XOR of two blocks.
 func xor(dst, src []byte) {
 	for i := range dst {
 		dst[i] ^= src[i]

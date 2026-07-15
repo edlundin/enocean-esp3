@@ -6,6 +6,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 )
 
+// TestNewWrSleep verifies NewWrSleep behavior.
 func TestNewWrSleep(t *testing.T) {
 	t.Run("creates write sleep command", func(t *testing.T) {
 		cmd, err := NewWrSleep(10000)
@@ -46,6 +47,7 @@ func TestNewWrSleep(t *testing.T) {
 	})
 }
 
+// TestWrSleep_Serialize verifies WrSleep_Serialize behavior.
 func TestWrSleep_Serialize(t *testing.T) {
 	t.Run("serializes write sleep command", func(t *testing.T) {
 		cmd, _ := NewWrSleep(10000)

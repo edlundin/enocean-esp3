@@ -11,10 +11,12 @@ type WrMode struct {
 	Mode        enums.RadioMode     `enocean-esp3:"data"`
 }
 
+// Serialize encodes WrMode into its wire representation.
 func (cmd *WrMode) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewWrMode constructs WrMode.
 func NewWrMode(mode enums.RadioMode) (WrMode, error) {
 	return WrMode{
 		CommandCode: enums.CommonCommandWR_MODE,

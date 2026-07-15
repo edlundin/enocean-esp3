@@ -4,6 +4,7 @@ import (
 	"testing"
 )
 
+// TestEventCode verifies EventCode behavior.
 func TestEventCode(t *testing.T) {
 	t.Run("ParseEventCodeFromByte", func(t *testing.T) {
 		tests := []struct {
@@ -96,6 +97,7 @@ func TestEventCode(t *testing.T) {
 	})
 }
 
+// TestLearnAckConfirmCode verifies LearnAckConfirmCode behavior.
 func TestLearnAckConfirmCode(t *testing.T) {
 	t.Run("ParseLearnAckConfirmCodeFromByte", func(t *testing.T) {
 		tests := []struct {
@@ -185,6 +187,7 @@ func TestLearnAckConfirmCode(t *testing.T) {
 	})
 }
 
+// TestWakeUpCause verifies WakeUpCause behavior.
 func TestWakeUpCause(t *testing.T) {
 	t.Run("ParseWakeUpCauseFromByte", func(t *testing.T) {
 		tests := []struct {
@@ -283,6 +286,7 @@ func TestWakeUpCause(t *testing.T) {
 	})
 }
 
+// TestWakeUpMode verifies WakeUpMode behavior.
 func TestWakeUpMode(t *testing.T) {
 	t.Run("ParseWakeUpModeFromByte", func(t *testing.T) {
 		tests := []struct {
@@ -354,6 +358,7 @@ func TestWakeUpMode(t *testing.T) {
 	})
 }
 
+// TestSecureDeviceEventCause verifies SecureDeviceEventCause behavior.
 func TestSecureDeviceEventCause(t *testing.T) {
 	t.Run("ParseCOEventSecureFromByte", func(t *testing.T) {
 		tests := []struct {
@@ -449,6 +454,7 @@ func TestSecureDeviceEventCause(t *testing.T) {
 	})
 }
 
+// TestDutyCycleLimitCause verifies DutyCycleLimitCause behavior.
 func TestDutyCycleLimitCause(t *testing.T) {
 	t.Run("ParseDutyCycleLimitCauseFromByte", func(t *testing.T) {
 		tests := []struct {
@@ -520,6 +526,7 @@ func TestDutyCycleLimitCause(t *testing.T) {
 	})
 }
 
+// TestTransmitFailedCause verifies TransmitFailedCause behavior.
 func TestTransmitFailedCause(t *testing.T) {
 	t.Run("ParseTransmitFailedCauseFromByte", func(t *testing.T) {
 		tests := []struct {

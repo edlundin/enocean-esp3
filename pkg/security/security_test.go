@@ -8,6 +8,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 )
 
+// TestCMACRFC4493 verifies CMACRFC4493 behavior.
 func TestCMACRFC4493(t *testing.T) {
 	key := [16]byte{0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c}
 	mac, err := cmac(key, []byte{})
@@ -20,6 +21,7 @@ func TestCMACRFC4493(t *testing.T) {
 	}
 }
 
+// TestSECAppendixA41 verifies SECAppendixA41 behavior.
 func TestSECAppendixA41(t *testing.T) {
 	key := [16]byte{0x45, 0x6e, 0x4f, 0x63, 0x65, 0x61, 0x6e, 0x20, 0x47, 0x6d, 0x62, 0x48, 0x2e, 0x31, 0x33, 0x00}
 	rlc := []byte{0xc0, 0xff, 0xee}
@@ -37,6 +39,7 @@ func TestSECAppendixA41(t *testing.T) {
 	}
 }
 
+// TestSECRoundTrip verifies SECRoundTrip behavior.
 func TestSECRoundTrip(t *testing.T) {
 	key := [16]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
 	raw := []byte{1, 2, 3, 4}
@@ -57,6 +60,7 @@ func TestSECRoundTrip(t *testing.T) {
 	}
 }
 
+// TestSECAppendixA43 verifies SECAppendixA43 behavior.
 func TestSECAppendixA43(t *testing.T) {
 	key := [16]byte{0xe5, 0x08, 0x80, 0xcf, 0x67, 0x79, 0x0d, 0x5d, 0x66, 0xaa, 0x7f, 0x3b, 0x7a, 0xd7, 0x7a, 0x3f}
 	data := make([]byte, 30)
@@ -81,6 +85,7 @@ func TestSECAppendixA43(t *testing.T) {
 	}
 }
 
+// TestSLF verifies SLF behavior.
 func TestSLF(t *testing.T) {
 	tests := []struct {
 		slf                   byte
@@ -104,6 +109,7 @@ func TestSLF(t *testing.T) {
 	}
 }
 
+// TestSECNeedsChainingAndPartialRLCState verifies SECNeedsChainingAndPartialRLCState behavior.
 func TestSECNeedsChainingAndPartialRLCState(t *testing.T) {
 	key := [16]byte{1}
 	if _, err := EncodeSEC_R(key, SLF(RLCExplicit32CMAC32VAES), []byte{0, 0, 0, 1}, enums.RorgSYS_EX, make([]byte, 6)); err != nil {

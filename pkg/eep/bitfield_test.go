@@ -6,6 +6,7 @@ import (
 	"testing"
 )
 
+// TestReadWriteBits verifies ReadWriteBits behavior.
 func TestReadWriteBits(t *testing.T) {
 	if got, err := ReadBits([]byte{0x01}, 7, 1); err != nil || got != 1 {
 		t.Fatalf("ReadBits offset 7 = %d, %v", got, err)
@@ -32,6 +33,7 @@ func TestReadWriteBits(t *testing.T) {
 	}
 }
 
+// TestReadWriteBitsBounds verifies ReadWriteBitsBounds behavior.
 func TestReadWriteBitsBounds(t *testing.T) {
 	if _, err := ReadBits([]byte{0}, 4, 5); !errors.Is(err, ErrBitfieldOutOfRange) {
 		t.Fatalf("ReadBits error = %v", err)
@@ -41,6 +43,7 @@ func TestReadWriteBitsBounds(t *testing.T) {
 	}
 }
 
+// TestScaleRaw verifies ScaleRaw behavior.
 func TestScaleRaw(t *testing.T) {
 	if got := ScaleRaw(255, 255, 0, -40, 0); got != -40 {
 		t.Fatalf("raw 255 = %v", got)

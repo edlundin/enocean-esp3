@@ -20,6 +20,7 @@ type ChainPart struct {
 	Data       []byte
 }
 
+// SplitSEC_CDM splits SEC_CDM.
 func SplitSEC_CDM(seq byte, data []byte) ([]erp1.Packet, error) {
 	if seq == 0 || seq > 3 {
 		return nil, fmt.Errorf("invalid seq %d", seq)
@@ -45,6 +46,7 @@ func SplitSEC_CDM(seq byte, data []byte) ([]erp1.Packet, error) {
 	return out, nil
 }
 
+// ParseSEC_CDM parses SEC_CDM.
 func ParseSEC_CDM(p erp1.Packet) (ChainPart, error) {
 	if p.Rorg != enums.RorgSEC_CDM {
 		return ChainPart{}, errors.New("not SEC_CDM")
@@ -72,6 +74,7 @@ func ParseSEC_CDM(p erp1.Packet) (ChainPart, error) {
 	return part, nil
 }
 
+// MergeSEC_CDM merges SEC_CDM.
 func MergeSEC_CDM(parts []ChainPart) ([]byte, bool, error) {
 	if len(parts) == 0 {
 		return nil, false, nil

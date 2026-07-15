@@ -13,10 +13,12 @@ const (
 	DeviceIDSize int = 4
 )
 
+// BroadcastId returns the broadcast device identifier.
 func BroadcastId() DeviceID {
 	return 0xffffffff
 }
 
+// ToArray converts its input to Array.
 func (d DeviceID) ToArray() [DeviceIDSize]byte {
 	return [4]byte{
 		byte(d >> 24),
@@ -26,10 +28,12 @@ func (d DeviceID) ToArray() [DeviceIDSize]byte {
 	}
 }
 
+// String returns the string representation of DeviceID.
 func (d DeviceID) String() string {
 	return fmt.Sprintf("%08x", uint32(d))
 }
 
+// FromHexString constructs a value from HexString.
 func FromHexString(hexStr string) (DeviceID, error) {
 	const sizeMaxStr = DeviceIDSize * 2
 
@@ -52,6 +56,7 @@ func FromHexString(hexStr string) (DeviceID, error) {
 	return FromByteArray(b)
 }
 
+// FromByteArray constructs a value from ByteArray.
 func FromByteArray(b []byte) (DeviceID, error) {
 	if len(b) > DeviceIDSize {
 		return 0, fmt.Errorf("invalid length (got:%d, need:%d)", len(b), DeviceIDSize)

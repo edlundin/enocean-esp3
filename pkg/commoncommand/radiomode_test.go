@@ -6,6 +6,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 )
 
+// TestNewWrMode verifies NewWrMode behavior.
 func TestNewWrMode(t *testing.T) {
 	t.Run("creates write mode command with ERP1 mode", func(t *testing.T) {
 		cmd, err := NewWrMode(enums.RadioModeERP1)
@@ -34,6 +35,7 @@ func TestNewWrMode(t *testing.T) {
 	})
 }
 
+// TestWrMode_Serialize verifies WrMode_Serialize behavior.
 func TestWrMode_Serialize(t *testing.T) {
 	t.Run("serializes write mode command", func(t *testing.T) {
 		cmd, _ := NewWrMode(enums.RadioModeERP1)

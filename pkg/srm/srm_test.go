@@ -5,6 +5,7 @@ import (
 	"testing"
 )
 
+// TestSYSExHeader verifies SYSExHeader behavior.
 func TestSYSExHeader(t *testing.T) {
 	b, err := (Message{Function: FuncPing, Payload: []byte{1, 2}}).MarshalSYSEx()
 	if err != nil || !bytes.Equal(b, []byte{0, 6, 1, 2}) {
@@ -16,6 +17,7 @@ func TestSYSExHeader(t *testing.T) {
 	}
 }
 
+// TestManufacturerSYSExHeader verifies ManufacturerSYSExHeader behavior.
 func TestManufacturerSYSExHeader(t *testing.T) {
 	mid := uint16(0x123)
 	b, err := (Message{ManufacturerID: &mid, Function: 0x456, Payload: []byte{9}}).MarshalSYSEx()
@@ -28,6 +30,7 @@ func TestManufacturerSYSExHeader(t *testing.T) {
 	}
 }
 
+// TestQueryStatusAnswer verifies QueryStatusAnswer behavior.
 func TestQueryStatusAnswer(t *testing.T) {
 	a := QueryStatusAnswer{LastFunction: FuncMemoryRead, Return: ReturnTooMuchData}
 	if got := a.Payload(); !bytes.Equal(got, []byte{0x02, 0x04, 0x0e}) {
@@ -39,6 +42,7 @@ func TestQueryStatusAnswer(t *testing.T) {
 	}
 }
 
+// TestRejectReservedHeaderBits verifies RejectReservedHeaderBits behavior.
 func TestRejectReservedHeaderBits(t *testing.T) {
 	if _, err := ParseSYSEx([]byte{0x10, 0x06}); err == nil {
 		t.Fatal("reserved Alliance header bits accepted")
@@ -57,6 +61,7 @@ func TestRejectReservedHeaderBits(t *testing.T) {
 	}
 }
 
+// TestRPCPayloads verifies RPCPayloads behavior.
 func TestRPCPayloads(t *testing.T) {
 	if got := RemoteLearnPayload(true); !bytes.Equal(got, []byte{1}) {
 		t.Fatalf("% x", got)

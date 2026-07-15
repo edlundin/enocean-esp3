@@ -13,6 +13,7 @@ const (
 	MemoryTypeRAM_EEPROM
 )
 
+// ParseMemoryTypeFromByte parses a MemoryType from a byte.
 func ParseMemoryTypeFromByte(b byte) (MemoryType, error) {
 	switch b {
 	case 0x00:
@@ -32,6 +33,7 @@ func ParseMemoryTypeFromByte(b byte) (MemoryType, error) {
 	}
 }
 
+// String returns the string representation of MemoryType.
 func (memoryType MemoryType) String() string {
 	switch memoryType {
 	case MemoryTypeFLASH:
@@ -51,6 +53,7 @@ func (memoryType MemoryType) String() string {
 	}
 }
 
+// Valid reports whether MemoryType is valid.
 func (memoryType MemoryType) Valid() bool {
 	switch memoryType {
 	case MemoryTypeFLASH, MemoryTypeRAM0, MemoryTypeRAM_DATA, MemoryTypeRAM_IDATA, MemoryTypeRAM_XDATA, MemoryTypeRAM_EEPROM:
@@ -68,6 +71,7 @@ const (
 	MemoryAreaSYSTEM_ERROR_LOG
 )
 
+// ParseMemoryAreaFromByte parses a MemoryArea from a byte.
 func ParseMemoryAreaFromByte(b byte) (MemoryArea, error) {
 	switch b {
 	case 0x00:
@@ -81,6 +85,7 @@ func ParseMemoryAreaFromByte(b byte) (MemoryArea, error) {
 	}
 }
 
+// String returns the string representation of MemoryArea.
 func (memoryArea MemoryArea) String() string {
 	switch memoryArea {
 	case MemoryAreaCONFIG:
@@ -94,6 +99,7 @@ func (memoryArea MemoryArea) String() string {
 	}
 }
 
+// Valid reports whether MemoryArea is valid.
 func (memoryArea MemoryArea) Valid() bool {
 	switch memoryArea {
 	case MemoryAreaCONFIG, MemoryAreaSMART_ACK_TABLE, MemoryAreaSYSTEM_ERROR_LOG:

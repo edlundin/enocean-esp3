@@ -7,6 +7,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/response"
 )
 
+// TestNewWrLearnMode verifies NewWrLearnMode behavior.
 func TestNewWrLearnMode(t *testing.T) {
 	t.Run("creates write learn mode command enabled", func(t *testing.T) {
 		cmd, err := NewWrLearnMode(true, 30000, 0x01)
@@ -47,6 +48,7 @@ func TestNewWrLearnMode(t *testing.T) {
 	})
 }
 
+// TestWrLearnMode_Serialize verifies WrLearnMode_Serialize behavior.
 func TestWrLearnMode_Serialize(t *testing.T) {
 	t.Run("serializes write learn mode command", func(t *testing.T) {
 		cmd, _ := NewWrLearnMode(true, 30000, 0x01)
@@ -67,6 +69,7 @@ func TestWrLearnMode_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseRdLearnModeResponseOK verifies ParseRdLearnModeResponseOK behavior.
 func TestParseRdLearnModeResponseOK(t *testing.T) {
 	t.Run("parses read learn mode response enabled", func(t *testing.T) {
 		// Response: LearnModeStatus(1) + Channel(1) = 2 bytes

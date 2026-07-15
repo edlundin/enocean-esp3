@@ -26,6 +26,7 @@ type fakePort struct {
 	closed            bool
 }
 
+// Read reads the value.
 func (p *fakePort) Read(b []byte) (int, error) {
 	if len(p.reads) == 0 {
 		time.Sleep(time.Millisecond)
@@ -36,19 +37,40 @@ func (p *fakePort) Read(b []byte) (int, error) {
 	return n, nil
 }
 
-func (p *fakePort) Write([]byte) (int, error)                            { return 0, io.ErrClosedPipe }
-func (p *fakePort) SetMode(*serial.Mode) error                           { return nil }
-func (p *fakePort) Drain() error                                         { return nil }
-func (p *fakePort) ResetInputBuffer() error                              { return nil }
-func (p *fakePort) ResetOutputBuffer() error                             { return nil }
-func (p *fakePort) SetDTR(bool) error                                    { return nil }
-func (p *fakePort) SetRTS(bool) error                                    { return nil }
+// Write writes the value.
+func (p *fakePort) Write([]byte) (int, error) { return 0, io.ErrClosedPipe }
+
+// SetMode updates Mode.
+func (p *fakePort) SetMode(*serial.Mode) error { return nil }
+
+// Drain waits for pending serial writes to complete.
+func (p *fakePort) Drain() error { return nil }
+
+// ResetInputBuffer clears buffered serial input.
+func (p *fakePort) ResetInputBuffer() error { return nil }
+
+// ResetOutputBuffer clears buffered serial output.
+func (p *fakePort) ResetOutputBuffer() error { return nil }
+
+// SetDTR updates DTR.
+func (p *fakePort) SetDTR(bool) error { return nil }
+
+// SetRTS updates RTS.
+func (p *fakePort) SetRTS(bool) error { return nil }
+
+// GetModemStatusBits returns ModemStatusBits.
 func (p *fakePort) GetModemStatusBits() (*serial.ModemStatusBits, error) { return nil, nil }
-func (p *fakePort) SetReadTimeout(time.Duration) error                   { return p.setReadTimeoutErr }
+
+// SetReadTimeout updates ReadTimeout.
+func (p *fakePort) SetReadTimeout(time.Duration) error { return p.setReadTimeoutErr }
+
+// Close closes the serial port.
 func (p *fakePort) Close() error {
 	p.closed = true
 	return nil
 }
+
+// Break requests a serial break for the supplied duration.
 func (p *fakePort) Break(time.Duration) error { return nil }
 
 type permanentErrorPort struct {
@@ -57,6 +79,7 @@ type permanentErrorPort struct {
 	unblock   chan struct{}
 }
 
+// Read reads the value.
 func (p *permanentErrorPort) Read([]byte) (int, error) {
 	if p.readCalls.Add(1) == 1 {
 		return 0, io.ErrUnexpectedEOF
@@ -65,6 +88,7 @@ func (p *permanentErrorPort) Read([]byte) (int, error) {
 	return 0, nil
 }
 
+// TestOpenSerialPortClosesPortWhenReadTimeoutFails verifies OpenSerialPortClosesPortWhenReadTimeoutFails behavior.
 func TestOpenSerialPortClosesPortWhenReadTimeoutFails(t *testing.T) {
 	wantErr := errors.New("timeout setup failed")
 	port := &fakePort{setReadTimeoutErr: wantErr}
@@ -78,6 +102,7 @@ func TestOpenSerialPortClosesPortWhenReadTimeoutFails(t *testing.T) {
 	}
 }
 
+// TestParserStopsAfterPermanentReadError verifies ParserStopsAfterPermanentReadError behavior.
 func TestParserStopsAfterPermanentReadError(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	port := &permanentErrorPort{unblock: make(chan struct{})}
@@ -100,6 +125,7 @@ func TestParserStopsAfterPermanentReadError(t *testing.T) {
 	}
 }
 
+// TestParserDispatchesTelegramsAndClosesOnCancel verifies ParserDispatchesTelegramsAndClosesOnCancel behavior.
 func TestParserDispatchesTelegramsAndClosesOnCancel(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	want := esp3.NewTelegramFromData(enums.PacketTypeRADIO_ERP1, []byte{0xd2}, []byte{0x00})
@@ -127,6 +153,7 @@ func TestParserDispatchesTelegramsAndClosesOnCancel(t *testing.T) {
 	}
 }
 
+// TestParserDispatchesParsedERP1 verifies ParserDispatchesParsedERP1 behavior.
 func TestParserDispatchesParsedERP1(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -145,6 +172,7 @@ func TestParserDispatchesParsedERP1(t *testing.T) {
 	}
 }
 
+// TestParserDispatchesMergedReMan verifies ParserDispatchesMergedReMan behavior.
 func TestParserDispatchesMergedReMan(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -171,6 +199,7 @@ func TestParserDispatchesMergedReMan(t *testing.T) {
 	}
 }
 
+// TestParserSkipsInvalidPacketType verifies ParserSkipsInvalidPacketType behavior.
 func TestParserSkipsInvalidPacketType(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -186,6 +215,7 @@ func TestParserSkipsInvalidPacketType(t *testing.T) {
 	}
 }
 
+// TestParserAcceptsCRC8DEqualToSyncByte verifies ParserAcceptsCRC8DEqualToSyncByte behavior.
 func TestParserAcceptsCRC8DEqualToSyncByte(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -206,6 +236,7 @@ func TestParserAcceptsCRC8DEqualToSyncByte(t *testing.T) {
 	}
 }
 
+// TestParserStreamsZeroPayloadFrame verifies ParserStreamsZeroPayloadFrame behavior.
 func TestParserStreamsZeroPayloadFrame(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -226,6 +257,7 @@ func TestParserStreamsZeroPayloadFrame(t *testing.T) {
 	}
 }
 
+// TestParserDropsBadCRC8HThenResyncs verifies ParserDropsBadCRC8HThenResyncs behavior.
 func TestParserDropsBadCRC8HThenResyncs(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -246,6 +278,7 @@ func TestParserDropsBadCRC8HThenResyncs(t *testing.T) {
 	}
 }
 
+// TestParserResyncsFromSyncByteInsideBadHeader verifies ParserResyncsFromSyncByteInsideBadHeader behavior.
 func TestParserResyncsFromSyncByteInsideBadHeader(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -265,6 +298,7 @@ func TestParserResyncsFromSyncByteInsideBadHeader(t *testing.T) {
 	}
 }
 
+// TestParseTelegramResponseAndUnparsed verifies ParseTelegramResponseAndUnparsed behavior.
 func TestParseTelegramResponseAndUnparsed(t *testing.T) {
 	remanMessages := newReManAssembler(time.Second)
 	resp := esp3.NewTelegramFromData(enums.PacketTypeRESPONSE, []byte{byte(enums.ReturnCodeSUCCESS), 1, 2}, []byte{3})
@@ -283,6 +317,7 @@ func TestParseTelegramResponseAndUnparsed(t *testing.T) {
 	}
 }
 
+// TestParseTelegramReportsParseErrors verifies ParseTelegramReportsParseErrors behavior.
 func TestParseTelegramReportsParseErrors(t *testing.T) {
 	cases := []esp3.Telegram{
 		esp3.NewTelegramFromData(enums.PacketTypeRESPONSE, nil, nil),
@@ -296,6 +331,7 @@ func TestParseTelegramReportsParseErrors(t *testing.T) {
 	}
 }
 
+// TestParseERP1SmartAckAndGPHeader verifies ParseERP1SmartAckAndGPHeader behavior.
 func TestParseERP1SmartAckAndGPHeader(t *testing.T) {
 	sa := smartack.DataReclaim{MailboxIndex: 3}.ERP1(deviceid.DeviceID(1))
 	msgs := parseERP1(newReManAssembler(time.Second), sa.ToEsp3(), sa)
@@ -317,6 +353,7 @@ func TestParseERP1SmartAckAndGPHeader(t *testing.T) {
 	}
 }
 
+// TestPublishDispatchesTypedChannels verifies PublishDispatchesTypedChannels behavior.
 func TestPublishDispatchesTypedChannels(t *testing.T) {
 	set, channels := newChannelSet(2)
 	msg := Message{Kind: "response", Data: response.Packet{Code: enums.ReturnCodeSUCCESS}}
@@ -331,6 +368,7 @@ func TestPublishDispatchesTypedChannels(t *testing.T) {
 	}
 }
 
+// TestPublishFullAllStillDispatchesTypedChannel verifies PublishFullAllStillDispatchesTypedChannel behavior.
 func TestPublishFullAllStillDispatchesTypedChannel(t *testing.T) {
 	set, channels := newChannelSet(1)
 	set.all <- Message{Kind: "occupied"}
@@ -343,6 +381,7 @@ func TestPublishFullAllStillDispatchesTypedChannel(t *testing.T) {
 	}
 }
 
+// TestPublishStopsWhenContextCancelled verifies PublishStopsWhenContextCancelled behavior.
 func TestPublishStopsWhenContextCancelled(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
@@ -352,6 +391,7 @@ func TestPublishStopsWhenContextCancelled(t *testing.T) {
 	}
 }
 
+// TestReManChainPeriod verifies ReManChainPeriod behavior.
 func TestReManChainPeriod(t *testing.T) {
 	if remanChainPeriod != time.Second {
 		t.Fatalf("ReMan chain period = %v", remanChainPeriod)
@@ -370,6 +410,7 @@ func TestReManChainPeriod(t *testing.T) {
 	}
 }
 
+// TestSendDropsWhenChannelFull verifies SendDropsWhenChannelFull behavior.
 func TestSendDropsWhenChannelFull(t *testing.T) {
 	ch := make(chan int, 1)
 	ch <- 1

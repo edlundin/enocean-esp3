@@ -9,6 +9,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/esp3"
 )
 
+// TestNewPacketFromEsp3 verifies NewPacketFromEsp3 behavior.
 func TestNewPacketFromEsp3(t *testing.T) {
 	t.Run("returns error for invalid packet type", func(t *testing.T) {
 		telegram := esp3.Telegram{

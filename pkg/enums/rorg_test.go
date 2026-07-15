@@ -4,6 +4,7 @@ import (
 	"testing"
 )
 
+// TestParseRorgFromByte verifies ParseRorgFromByte behavior.
 func TestParseRorgFromByte(t *testing.T) {
 	t.Run("parses all valid rorg types correctly", func(t *testing.T) {
 		testCases := []struct {
@@ -67,6 +68,7 @@ func TestParseRorgFromByte(t *testing.T) {
 	})
 }
 
+// TestRorgString verifies RorgString behavior.
 func TestRorgString(t *testing.T) {
 	t.Run("returns correct string for all valid rorg types", func(t *testing.T) {
 		testCases := []struct {
@@ -121,6 +123,7 @@ func TestRorgString(t *testing.T) {
 	})
 }
 
+// TestRorgValid verifies RorgValid behavior.
 func TestRorgValid(t *testing.T) {
 	t.Run("Rorg_Valid", func(t *testing.T) {
 		// Test valid rorg types

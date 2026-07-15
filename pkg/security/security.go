@@ -24,6 +24,7 @@ var (
 
 type SLF byte
 
+// Validate validates the security level format.
 func (s SLF) Validate() error {
 	rlcType, cmacType, encryptionType := byte(s)>>5, (byte(s)>>3)&3, byte(s)&7
 	if rlcType < 4 || cmacType < 1 || cmacType > 2 || encryptionType != 3 {
@@ -44,6 +45,7 @@ func (s SLF) RLCLength() int {
 	}
 }
 
+// TransmittedRLCLength returns the transmitted rolling-code length.
 func (s SLF) TransmittedRLCLength() int {
 	switch byte(s) >> 5 {
 	case 4:
@@ -57,6 +59,7 @@ func (s SLF) TransmittedRLCLength() int {
 	}
 }
 
+// CMACLength returns the configured CMAC length.
 func (s SLF) CMACLength() int {
 	switch (byte(s) >> 3) & 3 {
 	case 1:
@@ -68,6 +71,7 @@ func (s SLF) CMACLength() int {
 	}
 }
 
+// Encrypted reports whether encryption is enabled.
 func (s SLF) Encrypted() bool { return byte(s)&7 == 3 }
 
 type Secure struct {
@@ -77,6 +81,7 @@ type Secure struct {
 	CMAC []byte
 }
 
+// EncodeSEC_R encodes SEC_R.
 func EncodeSEC_R(key [16]byte, slf SLF, rlc []byte, rorg enums.Rorg, data []byte) (erp1.Packet, error) {
 	payload, err := encodeSecurePayload(key, slf, rlc, rorg, data)
 	if err != nil {
@@ -104,6 +109,7 @@ func EncodeSEC_CDM(key [16]byte, slf SLF, rlc []byte, seq byte, rorg enums.Rorg,
 	return packets, nil
 }
 
+// encodeSecurePayload encodes SecurePayload.
 func encodeSecurePayload(key [16]byte, slf SLF, rlc []byte, rorg enums.Rorg, data []byte) ([]byte, error) {
 	if err := slf.Validate(); err != nil {
 		return nil, err
@@ -126,6 +132,7 @@ func encodeSecurePayload(key [16]byte, slf SLF, rlc []byte, rorg enums.Rorg, dat
 	return append(payload, mac[:slf.CMACLength()]...), nil
 }
 
+// DecodeSEC_R decodes SEC_R.
 func DecodeSEC_R(key [16]byte, slf SLF, p erp1.Packet) (Secure, error) {
 	return DecodeSEC_RWithRLC(key, slf, nil, p)
 }
@@ -174,6 +181,7 @@ func DecodeSEC_RWithRLC(key [16]byte, slf SLF, rlc []byte, p erp1.Packet) (Secur
 	return Secure{Rorg: enums.Rorg(plain[0]), Data: plain[1:], RLC: append([]byte(nil), rlc...), CMAC: append([]byte(nil), got...)}, nil
 }
 
+// vaes applies the VAES transformation.
 func vaes(key [16]byte, rlc, data []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key[:])
 	if err != nil {
@@ -199,6 +207,7 @@ func vaes(key [16]byte, rlc, data []byte) ([]byte, error) {
 	return out, nil
 }
 
+// equal reports whether two byte slices are equal.
 func equal(a, b []byte) bool {
 	if len(a) != len(b) {
 		return false

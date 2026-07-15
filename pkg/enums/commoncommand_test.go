@@ -4,6 +4,7 @@ import (
 	"testing"
 )
 
+// TestParseCommonCommandFromByte verifies ParseCommonCommandFromByte behavior.
 func TestParseCommonCommandFromByte(t *testing.T) {
 	t.Run("parses all valid common commands correctly", func(t *testing.T) {
 		testCases := []struct {
@@ -103,6 +104,7 @@ func TestParseCommonCommandFromByte(t *testing.T) {
 	})
 }
 
+// TestCommonCommand_String verifies CommonCommand_String behavior.
 func TestCommonCommand_String(t *testing.T) {
 	t.Run("returns correct string for all valid common commands", func(t *testing.T) {
 		testCases := []struct {
@@ -202,6 +204,7 @@ func TestCommonCommand_String(t *testing.T) {
 	})
 }
 
+// TestCommonCommandValid verifies CommonCommandValid behavior.
 func TestCommonCommandValid(t *testing.T) {
 	t.Run("CommonCommand_Valid", func(t *testing.T) {
 		// Test valid commands

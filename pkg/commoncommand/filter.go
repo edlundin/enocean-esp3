@@ -17,10 +17,12 @@ type WrFilterAdd struct {
 	Value       uint32                `enocean-esp3:"data"`
 }
 
+// Serialize encodes WrFilterAdd into its wire representation.
 func (cmd *WrFilterAdd) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewWrFilterAdd constructs WrFilterAdd.
 func NewWrFilterAdd(criterion enums.FilterCriterion, value uint32, forward bool, repeat bool) (WrFilterAdd, error) {
 	filterAction := byte(0)
 
@@ -51,10 +53,12 @@ type WrFilterDel struct {
 	Value       uint32                `enocean-esp3:"data"`
 }
 
+// Serialize encodes WrFilterDel into its wire representation.
 func (cmd *WrFilterDel) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewWrFilterDel constructs WrFilterDel.
 func NewWrFilterDel(criterion enums.FilterCriterion, value uint32, forward bool, repeat bool) (WrFilterDel, error) {
 	filterAction := byte(0)
 
@@ -82,10 +86,12 @@ type WrFilterDelAll struct {
 	CommandCode enums.CommonCommand `enocean-esp3:"data"`
 }
 
+// Serialize encodes WrFilterDelAll into its wire representation.
 func (cmd *WrFilterDelAll) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewWrFilterDelAll constructs WrFilterDelAll.
 func NewWrFilterDelAll() (WrFilterDelAll, error) {
 	return WrFilterDelAll{
 		CommandCode: enums.CommonCommandWR_FILTER_DEL_ALL,
@@ -98,10 +104,12 @@ type WrFilterEnable struct {
 	FilerOperator enums.FilerOperator `enocean-esp3:"data"`
 }
 
+// Serialize encodes WrFilterEnable into its wire representation.
 func (cmd *WrFilterEnable) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewWrFilterEnable constructs WrFilterEnable.
 func NewWrFilterEnable(toggle bool, operator enums.FilerOperator) (WrFilterEnable, error) {
 	return WrFilterEnable{
 		CommandCode:   enums.CommonCommandWR_FILTER_ENABLE,
@@ -114,10 +122,12 @@ type RdFilter struct {
 	CommandCode enums.CommonCommand `enocean-esp3:"data"`
 }
 
+// Serialize encodes RdFilter into its wire representation.
 func (cmd *RdFilter) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewRdFilter constructs RdFilter.
 func NewRdFilter() (RdFilter, error) {
 	return RdFilter{
 		CommandCode: enums.CommonCommandRD_FILTER,
@@ -133,6 +143,7 @@ type RdFilterResponse struct {
 	Filters []Filter
 }
 
+// ParseRdFilterResponseOK parses RdFilterResponseOK.
 func ParseRdFilterResponseOK(response response.Packet) (RdFilterResponse, error) {
 	if response.Code != enums.ReturnCodeSUCCESS {
 		return RdFilterResponse{}, errors.New("invalid return code")

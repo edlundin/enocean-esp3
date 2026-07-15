@@ -28,6 +28,7 @@ type Packet struct {
 	UserData      []byte
 }
 
+// NewPacketFromEsp3 parses a subtelegram packet from an ESP3 telegram.
 func NewPacketFromEsp3(telegram esp3.Telegram) (Packet, error) {
 	const minDataLen = 6    // 1 rorg + 4 sender ID + 1 status
 	const minOptDataLen = 9 // 1 subTelNum + 4 destination ID + 1 rssi + 1 security level + 2 timestamp
@@ -93,6 +94,7 @@ func NewPacketFromEsp3(telegram esp3.Telegram) (Packet, error) {
 	}, nil
 }
 
+// ToEsp3 converts the packet to an ESP3 telegram.
 func (p Packet) ToEsp3() esp3.Telegram {
 	senderID := p.SenderID.ToArray()
 	destinationID := p.DestinationID.ToArray()
@@ -121,6 +123,7 @@ func (p Packet) ToEsp3() esp3.Telegram {
 	}
 }
 
+// Serialize encodes Packet into its wire representation.
 func (p Packet) Serialize() []byte {
 	return p.ToEsp3().Serialize()
 }

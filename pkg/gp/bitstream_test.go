@@ -2,6 +2,7 @@ package gp
 
 import "testing"
 
+// TestBitstreamEdges verifies BitstreamEdges behavior.
 func TestBitstreamEdges(t *testing.T) {
 	buf := []byte{0, 0}
 	if err := writeUnsigned(buf, 3, 5, 0b10101); err != nil { t.Fatal(err) }

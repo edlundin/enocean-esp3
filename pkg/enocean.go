@@ -17,6 +17,7 @@ import (
 	"go.bug.st/serial"
 )
 
+// GetSerialPortList returns the available serial port names.
 func GetSerialPortList() ([]string, error) {
 	ports, err := serial.GetPortsList()
 
@@ -66,6 +67,7 @@ type channelSet struct {
 	parseError chan Message
 }
 
+// newChannelSet constructs ChannelSet.
 func newChannelSet(size int) (*channelSet, *Channels) {
 	set := &channelSet{
 		all:        make(chan Message, size),
@@ -83,6 +85,7 @@ func newChannelSet(size int) (*channelSet, *Channels) {
 	return set, &Channels{All: set.all, ESP3: set.esp3, ERP1: set.erp1, Response: set.response, Event: set.event, SmartAck: set.smartAck, ReMan: set.reman, ReManPart: set.remanPart, GPHeader: set.gpHeader, Unparsed: set.unparsed, ParseError: set.parseError}
 }
 
+// close closes all parser output channels.
 func (c *channelSet) close() {
 	close(c.all)
 	close(c.esp3)
@@ -99,6 +102,7 @@ func (c *channelSet) close() {
 
 var serialOpen = serial.Open
 
+// OpenSerialPort opens a serial port and starts ESP3 parsing.
 func OpenSerialPort(ctx context.Context, portPath string) (serial.Port, *Channels, error) {
 	portSettings := &serial.Mode{
 		BaudRate: 57600,
@@ -126,6 +130,7 @@ func OpenSerialPort(ctx context.Context, portPath string) (serial.Port, *Channel
 	return port, channels, nil
 }
 
+// parser parses r.
 func parser(ctx context.Context, serialPort serial.Port, channels *channelSet) {
 	defer channels.close()
 	type ParserState uint8
@@ -304,10 +309,12 @@ type remanAssembler struct {
 	buffers map[remanKey]remanBuffer
 }
 
+// newReManAssembler constructs ReManAssembler.
 func newReManAssembler(ttl time.Duration) *remanAssembler {
 	return &remanAssembler{ttl: ttl, buffers: map[remanKey]remanBuffer{}}
 }
 
+// add adds a ReMan chain part to the assembler.
 func (a *remanAssembler) add(part reman.Part) ([]Message, error) {
 	now := time.Now()
 	a.expire(now)
@@ -335,6 +342,7 @@ func (a *remanAssembler) add(part reman.Part) ([]Message, error) {
 	return []Message{{Kind: "reman", Data: msg}}, nil
 }
 
+// expire removes stale ReMan chains.
 func (a *remanAssembler) expire(now time.Time) {
 	for key, buf := range a.buffers {
 		if now.Sub(buf.updated) >= a.ttl {
@@ -343,6 +351,7 @@ func (a *remanAssembler) expire(now time.Time) {
 	}
 }
 
+// parseTelegram parses Telegram.
 func parseTelegram(remanMessages *remanAssembler, t esp3.Telegram) []Message {
 	messages := []Message{{Kind: "esp3", ESP3: t, Data: t}}
 
@@ -373,6 +382,7 @@ func parseTelegram(remanMessages *remanAssembler, t esp3.Telegram) []Message {
 	return messages
 }
 
+// parseERP1 parses ERP1.
 func parseERP1(remanMessages *remanAssembler, t esp3.Telegram, p erp1.Packet) []Message {
 	switch {
 	case p.Rorg == enums.RorgSYS_EX:
@@ -405,6 +415,7 @@ func parseERP1(remanMessages *remanAssembler, t esp3.Telegram, p erp1.Packet) []
 	}
 }
 
+// parseGPHeader parses GPHeader.
 func parseGPHeader(p erp1.Packet) (any, error) {
 	switch p.Rorg {
 	case enums.RorgGP_TI:
@@ -416,6 +427,7 @@ func parseGPHeader(p erp1.Packet) (any, error) {
 	}
 }
 
+// publish dispatches parsed messages to output channels.
 func publish(ctx context.Context, channels *channelSet, messages []Message) bool {
 	for _, msg := range messages {
 		if !send(ctx, channels.all, msg) {
@@ -467,6 +479,7 @@ func publish(ctx context.Context, channels *channelSet, messages []Message) bool
 	return true
 }
 
+// send delivers a value without blocking the parser.
 func send[T any](ctx context.Context, ch chan<- T, v T) bool {
 	select {
 	case ch <- v:

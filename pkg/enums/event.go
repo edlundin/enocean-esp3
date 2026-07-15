@@ -16,6 +16,7 @@ const (
 	EventCodeCO_LRN_MODE_DISABLED
 )
 
+// ParseEventCodeFromByte parses a EventCode from a byte.
 func ParseEventCodeFromByte(b byte) (EventCode, error) {
 	switch b {
 	case 0x01:
@@ -41,6 +42,7 @@ func ParseEventCodeFromByte(b byte) (EventCode, error) {
 	}
 }
 
+// String returns the string representation of EventCode.
 func (eventCode EventCode) String() string {
 	switch eventCode {
 	case EventCodeSA_RECLAIM_NOT_SUCCESSFUL:
@@ -66,6 +68,7 @@ func (eventCode EventCode) String() string {
 	}
 }
 
+// Valid reports whether EventCode is valid.
 func (eventCode EventCode) Valid() bool {
 	switch eventCode {
 	case EventCodeSA_RECLAIM_NOT_SUCCESSFUL,
@@ -95,6 +98,7 @@ const (
 	LearnAckConfirmCodeFUNCTION_NOT_SUPPORTED LearnAckConfirmCode = 0xff
 )
 
+// ParseLearnAckConfirmCodeFromByte parses a LearnAckConfirmCode from a byte.
 func ParseLearnAckConfirmCodeFromByte(b byte) (LearnAckConfirmCode, error) {
 	switch b {
 	case 0x00:
@@ -116,6 +120,7 @@ func ParseLearnAckConfirmCodeFromByte(b byte) (LearnAckConfirmCode, error) {
 	}
 }
 
+// String returns the string representation of LearnAckConfirmCode.
 func (learnAckConfirmCode LearnAckConfirmCode) String() string {
 	switch learnAckConfirmCode {
 	case LearnAckConfirmCodeLRN_IN:
@@ -137,6 +142,7 @@ func (learnAckConfirmCode LearnAckConfirmCode) String() string {
 	}
 }
 
+// Valid reports whether LearnAckConfirmCode is valid.
 func (learnAckConfirmCode LearnAckConfirmCode) Valid() bool {
 	switch learnAckConfirmCode {
 	case LearnAckConfirmCodeLRN_IN,
@@ -168,6 +174,7 @@ const (
 	WakeUpCauseUART_WAKE_UP
 )
 
+// ParseWakeUpCauseFromByte parses a WakeUpCause from a byte.
 func ParseWakeUpCauseFromByte(b byte) (WakeUpCause, error) {
 	switch b {
 	case 0x00:
@@ -197,6 +204,7 @@ func ParseWakeUpCauseFromByte(b byte) (WakeUpCause, error) {
 	}
 }
 
+// String returns the string representation of WakeUpCause.
 func (wakeUpCause WakeUpCause) String() string {
 	switch wakeUpCause {
 	case WakeUpCauseVOLTAGE_SUPPLY_DROP:
@@ -226,6 +234,7 @@ func (wakeUpCause WakeUpCause) String() string {
 	}
 }
 
+// Valid reports whether WakeUpCause is valid.
 func (wakeUpCause WakeUpCause) Valid() bool {
 	switch wakeUpCause {
 	case WakeUpCauseVOLTAGE_SUPPLY_DROP,
@@ -252,6 +261,7 @@ const (
 	WakeUpModeEXTENDED_SECURITY
 )
 
+// ParseWakeUpModeFromByte parses a WakeUpMode from a byte.
 func ParseWakeUpModeFromByte(b byte) (WakeUpMode, error) {
 	switch b {
 	case 0x00:
@@ -263,6 +273,7 @@ func ParseWakeUpModeFromByte(b byte) (WakeUpMode, error) {
 	}
 }
 
+// String returns the string representation of WakeUpMode.
 func (wakeUpMode WakeUpMode) String() string {
 	switch wakeUpMode {
 	case WakeUpModeSTANDARD_SECURITY:
@@ -274,6 +285,7 @@ func (wakeUpMode WakeUpMode) String() string {
 	}
 }
 
+// Valid reports whether WakeUpMode is valid.
 func (wakeUpMode WakeUpMode) Valid() bool {
 	switch wakeUpMode {
 	case WakeUpModeSTANDARD_SECURITY,
@@ -299,6 +311,7 @@ const (
 	COEventSecureVALID_RLC_SYNC_RECEIVED_VIA_TEACH_IN
 )
 
+// ParseCOEventSecureFromByte parses a SecureDeviceEventCause from a byte.
 func ParseCOEventSecureFromByte(b byte) (SecureDeviceEventCause, error) {
 	switch b {
 	case 0x00:
@@ -326,6 +339,7 @@ func ParseCOEventSecureFromByte(b byte) (SecureDeviceEventCause, error) {
 	}
 }
 
+// String returns the string representation of SecureDeviceEventCause.
 func (coEventSecure SecureDeviceEventCause) String() string {
 	switch coEventSecure {
 	case COEventSecureSECURE_LINK_TABLE_FULL:
@@ -353,6 +367,7 @@ func (coEventSecure SecureDeviceEventCause) String() string {
 	}
 }
 
+// Valid reports whether SecureDeviceEventCause is valid.
 func (coEventSecure SecureDeviceEventCause) Valid() bool {
 	switch coEventSecure {
 	case COEventSecureSECURE_LINK_TABLE_FULL,
@@ -378,6 +393,7 @@ const (
 	DutyCycleLimitCauseREACHED
 )
 
+// ParseDutyCycleLimitCauseFromByte parses a DutyCycleLimitCause from a byte.
 func ParseDutyCycleLimitCauseFromByte(b byte) (DutyCycleLimitCause, error) {
 	switch b {
 	case 0x00:
@@ -389,6 +405,7 @@ func ParseDutyCycleLimitCauseFromByte(b byte) (DutyCycleLimitCause, error) {
 	}
 }
 
+// String returns the string representation of DutyCycleLimitCause.
 func (dutyCycleLimitCause DutyCycleLimitCause) String() string {
 	switch dutyCycleLimitCause {
 	case DutyCycleLimitCauseNOT_YET_REACHED:
@@ -400,6 +417,7 @@ func (dutyCycleLimitCause DutyCycleLimitCause) String() string {
 	}
 }
 
+// Valid reports whether DutyCycleLimitCause is valid.
 func (dutyCycleLimitCause DutyCycleLimitCause) Valid() bool {
 	switch dutyCycleLimitCause {
 	case DutyCycleLimitCauseNOT_YET_REACHED,
@@ -417,6 +435,7 @@ const (
 	TransmitFailedCauseNO_ACK_RECEIVED
 )
 
+// ParseTransmitFailedCauseFromByte parses a TransmitFailedCause from a byte.
 func ParseTransmitFailedCauseFromByte(b byte) (TransmitFailedCause, error) {
 	switch b {
 	case 0x00:
@@ -428,6 +447,7 @@ func ParseTransmitFailedCauseFromByte(b byte) (TransmitFailedCause, error) {
 	}
 }
 
+// String returns the string representation of TransmitFailedCause.
 func (transmitFailedCause TransmitFailedCause) String() string {
 	switch transmitFailedCause {
 	case TransmitFailedCauseCSMA_FAILED_CHANNEL_NOT_FREE:
@@ -439,6 +459,7 @@ func (transmitFailedCause TransmitFailedCause) String() string {
 	}
 }
 
+// Valid reports whether TransmitFailedCause is valid.
 func (transmitFailedCause TransmitFailedCause) Valid() bool {
 	switch transmitFailedCause {
 	case TransmitFailedCauseCSMA_FAILED_CHANNEL_NOT_FREE,

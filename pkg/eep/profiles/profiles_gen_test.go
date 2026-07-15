@@ -2,6 +2,7 @@ package profiles
 
 import "testing"
 
+// TestGeneratedRegistryLoaded verifies GeneratedRegistryLoaded behavior.
 func TestGeneratedRegistryLoaded(t *testing.T) {
 	if len(Registry) == 0 {
 		t.Fatal("empty registry")
@@ -11,6 +12,7 @@ func TestGeneratedRegistryLoaded(t *testing.T) {
 	}
 }
 
+// TestGeneratedSpecialRanges verifies GeneratedSpecialRanges behavior.
 func TestGeneratedSpecialRanges(t *testing.T) {
 	for _, tc := range []struct {
 		profile, shortcut string

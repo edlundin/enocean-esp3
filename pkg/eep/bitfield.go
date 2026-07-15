@@ -39,10 +39,12 @@ func WriteBits(data []byte, bitOffset, bitSize int, value uint64) error {
 	return nil
 }
 
+// ScaleRaw maps a raw value into its engineering range.
 func ScaleRaw(raw uint64, rawMin, rawMax int, scaleMin, scaleMax float64) float64 {
 	return scaleMin + (float64(raw)-float64(rawMin))*(scaleMax-scaleMin)/float64(rawMax-rawMin)
 }
 
+// UnscaleRaw maps an engineering value back to its raw representation.
 func UnscaleRaw(value float64, rawMin, rawMax int, scaleMin, scaleMax float64) uint64 {
 	return uint64(math.Round(float64(rawMin) + (value-scaleMin)*float64(rawMax-rawMin)/(scaleMax-scaleMin)))
 }

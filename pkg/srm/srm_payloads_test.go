@@ -5,6 +5,7 @@ import (
 	"testing"
 )
 
+// TestSRMPayloadHelpers verifies SRMPayloadHelpers behavior.
 func TestSRMPayloadHelpers(t *testing.T) {
 	if PingPayload() != nil {
 		t.Fatal("ping payload should be nil")

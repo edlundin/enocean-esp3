@@ -17,6 +17,7 @@ type Serializer interface {
 
 const syncByte = 0x55
 
+// crcTable returns the CRC-8 lookup table.
 func crcTable() [256]byte {
 	return [256]byte{
 		0x00, 0x07, 0x0e, 0x09, 0x1c, 0x1b, 0x12, 0x15, 0x38, 0x3f, 0x36, 0x31, 0x24, 0x23, 0x2a, 0x2d,
@@ -44,10 +45,12 @@ type Telegram struct {
 	OptData    []byte
 }
 
+// ComputeCrc8 computes Crc8.
 func ComputeCrc8(byte byte, crc byte) byte {
 	return crcTable()[byte^crc]
 }
 
+// ComputeCrcSlice computes CrcSlice.
 func ComputeCrcSlice(slice []byte) byte {
 	crc := byte(0)
 
@@ -58,6 +61,7 @@ func ComputeCrcSlice(slice []byte) byte {
 	return crc
 }
 
+// Serialize encodes Telegram into its wire representation.
 func (telegram Telegram) Serialize() []byte {
 	dataLen := len(telegram.Data)
 
@@ -68,6 +72,7 @@ func (telegram Telegram) Serialize() []byte {
 	return slices.Concat([]byte{syncByte}, header, []byte{crc8h}, telegram.Data, telegram.OptData, []byte{crc8d})
 }
 
+// NewTelegramFromData constructs a telegram from packet data.
 func NewTelegramFromData(packetType enums.PacketType, data []byte, optData []byte) Telegram {
 	return Telegram{
 		PacketType: packetType,
@@ -76,6 +81,7 @@ func NewTelegramFromData(packetType enums.PacketType, data []byte, optData []byt
 	}
 }
 
+// NewEsp3TelegramFromHexString parses a telegram from hexadecimal ESP3 data.
 func NewEsp3TelegramFromHexString(hexStr string) (Telegram, error) {
 	const minHexStringLen = 7
 

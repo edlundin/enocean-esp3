@@ -13,6 +13,7 @@ type Packet struct {
 	OptData []byte
 }
 
+// NewPacketFromEsp3 parses a response packet from an ESP3 telegram.
 func NewPacketFromEsp3(telegram esp3.Telegram) (Packet, error) {
 	if telegram.PacketType != enums.PacketTypeRESPONSE {
 		return Packet{}, errors.New("invalid packet type")

@@ -6,6 +6,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 )
 
+// init registers generated EEP profile metadata.
 func init() {
 	Registry["F6-01-01"] = Profile{EEP: eep.EEP{Rorg: enums.Rorg(0xF6), Func: 0x01, Type: 0x01}, Title: "Push Button", Fields: []Field{
 		{Name: "Push button", Shortcut: "PB", BitOff: 3, BitSize: 1, Unit: "", ScaleMin: 0, ScaleMax: 0, RawMin: 0, RawMax: 0, Enums: []EnumValue{{Raw: 0, Name: "Released", Description: "Released"}, {Raw: 1, Name: "PressedHold", Description: "Pressed & Hold"}}},

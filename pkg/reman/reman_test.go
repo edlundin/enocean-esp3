@@ -7,6 +7,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/deviceid"
 )
 
+// TestPacketRoundTrip verifies PacketRoundTrip behavior.
 func TestPacketRoundTrip(t *testing.T) {
 	msg := Message{Seq: 1, ManufacturerID: ManufacturerID, Function: FuncQueryID, Payload: []byte{1, 2, 3, 4, 5, 6, 7, 8, 9}, SourceID: 0x01020304, DestinationID: deviceid.BroadcastId()}
 	packets, err := msg.Packets()
@@ -33,6 +34,7 @@ func TestPacketRoundTrip(t *testing.T) {
 	}
 }
 
+// TestHeaderPacking verifies HeaderPacking behavior.
 func TestHeaderPacking(t *testing.T) {
 	b := make([]byte, 4)
 	putHeader(b, 508, 0x7ff, 0x804)
@@ -42,6 +44,7 @@ func TestHeaderPacking(t *testing.T) {
 	}
 }
 
+// TestMergeNeedsMoreAndDuplicate verifies MergeNeedsMoreAndDuplicate behavior.
 func TestMergeNeedsMoreAndDuplicate(t *testing.T) {
 	msg := Message{Seq: 2, ManufacturerID: 1, Function: 2, Payload: []byte{1, 2, 3, 4, 5}, SourceID: 1}
 	packets, _ := msg.Packets()
@@ -59,6 +62,7 @@ func TestMergeNeedsMoreAndDuplicate(t *testing.T) {
 	}
 }
 
+// TestPacketsValidateIdentifiers verifies PacketsValidateIdentifiers behavior.
 func TestPacketsValidateIdentifiers(t *testing.T) {
 	valid := Message{Seq: 1, ManufacturerID: 0x7ff, Function: 0xfff}
 	if _, err := valid.Packets(); err != nil {
@@ -75,6 +79,7 @@ func TestPacketsValidateIdentifiers(t *testing.T) {
 	}
 }
 
+// TestCodePayload verifies CodePayload behavior.
 func TestCodePayload(t *testing.T) {
 	b, err := CodePayload(0x12345678)
 	if err != nil || !bytes.Equal(b, []byte{0x12, 0x34, 0x56, 0x78}) {

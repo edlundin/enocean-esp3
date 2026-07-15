@@ -2,6 +2,7 @@ package enums
 
 import "testing"
 
+// TestFilterCriterion verifies FilterCriterion behavior.
 func TestFilterCriterion(t *testing.T) {
 	cases := []struct{ b byte; v FilterCriterion; s string }{
 		{0x01, FilterCriterionSENDER_ID, "SENDER_ID"},
@@ -17,6 +18,7 @@ func TestFilterCriterion(t *testing.T) {
 	if FilterCriterion(0xff).String() != "UNKNOWN" || FilterCriterion(0xff).Valid() { t.Fatal("invalid filter accepted") }
 }
 
+// TestFilterActionMask verifies FilterActionMask behavior.
 func TestFilterActionMask(t *testing.T) {
 	cases := []struct{ b byte; v FilterActionMask; s string }{
 		{0x00, FilterActionNO_FORWARD, "NO_FORWARD"},
@@ -32,6 +34,7 @@ func TestFilterActionMask(t *testing.T) {
 	if FilterActionMask(0xff).String() != "UNKNOWN" || FilterActionMask(0xff).Valid() { t.Fatal("invalid action accepted") }
 }
 
+// TestFilerOperator verifies FilerOperator behavior.
 func TestFilerOperator(t *testing.T) {
 	cases := []struct{ b byte; v FilerOperator; s string }{
 		{0x00, FilerOperatorOR_ALL_FILTERS, "OR_ALL_FILTERS"},

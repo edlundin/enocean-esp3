@@ -13,6 +13,7 @@ type Telegram interface {
 	Format() string
 }
 
+// ParsePacket parses Packet.
 func ParsePacket(p erp1.Packet, prof eep.EEP) (Telegram, error) {
 	if p.Rorg != prof.Rorg {
 		return nil, errors.New("packet RORG does not match EEP")
@@ -20,6 +21,7 @@ func ParsePacket(p erp1.Packet, prof eep.EEP) (Telegram, error) {
 	return ParseUserData(prof, p.UserData, p.Status)
 }
 
+// ParseUserData parses UserData.
 func ParseUserData(prof eep.EEP, userData []byte, status byte) (Telegram, error) {
 	switch prof {
 	case mustEEP(enums.Rorg1BS, 0x00, 0x01):
@@ -33,4 +35,5 @@ func ParseUserData(prof eep.EEP, userData []byte, status byte) (Telegram, error)
 	}
 }
 
+// mustEEP parses an EEP or fails the test.
 func mustEEP(r enums.Rorg, f, t byte) eep.EEP { e, _ := eep.FromTriplet(r, f, t); return e }

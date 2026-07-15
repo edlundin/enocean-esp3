@@ -6,6 +6,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 )
 
+// TestNewWrSubTel verifies NewWrSubTel behavior.
 func TestNewWrSubTel(t *testing.T) {
 	t.Run("creates write subtel command with toggle enabled", func(t *testing.T) {
 		cmd, err := NewWrSubTel(true)
@@ -34,6 +35,7 @@ func TestNewWrSubTel(t *testing.T) {
 	})
 }
 
+// TestWrSubTel_Serialize verifies WrSubTel_Serialize behavior.
 func TestWrSubTel_Serialize(t *testing.T) {
 	t.Run("serializes write subtel command", func(t *testing.T) {
 		cmd, _ := NewWrSubTel(true)

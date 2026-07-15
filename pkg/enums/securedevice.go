@@ -15,6 +15,7 @@ const (
 	SecureDeviceDirectionNONE        SecureDeviceDirection = 0xff
 )
 
+// ParseSecureDeviceDirectionFromByte parses a SecureDeviceDirection from a byte.
 func ParseSecureDeviceDirectionFromByte(b byte) (SecureDeviceDirection, error) {
 	switch b {
 	case 0x00:
@@ -32,6 +33,7 @@ func ParseSecureDeviceDirectionFromByte(b byte) (SecureDeviceDirection, error) {
 	}
 }
 
+// String returns the string representation of SecureDeviceDirection.
 func (direction SecureDeviceDirection) String() string {
 	switch direction {
 	case SecureDeviceDirectionINBOUND_TABLE:
@@ -49,6 +51,7 @@ func (direction SecureDeviceDirection) String() string {
 	}
 }
 
+// Valid reports whether SecureDeviceDirection is valid.
 func (direction SecureDeviceDirection) Valid() bool {
 	switch direction {
 	case SecureDeviceDirectionINBOUND_TABLE,

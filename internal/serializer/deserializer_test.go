@@ -62,6 +62,7 @@ type StructWithUnexported struct {
 
 type CustomDeserializerType uint32
 
+// TestDeserializerConfig_sanitize verifies DeserializerConfig_sanitize behavior.
 func TestDeserializerConfig_sanitize(t *testing.T) {
 	t.Run("nil Deserializers", func(t *testing.T) {
 		cfg := DeserializerConfig{
@@ -121,6 +122,7 @@ func TestDeserializerConfig_sanitize(t *testing.T) {
 	})
 }
 
+// TestMergeDeserializerConfigs verifies MergeDeserializerConfigs behavior.
 func TestMergeDeserializerConfigs(t *testing.T) {
 	t.Run("empty configs", func(t *testing.T) {
 		result := mergeDeserializerConfigs([]DeserializerConfig{})
@@ -204,6 +206,7 @@ func TestMergeDeserializerConfigs(t *testing.T) {
 	})
 }
 
+// TestBytesToStruct verifies BytesToStruct behavior.
 func TestBytesToStruct(t *testing.T) {
 	t.Run("nil pointer", func(t *testing.T) {
 		err := BytesToStruct([]byte{1, 2, 3}, nil)
@@ -297,6 +300,7 @@ func TestBytesToStruct(t *testing.T) {
 	})
 }
 
+// TestDeserializeValue verifies DeserializeValue behavior.
 func TestDeserializeValue(t *testing.T) {
 	t.Run("pointer - nil", func(t *testing.T) {
 		data := []byte{0x01, 0x02, 0x03, 0x04}
@@ -763,6 +767,7 @@ func TestDeserializeValue(t *testing.T) {
 	})
 }
 
+// TestDeserializeStruct verifies DeserializeStruct behavior.
 func TestDeserializeStruct(t *testing.T) {
 	t.Run("nested struct", func(t *testing.T) {
 		data := []byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08}
@@ -817,6 +822,7 @@ func TestDeserializeStruct(t *testing.T) {
 	})
 }
 
+// TestDeserializeArray verifies DeserializeArray behavior.
 func TestDeserializeArray(t *testing.T) {
 	t.Run("byte array", func(t *testing.T) {
 		data := []byte{0x01, 0x02, 0x03, 0x04}
@@ -899,6 +905,7 @@ func TestDeserializeArray(t *testing.T) {
 	})
 }
 
+// TestDeserializeSlice verifies DeserializeSlice behavior.
 func TestDeserializeSlice(t *testing.T) {
 	t.Run("byte slice with data", func(t *testing.T) {
 		data := []byte{0x01, 0x02, 0x03, 0x04}
@@ -1065,6 +1072,7 @@ func TestDeserializeSlice(t *testing.T) {
 	})
 }
 
+// TestBytesToStruct_ComplexTypes verifies BytesToStruct_ComplexTypes behavior.
 func TestBytesToStruct_ComplexTypes(t *testing.T) {
 	t.Run("struct with arrays", func(t *testing.T) {
 		// ByteArray (4 bytes) + IntArray (4 bytes) + EmptyArray (0 bytes)
