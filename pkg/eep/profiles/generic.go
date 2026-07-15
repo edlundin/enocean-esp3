@@ -44,7 +44,7 @@ func Decode(prof eep.EEP, userData []byte, status byte) (Decoded, error) {
 			v.Text = ev.Name
 		}
 		if f.RawMin != f.RawMax || f.ScaleMin != f.ScaleMax {
-			v.Scaled = scale(raw, f.RawMin, f.RawMax, f.ScaleMin, f.ScaleMax)
+			v.Scaled = eep.ScaleRaw(raw, f.RawMin, f.RawMax, f.ScaleMin, f.ScaleMax)
 		}
 		vals[fieldKey(f, i)] = v
 	}

@@ -2,6 +2,7 @@ package security
 
 import (
 	"crypto/aes"
+	"crypto/subtle"
 	"errors"
 	"fmt"
 
@@ -163,7 +164,7 @@ func DecodeSEC_RWithRLC(key [16]byte, slf SLF, rlc []byte, p erp1.Packet) (Secur
 		if len(rlc) != slf.RLCLength() {
 			return Secure{}, fmt.Errorf("RLC length %d, want %d", len(rlc), slf.RLCLength())
 		}
-		if !equal(transmittedRLC, rlc[len(rlc)-txLen:]) {
+		if subtle.ConstantTimeCompare(transmittedRLC, rlc[len(rlc)-txLen:]) != 1 {
 			return Secure{}, errors.New("transmitted RLC does not match receiver state")
 		}
 	}
@@ -171,7 +172,7 @@ func DecodeSEC_RWithRLC(key [16]byte, slf SLF, rlc []byte, p erp1.Packet) (Secur
 	if err != nil {
 		return Secure{}, err
 	}
-	if !equal(got, mac[:macLen]) {
+	if subtle.ConstantTimeCompare(got, mac[:macLen]) != 1 {
 		return Secure{}, errors.New("invalid CMAC")
 	}
 	plain, err := vaes(key, rlc, enc)
@@ -205,16 +206,4 @@ func vaes(key [16]byte, rlc, data []byte) ([]byte, error) {
 		previous = stream
 	}
 	return out, nil
-}
-
-// equal reports whether two byte slices are equal.
-func equal(a, b []byte) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	var v byte
-	for i := range a {
-		v |= a[i] ^ b[i]
-	}
-	return v == 0
 }

@@ -99,8 +99,7 @@ func parseLearnRequest(b []byte) (LearnRequest, error) {
 		return LearnRequest{}, fmt.Errorf("learn request length %d, want 10", len(b))
 	}
 	head := binary.BigEndian.Uint16(b[:2])
-	rep, _ := deviceid.FromByteArray(b[6:10])
-	return LearnRequest{RequestCode: RequestCode(head >> 11), ManufacturerID: head & 0x07ff, EEP: eep.EEP{Rorg: enums.Rorg(b[2]), Func: b[3], Type: b[4]}, RSSI: b[5], RepeaterID: rep}, nil
+	return LearnRequest{RequestCode: RequestCode(head >> 11), ManufacturerID: head & 0x07ff, EEP: eep.EEP{Rorg: enums.Rorg(b[2]), Func: b[3], Type: b[4]}, RSSI: b[5], RepeaterID: deviceid.DeviceID(binary.BigEndian.Uint32(b[6:10]))}, nil
 }
 
 // parseLearnAnswer parses LearnAnswer.
@@ -113,8 +112,7 @@ func parseLearnAnswer(b []byte) (Message, error) {
 		if len(b) != 8 {
 			return nil, fmt.Errorf("learn reply length %d, want 8", len(b))
 		}
-		id, _ := deviceid.FromByteArray(b[4:8])
-		return LearnReply{ResponseTime: binary.BigEndian.Uint16(b[1:3]), AckCode: AckCode(b[3]), SensorID: id}, nil
+		return LearnReply{ResponseTime: binary.BigEndian.Uint16(b[1:3]), AckCode: AckCode(b[3]), SensorID: deviceid.DeviceID(binary.BigEndian.Uint32(b[4:8]))}, nil
 	case LearnAcknowledgeIndex:
 		if len(b) != 5 {
 			return nil, fmt.Errorf("learn acknowledge length %d, want 5", len(b))
