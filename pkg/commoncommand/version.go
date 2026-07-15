@@ -17,10 +17,12 @@ type RdVersion struct {
 	CommandCode enums.CommonCommand `enocean-esp3:"data"`
 }
 
+// Serialize encodes RdVersion into its wire representation.
 func (cmd *RdVersion) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewRdVersion constructs RdVersion.
 func NewRdVersion() (RdVersion, error) {
 	return RdVersion{
 		CommandCode: enums.CommonCommandRD_VERSION,
@@ -35,6 +37,7 @@ type RdVersionResponse struct {
 	Description string
 }
 
+// ParseRdVersionResponseOK parses RdVersionResponseOK.
 func ParseRdVersionResponseOK(response response.Packet) (RdVersionResponse, error) {
 	if response.Code != enums.ReturnCodeSUCCESS {
 		return RdVersionResponse{}, errors.New("invalid return code")

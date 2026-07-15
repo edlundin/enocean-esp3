@@ -34,3 +34,5 @@ coverage.html
 .DS_Store
 
 /coverage
+
+.pi-subagents

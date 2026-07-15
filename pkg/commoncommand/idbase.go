@@ -21,10 +21,12 @@ type WrIDBase struct {
 	IDBase      deviceid.DeviceID   `enocean-esp3:"data"`
 }
 
+// Serialize encodes WrIDBase into its wire representation.
 func (cmd *WrIDBase) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewWrIDBase constructs WrIDBase.
 func NewWrIDBase(deviceID deviceid.DeviceID) (WrIDBase, error) {
 	if deviceID < minBaseID || deviceID > maxBaseID {
 		return WrIDBase{}, errors.New("device ID out of range")
@@ -44,10 +46,12 @@ type RdIDBase struct {
 	CommandCode enums.CommonCommand `enocean-esp3:"data"`
 }
 
+// Serialize encodes RdIDBase into its wire representation.
 func (cmd *RdIDBase) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewRdIDBase constructs RdIDBase.
 func NewRdIDBase() (RdIDBase, error) {
 	return RdIDBase{
 		CommandCode: enums.CommonCommandRD_IDBASE,
@@ -59,6 +63,7 @@ type RdIDBaseResponse struct {
 	RemainingWriteCount uint8
 }
 
+// ParseRdIDBaseResponseOK parses RdIDBaseResponseOK.
 func ParseRdIDBaseResponseOK(response response.Packet) (RdIDBaseResponse, error) {
 	if response.Code != enums.ReturnCodeSUCCESS {
 		return RdIDBaseResponse{}, errors.New("invalid return code")

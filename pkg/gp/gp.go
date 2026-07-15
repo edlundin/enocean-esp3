@@ -37,10 +37,12 @@ type ResponseHeader struct {
 	Result         Result
 }
 
+// IsRorg reports whether its condition holds.
 func IsRorg(r enums.Rorg) bool {
 	return r == enums.RorgGP_TI || r == enums.RorgGP_TR || r == enums.RorgGP_CD || r == enums.RorgGP_SD
 }
 
+// EncodeRequestHeader encodes RequestHeader.
 func EncodeRequestHeader(h RequestHeader) ([]byte, error) {
 	if h.ManufacturerID > 0x7ff || h.Purpose > PurposeToggle {
 		return nil, errors.New("invalid GP teach-in request header")
@@ -55,6 +57,7 @@ func EncodeRequestHeader(h RequestHeader) ([]byte, error) {
 	return out, nil
 }
 
+// DecodeRequestHeader decodes RequestHeader.
 func DecodeRequestHeader(data []byte) (RequestHeader, error) {
 	word, err := readUnsigned(data, 0, 16)
 	if err != nil {
@@ -66,6 +69,7 @@ func DecodeRequestHeader(data []byte) (RequestHeader, error) {
 	return RequestHeader{ManufacturerID: uint16(word >> 5), Bidirectional: word&(1<<4) != 0, Purpose: Purpose((word >> 2) & 0x3)}, nil
 }
 
+// EncodeResponseHeader encodes ResponseHeader.
 func EncodeResponseHeader(h ResponseHeader) ([]byte, error) {
 	if h.ManufacturerID > 0x7ff || h.Result > ResultRejectedChannels {
 		return nil, errors.New("invalid GP teach-in response header")
@@ -75,6 +79,7 @@ func EncodeResponseHeader(h ResponseHeader) ([]byte, error) {
 	return out, nil
 }
 
+// DecodeResponseHeader decodes ResponseHeader.
 func DecodeResponseHeader(data []byte) (ResponseHeader, error) {
 	word, err := readUnsigned(data, 0, 16)
 	if err != nil {
@@ -109,12 +114,18 @@ type Channel struct {
 	SignalType     byte
 	ValueType      ValueType
 	ResolutionCode byte
-	EngineeringMin byte
+	EngineeringMin byte // Two's-complement; use EngineeringRange for signed values.
 	ScalingMin     byte
-	EngineeringMax byte
+	EngineeringMax byte // Two's-complement; use EngineeringRange for signed values.
 	ScalingMax     byte
 }
 
+// EngineeringRange returns the channel engineering range.
+func (c Channel) EngineeringRange() (int8, int8) {
+	return int8(c.EngineeringMin), int8(c.EngineeringMax)
+}
+
+// ResolutionBits returns the number of bits used for channel resolution.
 func ResolutionBits(code byte) (int, bool) {
 	bits := [...]int{0, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32}
 	if int(code) >= len(bits) || bits[code] == 0 {
@@ -123,6 +134,7 @@ func ResolutionBits(code byte) (int, bool) {
 	return bits[code], true
 }
 
+// ValueBits returns the number of bits used for a channel value.
 func (c Channel) ValueBits() (int, error) {
 	switch c.Type {
 	case ChannelFlag:
@@ -139,6 +151,7 @@ func (c Channel) ValueBits() (int, error) {
 	}
 }
 
+// EncodeChannelDefinition encodes ChannelDefinition.
 func EncodeChannelDefinition(c Channel) ([]byte, int, error) {
 	bits, err := channelDefinitionBits(c)
 	if err != nil {
@@ -151,6 +164,7 @@ func EncodeChannelDefinition(c Channel) ([]byte, int, error) {
 	return out, bits, nil
 }
 
+// DecodeChannelDefinition decodes ChannelDefinition.
 func DecodeChannelDefinition(data []byte, bitOffset int) (Channel, int, error) {
 	ct, err := readUnsigned(data, bitOffset, 2)
 	if err != nil {
@@ -178,6 +192,7 @@ func DecodeChannelDefinition(data []byte, bitOffset int) (Channel, int, error) {
 	return c, bits, nil
 }
 
+// channelDefinitionBits returns the encoded channel-definition size.
 func channelDefinitionBits(c Channel) (int, error) {
 	switch c.Type {
 	case ChannelData:
@@ -191,6 +206,7 @@ func channelDefinitionBits(c Channel) (int, error) {
 	}
 }
 
+// writeChannelDefinition writes ChannelDefinition.
 func writeChannelDefinition(out []byte, bitOffset int, c Channel) error {
 	if err := writeUnsigned(out, bitOffset, 2, uint64(c.Type)); err != nil {
 		return err
@@ -209,6 +225,7 @@ func writeChannelDefinition(out []byte, bitOffset int, c Channel) error {
 	return nil
 }
 
+// mustRead reads a bit field or fails the test.
 func mustRead(data []byte, off, size int) uint64 {
 	v, _ := readUnsigned(data, off, size)
 	return v

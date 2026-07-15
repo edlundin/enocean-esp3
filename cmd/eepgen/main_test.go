@@ -26,7 +26,8 @@ const tinyEEPXML = `<?xml version="1.0"?>
             <bitoffs>8</bitoffs>
             <bitsize>8</bitsize>
             <range><min>0</min><max>255</max></range>
-            <scale><min>-40</min><max>60</max><unit>°C</unit></scale>
+            <scale><min>-40</min><max>60</max></scale>
+            <unit>°C</unit>
             <enum>
               <item><value>0</value><description>Off - disabled</description></item>
               <item><value>1</value><description>On, enabled</description></item>
@@ -49,6 +50,7 @@ const tinyEEPXML = `<?xml version="1.0"?>
   </rorg>
 </eep>`
 
+// TestRunGeneratesProfilesFromFlags verifies RunGeneratesProfilesFromFlags behavior.
 func TestRunGeneratesProfilesFromFlags(t *testing.T) {
 	xmlPath := writeXML(t)
 	outDir := t.TempDir()
@@ -82,6 +84,7 @@ func TestRunGeneratesProfilesFromFlags(t *testing.T) {
 	}
 }
 
+// TestRunUsesDefaultPaths verifies RunUsesDefaultPaths behavior.
 func TestRunUsesDefaultPaths(t *testing.T) {
 	t.Chdir(t.TempDir())
 	if err := os.WriteFile("eep268.xml", []byte(tinyEEPXML), 0o644); err != nil {
@@ -97,12 +100,14 @@ func TestRunUsesDefaultPaths(t *testing.T) {
 	}
 }
 
+// TestRunReturnsFlagErrors verifies RunReturnsFlagErrors behavior.
 func TestRunReturnsFlagErrors(t *testing.T) {
 	if err := run(flag.NewFlagSet("eepgen", flag.ContinueOnError), []string{"-nope"}); err == nil {
 		t.Fatal("run() error = nil, want flag parse error")
 	}
 }
 
+// TestRunReturnsGenerateErrors verifies RunReturnsGenerateErrors behavior.
 func TestRunReturnsGenerateErrors(t *testing.T) {
 	outDir := t.TempDir()
 	if err := run(flag.NewFlagSet("eepgen", flag.ContinueOnError), []string{"-xml", filepath.Join(t.TempDir(), "missing.xml"), "-out", outDir}); err == nil {
@@ -110,6 +115,7 @@ func TestRunReturnsGenerateErrors(t *testing.T) {
 	}
 }
 
+// writeXML writes XML.
 func writeXML(t *testing.T) string {
 	t.Helper()
 	path := filepath.Join(t.TempDir(), "eep.xml")
@@ -119,6 +125,7 @@ func writeXML(t *testing.T) string {
 	return path
 }
 
+// readGenerated reads Generated.
 func readGenerated(t *testing.T, outDir string) string {
 	t.Helper()
 	b, err := os.ReadFile(filepath.Join(outDir, "profiles_gen.go"))

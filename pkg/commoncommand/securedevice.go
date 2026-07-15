@@ -22,10 +22,12 @@ type WrSecureDeviceAdd struct {
 	TeachInInfo         uint8                       `enocean-esp3:"optdata"`
 }
 
+// Serialize encodes WrSecureDeviceAdd into its wire representation.
 func (cmd *WrSecureDeviceAdd) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewWrSecureDeviceAdd constructs WrSecureDeviceAdd.
 func NewWrSecureDeviceAdd(securityLevelFormat uint8, deviceID deviceid.DeviceID, securityKey [16]byte, rollingCode [3]byte, direction enums.SecureDeviceDirection, ptmModule uint8, teachInfo uint8) (WrSecureDeviceAdd, error) {
 	if teachInfo > 0x0f {
 		return WrSecureDeviceAdd{}, errors.New("teach info out of range: only half a byte is allowed, use NewWrSecureDeviceV2Add 1-byte teach-in info")
@@ -49,10 +51,12 @@ type WrSecureDeviceDel struct {
 	Direction   enums.SecureDeviceDirection `enocean-esp3:"optdata"`
 }
 
+// Serialize encodes WrSecureDeviceDel into its wire representation.
 func (cmd *WrSecureDeviceDel) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewWrSecureDeviceDel constructs WrSecureDeviceDel.
 func NewWrSecureDeviceDel(deviceID deviceid.DeviceID, direction enums.SecureDeviceDirection) (WrSecureDeviceDel, error) {
 	return WrSecureDeviceDel{
 		CommandCode: enums.CommonCommandWR_SECUREDEVICE_DEL,
@@ -67,10 +71,12 @@ type RdSecureDeviceByIndex struct {
 	Direction   enums.SecureDeviceDirection `enocean-esp3:"optdata"`
 }
 
+// Serialize encodes RdSecureDeviceByIndex into its wire representation.
 func (cmd *RdSecureDeviceByIndex) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewRdSecureDeviceByIndex constructs RdSecureDeviceByIndex.
 func NewRdSecureDeviceByIndex(index uint8, direction enums.SecureDeviceDirection) (RdSecureDeviceByIndex, error) {
 	if index > 0xfe {
 		return RdSecureDeviceByIndex{}, errors.New("index must be between 0 and 254")
@@ -92,6 +98,7 @@ type RdSecureDeviceByIndexResponse struct {
 	TeachInInfo         uint8
 }
 
+// ParseRdSecureDeviceByIndexResponseOK parses RdSecureDeviceByIndexResponseOK.
 func ParseRdSecureDeviceByIndexResponseOK(response response.Packet) (RdSecureDeviceByIndexResponse, error) {
 	if response.Code != enums.ReturnCodeSUCCESS {
 		return RdSecureDeviceByIndexResponse{}, errors.New("invalid return code")
@@ -114,10 +121,12 @@ type RdNumSecureDevices struct {
 	Direction   enums.SecureDeviceDirection `enocean-esp3:"optdata"`
 }
 
+// Serialize encodes RdNumSecureDevices into its wire representation.
 func (cmd *RdNumSecureDevices) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewRdNumSecureDevices constructs RdNumSecureDevices.
 func NewRdNumSecureDevices(direction enums.SecureDeviceDirection) (RdNumSecureDevices, error) {
 	return RdNumSecureDevices{
 		CommandCode: enums.CommonCommandRD_NUMSECUREDEVICES,
@@ -129,6 +138,7 @@ type RdNumSecureDevicesResponse struct {
 	NumSecureDevices uint8
 }
 
+// ParseRdNumSecureDevicesResponseOK parses RdNumSecureDevicesResponseOK.
 func ParseRdNumSecureDevicesResponseOK(response response.Packet) (RdNumSecureDevicesResponse, error) {
 	if response.Code != enums.ReturnCodeSUCCESS {
 		return RdNumSecureDevicesResponse{}, errors.New("invalid return code")
@@ -148,10 +158,12 @@ type RdSecureDeviceByID struct {
 	Direction   enums.SecureDeviceDirection `enocean-esp3:"optdata"`
 }
 
+// Serialize encodes RdSecureDeviceByID into its wire representation.
 func (cmd *RdSecureDeviceByID) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewRdSecureDeviceByID constructs RdSecureDeviceByID.
 func NewRdSecureDeviceByID(deviceID deviceid.DeviceID, direction enums.SecureDeviceDirection) (RdSecureDeviceByID, error) {
 	return RdSecureDeviceByID{
 		CommandCode: enums.CommonCommandRD_SECUREDEVICE_BY_ID,
@@ -165,6 +177,7 @@ type RdSecureDeviceByIDResponse struct {
 	Index               uint8
 }
 
+// ParseRdSecureDeviceByIDResponseOK parses RdSecureDeviceByIDResponseOK.
 func ParseRdSecureDeviceByIDResponseOK(response response.Packet) (RdSecureDeviceByIDResponse, error) {
 	if response.Code != enums.ReturnCodeSUCCESS {
 		return RdSecureDeviceByIDResponse{}, errors.New("invalid return code")
@@ -188,10 +201,12 @@ type WrSecureDeviceAddPSK struct {
 	PSK         [16]byte            `enocean-esp3:"data"`
 }
 
+// Serialize encodes WrSecureDeviceAddPSK into its wire representation.
 func (cmd *WrSecureDeviceAddPSK) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewWrSecureDeviceAddPSK constructs WrSecureDeviceAddPSK.
 func NewWrSecureDeviceAddPSK(deviceID deviceid.DeviceID, psk [16]byte) (WrSecureDeviceAddPSK, error) {
 	return WrSecureDeviceAddPSK{
 		CommandCode: enums.CommonCommandWR_SECUREDEVICE_ADD_PSK,
@@ -206,10 +221,12 @@ type WrSecureDeviceSendTeachIn struct {
 	TeachInInfo uint8               `enocean-esp3:"optdata"`
 }
 
+// Serialize encodes WrSecureDeviceSendTeachIn into its wire representation.
 func (cmd *WrSecureDeviceSendTeachIn) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewWrSecureDeviceSendTeachIn constructs WrSecureDeviceSendTeachIn.
 func NewWrSecureDeviceSendTeachIn(deviceID deviceid.DeviceID, teachInInfo uint8) (WrSecureDeviceSendTeachIn, error) {
 	return WrSecureDeviceSendTeachIn{
 		CommandCode: enums.CommonCommandWR_SECUREDEVICE_SENDTEACHIN,
@@ -224,10 +241,12 @@ type WrTemporaryRLCWindow struct {
 	RLCWindow   uint32              `enocean-esp3:"data"`
 }
 
+// Serialize encodes WrTemporaryRLCWindow into its wire representation.
 func (cmd *WrTemporaryRLCWindow) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewWrTemporaryRLCWindow constructs WrTemporaryRLCWindow.
 func NewWrTemporaryRLCWindow(enable bool, rlcWindow uint32) (WrTemporaryRLCWindow, error) {
 	return WrTemporaryRLCWindow{
 		CommandCode: enums.CommonCommandWR_TEMPORARY_RLC_WINDOW,
@@ -241,10 +260,12 @@ type RdSecureDevicePSK struct {
 	DeviceID    deviceid.DeviceID   `enocean-esp3:"data"` // Use 0x00000000 for current device, other IDs will return the PSK for the device with the given ID
 }
 
+// Serialize encodes RdSecureDevicePSK into its wire representation.
 func (cmd *RdSecureDevicePSK) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewRdSecureDevicePSK constructs RdSecureDevicePSK.
 func NewRdSecureDevicePSK(deviceID deviceid.DeviceID, direction enums.SecureDeviceDirection) (RdSecureDevicePSK, error) {
 	return RdSecureDevicePSK{
 		CommandCode: enums.CommonCommandRD_SECUREDEVICE_PSK,
@@ -256,6 +277,7 @@ type RdSecureDevicePSKResponse struct {
 	PSK [16]byte
 }
 
+// ParseRdSecureDevicePSKResponseOK parses RdSecureDevicePSKResponseOK.
 func ParseRdSecureDevicePSKResponseOK(response response.Packet) (RdSecureDevicePSKResponse, error) {
 	if response.Code != enums.ReturnCodeSUCCESS {
 		return RdSecureDevicePSKResponse{}, errors.New("invalid return code")
@@ -274,10 +296,12 @@ type WrRLCSavePeriod struct {
 	SavePeriod  uint8               `enocean-esp3:"data"`
 }
 
+// Serialize encodes WrRLCSavePeriod into its wire representation.
 func (cmd *WrRLCSavePeriod) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewWrRLCSavePeriod constructs WrRLCSavePeriod.
 func NewWrRLCSavePeriod(savePeriod uint8) (WrRLCSavePeriod, error) {
 	return WrRLCSavePeriod{
 		CommandCode: enums.CommonCommandWR_RLC_SAVE_PERIOD,
@@ -290,10 +314,12 @@ type WrRLCLegacyMode struct {
 	RLCMode     enums.RLCMode       `enocean-esp3:"data"`
 }
 
+// Serialize encodes WrRLCLegacyMode into its wire representation.
 func (cmd *WrRLCLegacyMode) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewWrRLCLegacyMode constructs WrRLCLegacyMode.
 func NewWrRLCLegacyMode(rlcMode enums.RLCMode) (WrRLCLegacyMode, error) {
 	if !rlcMode.Valid() {
 		return WrRLCLegacyMode{}, errors.New("invalid RLC mode")
@@ -314,6 +340,7 @@ type WrSecureDeviceV2Add struct {
 	Direction           enums.SecureDeviceDirection `enocean-esp3:"optdata"`
 }
 
+// Serialize encodes WrSecureDeviceV2Add into its wire representation.
 func (cmd *WrSecureDeviceV2Add) Serialize() (esp3.Telegram, error) {
 	if cmd.Direction != enums.SecureDeviceDirectionINBOUND_TABLE &&
 		cmd.Direction != enums.SecureDeviceDirectionOUTBOUND_TABLE &&
@@ -324,6 +351,7 @@ func (cmd *WrSecureDeviceV2Add) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewWrSecureDeviceV2Add constructs WrSecureDeviceV2Add.
 func NewWrSecureDeviceV2Add(securityLevelFormat uint8, deviceID deviceid.DeviceID, privateKey [16]byte, rollingCode uint32, direction enums.SecureDeviceDirection) (WrSecureDeviceV2Add, error) {
 	return WrSecureDeviceV2Add{
 		CommandCode:         enums.CommonCommandWR_SECUREDEVICEV2_ADD,
@@ -341,6 +369,7 @@ type RdSecureDeviceV2ByIndex struct {
 	Direction   enums.SecureDeviceDirection `enocean-esp3:"optdata"`
 }
 
+// Serialize encodes RdSecureDeviceV2ByIndex into its wire representation.
 func (cmd *RdSecureDeviceV2ByIndex) Serialize() (esp3.Telegram, error) {
 	if cmd.Index > 0xfe {
 		return esp3.Telegram{}, errors.New("index must be between 0 and 254")
@@ -353,6 +382,7 @@ func (cmd *RdSecureDeviceV2ByIndex) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewRdSecureDeviceV2ByIndex constructs RdSecureDeviceV2ByIndex.
 func NewRdSecureDeviceV2ByIndex(index uint8, direction enums.SecureDeviceDirection) (RdSecureDeviceV2ByIndex, error) {
 	if index > 0xfe {
 		return RdSecureDeviceV2ByIndex{}, errors.New("index must be between 0 and 254")
@@ -373,6 +403,7 @@ type RdSecureDeviceV2ByIndexResponse struct {
 	PSK                 [16]byte
 }
 
+// ParseRdSecureDeviceV2ByIndexResponseOK parses RdSecureDeviceV2ByIndexResponseOK.
 func ParseRdSecureDeviceV2ByIndexResponseOK(response response.Packet) (RdSecureDeviceV2ByIndexResponse, error) {
 	if response.Code != enums.ReturnCodeSUCCESS {
 		return RdSecureDeviceV2ByIndexResponse{}, errors.New("invalid return code")
@@ -397,6 +428,7 @@ type WrSecureDeviceRemanKey struct {
 	RemanKeyNumber uint8               `enocean-esp3:"data"`
 }
 
+// Serialize encodes WrSecureDeviceRemanKey into its wire representation.
 func (cmd *WrSecureDeviceRemanKey) Serialize() (esp3.Telegram, error) {
 	if cmd.RemanKeyNumber < 1 || cmd.RemanKeyNumber > 0x0f {
 		return esp3.Telegram{}, errors.New("reman key number must be between 1 and 15")
@@ -405,6 +437,7 @@ func (cmd *WrSecureDeviceRemanKey) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewWrSecureDeviceRemainCode constructs a secure-device ReMan key command.
 func NewWrSecureDeviceRemainCode(deviceID deviceid.DeviceID, remanKey [16]byte, remanKeyNumber uint8) (WrSecureDeviceRemanKey, error) {
 	return WrSecureDeviceRemanKey{
 		CommandCode:    enums.CommonCommandWR_SECUREDEVICE_REMAN_KEY,
@@ -419,6 +452,7 @@ type RdSecureDeviceRemanKey struct {
 	Index       uint8               `enocean-esp3:"data"`
 }
 
+// Serialize encodes RdSecureDeviceRemanKey into its wire representation.
 func (cmd *RdSecureDeviceRemanKey) Serialize() (esp3.Telegram, error) {
 	if cmd.Index < 1 || cmd.Index > 0x0f {
 		return esp3.Telegram{}, errors.New("index must be between 1 and 15")
@@ -427,6 +461,7 @@ func (cmd *RdSecureDeviceRemanKey) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewRdSecureDeviceRemanKey constructs RdSecureDeviceRemanKey.
 func NewRdSecureDeviceRemanKey(index uint8) (RdSecureDeviceRemanKey, error) {
 	return RdSecureDeviceRemanKey{
 		CommandCode: enums.CommonCommandRD_SECUREDEVICE_REMAN_KEY,
@@ -443,6 +478,7 @@ type RdSecureDeviceRemanKeyResponse struct {
 	OutboundRollingCode uint32
 }
 
+// ParseRdSecureDeviceRemanKeyResponseOK parses RdSecureDeviceRemanKeyResponseOK.
 func ParseRdSecureDeviceRemanKeyResponseOK(response response.Packet) (RdSecureDeviceRemanKeyResponse, error) {
 	if response.Code != enums.ReturnCodeSUCCESS {
 		return RdSecureDeviceRemanKeyResponse{}, errors.New("invalid return code")

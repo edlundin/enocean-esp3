@@ -9,7 +9,10 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/erp1"
 )
 
-const MaxChainParts = 64
+const (
+	MaxChainParts = 64
+	MaxChainData  = 10 + 13*(MaxChainParts-1)
+)
 
 type ChainPart struct {
 	Seq, Index byte
@@ -17,11 +20,12 @@ type ChainPart struct {
 	Data       []byte
 }
 
+// SplitSEC_CDM splits SEC_CDM.
 func SplitSEC_CDM(seq byte, data []byte) ([]erp1.Packet, error) {
 	if seq == 0 || seq > 3 {
 		return nil, fmt.Errorf("invalid seq %d", seq)
 	}
-	if len(data) > 16+13*(MaxChainParts-1) {
+	if len(data) > MaxChainData {
 		return nil, fmt.Errorf("chain data too long")
 	}
 	first := make([]byte, 2, 18)
@@ -42,12 +46,13 @@ func SplitSEC_CDM(seq byte, data []byte) ([]erp1.Packet, error) {
 	return out, nil
 }
 
+// ParseSEC_CDM parses SEC_CDM.
 func ParseSEC_CDM(p erp1.Packet) (ChainPart, error) {
 	if p.Rorg != enums.RorgSEC_CDM {
 		return ChainPart{}, errors.New("not SEC_CDM")
 	}
-	if len(p.UserData) < 2 {
-		return ChainPart{}, errors.New("SEC_CDM too short")
+	if len(p.UserData) < 2 || len(p.UserData) > 14 {
+		return ChainPart{}, errors.New("invalid SEC_CDM length")
 	}
 	seq, idx := p.UserData[0]>>6, p.UserData[0]&0x3f
 	if seq == 0 {
@@ -59,6 +64,9 @@ func ParseSEC_CDM(p erp1.Packet) (ChainPart, error) {
 			return ChainPart{}, errors.New("SEC_CDM first part too short")
 		}
 		part.Length = int(p.UserData[1])<<8 | int(p.UserData[2])
+		if part.Length > MaxChainData || len(p.UserData) > 13 {
+			return ChainPart{}, errors.New("invalid SEC_CDM first part")
+		}
 		part.Data = append([]byte(nil), p.UserData[3:]...)
 	} else {
 		part.Data = append([]byte(nil), p.UserData[1:]...)
@@ -66,6 +74,7 @@ func ParseSEC_CDM(p erp1.Packet) (ChainPart, error) {
 	return part, nil
 }
 
+// MergeSEC_CDM merges SEC_CDM.
 func MergeSEC_CDM(parts []ChainPart) ([]byte, bool, error) {
 	if len(parts) == 0 {
 		return nil, false, nil
@@ -77,7 +86,7 @@ func MergeSEC_CDM(parts []ChainPart) ([]byte, bool, error) {
 	}
 	seen := map[byte]bool{}
 	var data []byte
-	for _, p := range parts {
+	for i, p := range parts {
 		if p.Seq != first.Seq {
 			return nil, false, errors.New("mixed seq")
 		}
@@ -85,10 +94,16 @@ func MergeSEC_CDM(parts []ChainPart) ([]byte, bool, error) {
 			return nil, false, fmt.Errorf("duplicate index %d", p.Index)
 		}
 		seen[p.Index] = true
+		if p.Index != byte(i) {
+			return nil, false, nil
+		}
 		data = append(data, p.Data...)
 	}
 	if len(data) < first.Length {
 		return nil, false, nil
 	}
-	return data[:first.Length], true, nil
+	if len(data) > first.Length {
+		return nil, false, errors.New("SEC_CDM data exceeds declared length")
+	}
+	return data, true, nil
 }

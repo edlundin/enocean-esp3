@@ -8,6 +8,8 @@ tasks:
     desc: Run tests and generate coverage report
     cmds:
       - mkdir -p coverage
-      - go test ./... -coverprofile=coverage/coverage.raw.out
+      - go test ./... -covermode=atomic -coverprofile=coverage/coverage.raw.out
       - grep -v '/profiles_gen.go:' coverage/coverage.raw.out > coverage/coverage.out
+      - go tool cover -func=coverage/coverage.out | tee coverage/coverage.func.txt
+      - awk '/^total:/ { sub(/%/, "", $3); if ($3 + 0 < 88) { print "coverage below 88%"; exit 1 } }' coverage/coverage.func.txt
       - go tool cover -html=coverage/coverage.out -o coverage/coverage.html

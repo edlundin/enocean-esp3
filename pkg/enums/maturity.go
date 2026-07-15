@@ -10,6 +10,7 @@ const (
 	MaturityFORWARD_SUBTELEGRAMS
 )
 
+// ParseMaturityFromByte parses a Maturity from a byte.
 func ParseMaturityFromByte(b byte) (Maturity, error) {
 	switch b {
 	case 0x00:
@@ -23,6 +24,7 @@ func ParseMaturityFromByte(b byte) (Maturity, error) {
 	}
 }
 
+// String returns the string representation of Maturity.
 func (maturity Maturity) String() string {
 	switch maturity {
 	case MaturityFORWARDED_IMMEDIATELY:
@@ -36,6 +38,7 @@ func (maturity Maturity) String() string {
 	}
 }
 
+// Valid reports whether Maturity is valid.
 func (maturity Maturity) Valid() bool {
 	switch maturity {
 	case MaturityFORWARDED_IMMEDIATELY,

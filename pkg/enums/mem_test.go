@@ -2,6 +2,7 @@ package enums
 
 import "testing"
 
+// TestMemoryType verifies MemoryType behavior.
 func TestMemoryType(t *testing.T) {
 	cases := []struct{ b byte; v MemoryType; s string }{
 		{0x00, MemoryTypeFLASH, "FLASH"}, {0x01, MemoryTypeRAM0, "RAM0"},
@@ -16,6 +17,7 @@ func TestMemoryType(t *testing.T) {
 	if MemoryType(0xff).String() != "UNKNOWN" || MemoryType(0xff).Valid() { t.Fatal("invalid memory type accepted") }
 }
 
+// TestMemoryArea verifies MemoryArea behavior.
 func TestMemoryArea(t *testing.T) {
 	cases := []struct{ b byte; v MemoryArea; s string }{
 		{0x00, MemoryAreaCONFIG, "CONFIG"},

@@ -16,6 +16,7 @@ type WrMem struct {
 	Data        []byte              `enocean-esp3:"data"`
 }
 
+// Serialize encodes WrMem into its wire representation.
 func (cmd *WrMem) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
@@ -37,10 +38,12 @@ type RdMem struct {
 	DataLength  uint16              `enocean-esp3:"data"`
 }
 
+// Serialize encodes RdMem into its wire representation.
 func (cmd *RdMem) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewRdMem constructs RdMem.
 func NewRdMem(memoryType enums.MemoryType, address uint32, dataLength uint16) (RdMem, error) {
 	return RdMem{
 		CommandCode: enums.CommonCommandRD_MEM,
@@ -54,6 +57,7 @@ type RdMemResponse struct {
 	Data []byte
 }
 
+// ParseRdMemResponseOK parses RdMemResponseOK.
 func ParseRdMemResponseOK(response response.Packet) (RdMemResponse, error) {
 	if response.Code != enums.ReturnCodeSUCCESS {
 		return RdMemResponse{}, errors.New("invalid return code")
@@ -69,10 +73,12 @@ type RdMemAddress struct {
 	Area        enums.MemoryArea    `enocean-esp3:"data"`
 }
 
+// Serialize encodes RdMemAddress into its wire representation.
 func (cmd *RdMemAddress) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewRdMemAddress constructs RdMemAddress.
 func NewRdMemAddress(area enums.MemoryArea) (RdMemAddress, error) {
 	return RdMemAddress{
 		CommandCode: enums.CommonCommandRD_MEM_ADDRESS,
@@ -86,6 +92,7 @@ type RdMemAddressResponse struct {
 	Length  uint32
 }
 
+// ParseRdMemAddressResponseOK parses RdMemAddressResponseOK.
 func ParseRdMemAddressResponseOK(response response.Packet) (RdMemAddressResponse, error) {
 	if response.Code != enums.ReturnCodeSUCCESS {
 		return RdMemAddressResponse{}, errors.New("invalid return code")

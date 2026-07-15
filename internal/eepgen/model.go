@@ -39,29 +39,34 @@ type Case struct {
 	Fields []Field `xml:"datafield"`
 }
 type Field struct {
-	Data     string  `xml:"data"`
-	Shortcut string  `xml:"shortcut"`
-	BitOff   string  `xml:"bitoffs"`
-	BitSize  string  `xml:"bitsize"`
-	Enums    []Enum  `xml:"enum"`
-	Ranges   []Range `xml:"range"`
-	Scales   []Scale `xml:"scale"`
+	Data        string  `xml:"data"`
+	Shortcut    string  `xml:"shortcut"`
+	Description string  `xml:"description"`
+	BitOff      string  `xml:"bitoffs"`
+	BitSize     string  `xml:"bitsize"`
+	Unit        string  `xml:"unit"`
+	Enums       []Enum  `xml:"enum"`
+	Ranges      []Range `xml:"range"`
+	Scales      []Scale `xml:"scale"`
 }
 type Enum struct {
 	Items []EnumItem `xml:"item"`
 }
 type EnumItem struct {
-	Value       string `xml:"value"`
-	Description string `xml:"description"`
+	Value       string  `xml:"value"`
+	Min         string  `xml:"min"`
+	Max         string  `xml:"max"`
+	Unit        string  `xml:"unit"`
+	Description string  `xml:"description"`
+	Scales      []Scale `xml:"scale"`
 }
 type Range struct {
 	Min string `xml:"min"`
 	Max string `xml:"max"`
 }
 type Scale struct {
-	Min  string `xml:"min"`
-	Max  string `xml:"max"`
-	Unit string `xml:"unit"`
+	Min string `xml:"min"`
+	Max string `xml:"max"`
 }
 
 type OutProfile struct {
@@ -82,6 +87,7 @@ type OutEnum struct {
 	Description string
 }
 
+// Generate generates Go profile metadata from EEP XML.
 func Generate(xmlPath, outDir string) error {
 	profiles, err := Load(xmlPath)
 	if err != nil {
@@ -101,6 +107,7 @@ func Generate(xmlPath, outDir string) error {
 	return os.WriteFile(filepath.Join(outDir, "profiles_gen.go"), goSrc, 0o644)
 }
 
+// Load loads EEP profiles from XML.
 func Load(path string) ([]OutProfile, error) {
 	root, err := LoadRaw(path)
 	if err != nil {
@@ -133,23 +140,39 @@ func Load(path string) ([]OutProfile, error) {
 							continue
 						}
 						seen[key] = true
-						of := OutField{Name: name, Shortcut: clean(xf.Shortcut), BitOff: bo, BitSize: bs}
-						if len(xf.Ranges) > 0 {
-							of.RawMin = atoi64(xf.Ranges[0].Min)
-							of.RawMax = atoi64(xf.Ranges[0].Max)
+						ranges, scales, unit := xf.Ranges, xf.Scales, xf.Unit
+						if item, ok := numericEnumItem(xf); ok {
+							if len(ranges) == 0 {
+								ranges = []Range{{Min: item.Min, Max: item.Max}}
+							}
+							if len(scales) == 0 {
+								scales = item.Scales
+							}
+							if strings.TrimSpace(unit) == "" {
+								unit = item.Unit
+							}
 						}
-						if len(xf.Scales) > 0 {
-							of.ScaleMin = atof(xf.Scales[0].Min)
-							of.ScaleMax = atof(xf.Scales[0].Max)
-							of.Unit = clean(xf.Scales[0].Unit)
+						of := OutField{Name: name, Shortcut: clean(xf.Shortcut), Unit: clean(unit), BitOff: bo, BitSize: bs}
+						if len(ranges) > 0 {
+							of.RawMin, _ = parseInt(ranges[0].Min)
+							of.RawMax, _ = parseRangeMax(ranges[0].Max, xf.Description)
 						}
+						if len(scales) > 0 {
+							of.ScaleMin, _ = parseFloat(scales[0].Min)
+							of.ScaleMax, _ = parseFloat(scales[0].Max)
+						}
+						seenEnums := map[uint64]bool{}
 						for _, en := range xf.Enums {
 							for _, item := range en.Items {
 								desc := clean(item.Description)
-								if v, err := strconv.ParseUint(strings.TrimSpace(item.Value), 0, 64); err == nil {
+								if v, ok := parseEnumValue(item.Value); ok {
 									of.Enums = append(of.Enums, OutEnum{Raw: v, Name: enumName(desc, v), Description: desc})
+									seenEnums[v] = true
 								}
 							}
+						}
+						if v, desc, ok := describedEnum(xf.Description); ok && !seenEnums[v] {
+							of.Enums = append(of.Enums, OutEnum{Raw: v, Name: enumName(desc, v), Description: desc})
 						}
 						p.Fields = append(p.Fields, of)
 					}
@@ -163,6 +186,7 @@ func Load(path string) ([]OutProfile, error) {
 	return out, nil
 }
 
+// LoadRaw loads the raw EEP XML model.
 func LoadRaw(path string) (EEP, error) {
 	raw, err := os.ReadFile(path)
 	if err != nil {
@@ -179,6 +203,7 @@ func LoadRaw(path string) (EEP, error) {
 	return root, nil
 }
 
+// decodeUTF16 decodes UTF16.
 func decodeUTF16(raw []byte) []byte {
 	if len(raw) < 2 || raw[0] != 0xff || raw[1] != 0xfe {
 		return raw
@@ -191,6 +216,8 @@ func decodeUTF16(raw []byte) []byte {
 	s = strings.Replace(s, `encoding="utf-16le"`, `encoding="utf-8"`, 1)
 	return []byte(s)
 }
+
+// first returns the first non-empty string.
 func first(v ...string) string {
 	for _, s := range v {
 		if strings.TrimSpace(s) != "" {
@@ -199,13 +226,102 @@ func first(v ...string) string {
 	}
 	return ""
 }
+
+// clean normalizes text extracted from EEP XML.
 func clean(s string) string { return strings.Join(strings.Fields(html.UnescapeString(s)), " ") }
+
+// hex2 formats an XML number as two-digit hexadecimal.
 func hex2(s string) string {
 	n, _ := strconv.ParseUint(strings.TrimSpace(s), 0, 8)
 	return fmt.Sprintf("%02X", n)
 }
-func atoi64(s string) int64 { n, _ := strconv.ParseInt(strings.TrimSpace(s), 0, 64); return n }
-func atof(s string) float64 { f, _ := strconv.ParseFloat(strings.TrimSpace(s), 64); return f }
+
+// parseInt parses Int.
+func parseInt(s string) (int64, bool) {
+	n, err := strconv.ParseInt(strings.TrimSpace(s), 0, 64)
+	return n, err == nil
+}
+
+// parseFloat parses Float.
+func parseFloat(s string) (float64, bool) {
+	f, err := strconv.ParseFloat(strings.TrimSpace(s), 64)
+	return f, err == nil
+}
+
+// parseRangeMax parses RangeMax.
+func parseRangeMax(s, description string) (int64, bool) {
+	if max, ok := parseInt(s); ok {
+		return max, true
+	}
+	parts := strings.Split(s, ",")
+	if len(parts) != 2 {
+		return 0, false
+	}
+	max, maxOK := parseInt(parts[0])
+	special, err := strconv.ParseUint(strings.TrimSpace(parts[1]), 0, 64)
+	described, _, describedOK := describedEnum(description)
+	if maxOK && err == nil && describedOK && special == described {
+		return max, true
+	}
+	return 0, false
+}
+
+// parseEnumValue parses EnumValue.
+func parseEnumValue(s string) (uint64, bool) {
+	s = strings.TrimSpace(s)
+	if i := strings.Index(s, " ("); i >= 0 && strings.HasSuffix(s, ")") {
+		s = s[:i]
+	}
+	v, err := strconv.ParseUint(s, 0, 64)
+	return v, err == nil
+}
+
+// numericEnumItem finds an unambiguous numeric enum item.
+func numericEnumItem(f Field) (EnumItem, bool) {
+	var found EnumItem
+	ok := false
+	for _, enum := range f.Enums {
+		for _, item := range enum.Items {
+			if _, minOK := parseInt(item.Min); !minOK {
+				continue
+			}
+			if _, maxOK := parseInt(item.Max); !maxOK || len(item.Scales) == 0 && strings.TrimSpace(item.Unit) == "" {
+				continue
+			}
+			if ok {
+				return EnumItem{}, false
+			}
+			found, ok = item, true
+		}
+	}
+	return found, ok
+}
+
+// describedEnum extracts a sentinel enum from a field description.
+func describedEnum(s string) (uint64, string, bool) {
+	const marker = "value "
+	i := strings.Index(strings.ToLower(s), marker)
+	if i < 0 {
+		return 0, "", false
+	}
+	rest := s[i+len(marker):]
+	eq := strings.Index(rest, "=")
+	if eq < 0 {
+		return 0, "", false
+	}
+	v, err := strconv.ParseUint(strings.TrimSpace(rest[:eq]), 0, 64)
+	if err != nil {
+		return 0, "", false
+	}
+	desc := strings.TrimSpace(rest[eq+1:])
+	if i := strings.IndexAny(desc, ",;."); i >= 0 {
+		desc = desc[:i]
+	}
+	desc = clean(desc)
+	return v, desc, desc != ""
+}
+
+// enumName derives a Go enum name from its description.
 func enumName(desc string, raw uint64) string {
 	name := desc
 	for _, cut := range []string{":", " or ", " (", " - ", ","} {
@@ -241,6 +357,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 )
 
+// init registers generated EEP profile metadata.
 func init() {
 {{- range . }}
 	Registry["{{ .Key }}"] = Profile{EEP: eep.EEP{Rorg: enums.Rorg(0x{{ .Rorg }}), Func: 0x{{ .Func }}, Type: 0x{{ .Type }}}, Title: {{ printf "%q" .Title }}, Fields: []Field{

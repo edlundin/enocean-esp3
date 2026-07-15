@@ -12,6 +12,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/response"
 )
 
+// TestNewRdVersion verifies NewRdVersion behavior.
 func TestNewRdVersion(t *testing.T) {
 	t.Run("creates read version command", func(t *testing.T) {
 		cmd, err := NewRdVersion()
@@ -25,9 +26,13 @@ func TestNewRdVersion(t *testing.T) {
 	})
 }
 
+// TestRdVersion_Serialize verifies RdVersion_Serialize behavior.
 func TestRdVersion_Serialize(t *testing.T) {
 	t.Run("serializes read version command", func(t *testing.T) {
-		cmd, _ := NewRdVersion()
+		cmd, err := NewRdVersion()
+		if err != nil {
+			t.Fatalf("expected no constructor error, got: %v", err)
+		}
 		telegram, err := cmd.Serialize()
 
 		if err != nil {
@@ -35,7 +40,7 @@ func TestRdVersion_Serialize(t *testing.T) {
 		}
 
 		if len(telegram.Data) != 1 {
-			t.Errorf("expected Data length 1, got %d", len(telegram.Data))
+			t.Fatalf("expected Data length 1, got %d", len(telegram.Data))
 		}
 
 		if telegram.Data[0] != byte(enums.CommonCommandRD_VERSION) {
@@ -44,6 +49,7 @@ func TestRdVersion_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseRdVersionResponseOK verifies ParseRdVersionResponseOK behavior.
 func TestParseRdVersionResponseOK(t *testing.T) {
 	t.Run("parses version response", func(t *testing.T) {
 		// Response: AppVersion(4) + ApiVersion(4) + ChipID(4) + ChipVersion(4) + Description(variable)
@@ -166,7 +172,7 @@ func TestParseRdVersionResponseOK(t *testing.T) {
 	})
 }
 
-// Test the custom string deserializer logic directly
+// TestVersionStringDeserializer verifies custom string deserialization.
 func TestVersionStringDeserializer(t *testing.T) {
 	t.Run("custom string deserializer reads all remaining bytes", func(t *testing.T) {
 		stringDeserializer := func(buf *bytes.Reader, v reflect.Value, _ binary.ByteOrder) error {

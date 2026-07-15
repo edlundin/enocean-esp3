@@ -14,10 +14,12 @@ type WrRemanCode struct {
 	SecureCode  uint32              `enocean-esp3:"data"`
 }
 
+// Serialize encodes WrRemanCode into its wire representation.
 func (cmd *WrRemanCode) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewWrRemanCode constructs WrRemanCode.
 func NewWrRemanCode(secureCode uint32) (WrRemanCode, error) {
 	return WrRemanCode{
 		CommandCode: enums.CommonCommandWR_REMAN_CODE,
@@ -33,10 +35,12 @@ type WrRemanRepeating struct {
 	SetRemanRepetition bool `enocean-esp3:"data"`
 }
 
+// Serialize encodes WrRemanRepeating into its wire representation.
 func (cmd *WrRemanRepeating) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewWrRemanRepeating constructs WrRemanRepeating.
 func NewWrRemanRepeating(setRemanRepetition bool) (WrRemanRepeating, error) {
 	return WrRemanRepeating{
 		CommandCode:        enums.CommonCommandWR_REMAN_REPEATING,
@@ -48,10 +52,12 @@ type RdRemanRepeating struct {
 	CommandCode enums.CommonCommand `enocean-esp3:"data"`
 }
 
+// Serialize encodes RdRemanRepeating into its wire representation.
 func (cmd *RdRemanRepeating) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewRdRemanRepeating constructs RdRemanRepeating.
 func NewRdRemanRepeating() (RdRemanRepeating, error) {
 	return RdRemanRepeating{
 		CommandCode: enums.CommonCommandRD_REMAN_REPEATING,
@@ -62,6 +68,7 @@ type RdRemanRepeatingResponse struct {
 	RemanRepetitionEnabled bool
 }
 
+// ParseRdRemanRepeatingResponseOK parses RdRemanRepeatingResponseOK.
 func ParseRdRemanRepeatingResponseOK(response response.Packet) (RdRemanRepeatingResponse, error) {
 	if response.Code != enums.ReturnCodeSUCCESS {
 		return RdRemanRepeatingResponse{}, errors.New("invalid return code")

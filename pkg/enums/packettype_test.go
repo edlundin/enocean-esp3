@@ -4,6 +4,7 @@ import (
 	"testing"
 )
 
+// TestParsePacketTypeFromByte verifies ParsePacketTypeFromByte behavior.
 func TestParsePacketTypeFromByte(t *testing.T) {
 	t.Run("parses all valid packet types correctly", func(t *testing.T) {
 		testCases := []struct {
@@ -58,6 +59,7 @@ func TestParsePacketTypeFromByte(t *testing.T) {
 	})
 }
 
+// TestPacketType_String verifies PacketType_String behavior.
 func TestPacketType_String(t *testing.T) {
 	t.Run("returns correct string for all valid packet types", func(t *testing.T) {
 		testCases := []struct {
@@ -103,6 +105,7 @@ func TestPacketType_String(t *testing.T) {
 	})
 }
 
+// TestPacketTypeValid verifies PacketTypeValid behavior.
 func TestPacketTypeValid(t *testing.T) {
 	t.Run("PacketType_Valid", func(t *testing.T) {
 		// Test valid packet types

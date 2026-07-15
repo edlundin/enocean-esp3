@@ -11,10 +11,12 @@ type WrWaitMaturity struct {
 	Maturity    enums.Maturity      `enocean-esp3:"data"`
 }
 
+// Serialize encodes WrWaitMaturity into its wire representation.
 func (cmd *WrWaitMaturity) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewWrWaitMaturity constructs WrWaitMaturity.
 func NewWrWaitMaturity(maturity enums.Maturity) (WrWaitMaturity, error) {
 	return WrWaitMaturity{
 		CommandCode: enums.CommonCommandWR_WAIT_MATURITY,

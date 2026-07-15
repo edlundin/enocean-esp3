@@ -6,6 +6,7 @@ import (
 	"testing"
 )
 
+// TestProductID verifies ProductID behavior.
 func TestProductID(t *testing.T) {
 	p := ProductID{Manufacturer: 0x0123, Product: 0x456789ab}
 	if got := p.MarshalBinary(); !bytes.Equal(got, []byte{1, 0x23, 0x45, 0x67, 0x89, 0xab}) {
@@ -17,6 +18,7 @@ func TestProductID(t *testing.T) {
 	}
 }
 
+// TestParamRecords verifies ParamRecords behavior.
 func TestParamRecords(t *testing.T) {
 	recs := []ParamRecord{{Index: 0x1234, Value: []byte{1, 2, 3}}, {Index: 0xabcd}}
 	b, err := MarshalParamRecords(recs)
@@ -32,6 +34,7 @@ func TestParamRecords(t *testing.T) {
 	}
 }
 
+// TestParamRecordLimits verifies ParamRecordLimits behavior.
 func TestParamRecordLimits(t *testing.T) {
 	if _, err := MarshalParamRecords([]ParamRecord{{Value: make([]byte, 65)}}); err == nil {
 		t.Fatal("expected value length error")
@@ -41,6 +44,7 @@ func TestParamRecordLimits(t *testing.T) {
 	}
 }
 
+// TestLinkEntry verifies LinkEntry behavior.
 func TestLinkEntry(t *testing.T) {
 	e := LinkEntry{EEP: [3]byte{0xa5, 2, 1}, DeviceID: 0x01020304, Data: [2]byte{0xaa, 0xbb}}
 	if got := e.MarshalBinary(); !bytes.Equal(got, []byte{0xa5, 2, 1, 1, 2, 3, 4, 0xaa, 0xbb}) {

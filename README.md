@@ -138,6 +138,10 @@ Packages are split by layer:
 - `pkg/security`: SEC_R encode/decode, CMAC, SEC_CDM chain helpers
 - `pkg/ddf`: minimal DDF V2 metadata parser
 
+Plain ReMan/ReCom SYS_EX messages do not contain a rolling code. Secure envelopes
+(legacy SEC_MAN or modern SEC_R/SEC_CDM) use the RLC defined by their SLF; RLC
+fields in ReCom security-profile RPCs are configuration state, not an extra envelope.
+
 Example Remote Management message:
 
 ```go

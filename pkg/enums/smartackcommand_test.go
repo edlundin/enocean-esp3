@@ -2,6 +2,7 @@ package enums
 
 import "testing"
 
+// TestSmartAckCommand verifies SmartAckCommand behavior.
 func TestSmartAckCommand(t *testing.T) {
 	cases := []struct{ b byte; v SmartAckCommand; s string }{
 		{0x01, SmartAckCommandWR_LEARN_MODE, "WR_LEARN_MODE"},

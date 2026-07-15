@@ -5,8 +5,11 @@ import (
 	"testing"
 
 	"github.com/edlundin/enocean-esp3/pkg/deviceid"
+	"github.com/edlundin/enocean-esp3/pkg/enums"
+	"github.com/edlundin/enocean-esp3/pkg/erp1"
 )
 
+// TestPacketRoundTrip verifies PacketRoundTrip behavior.
 func TestPacketRoundTrip(t *testing.T) {
 	msg := Message{Seq: 1, ManufacturerID: ManufacturerID, Function: FuncQueryID, Payload: []byte{1, 2, 3, 4, 5, 6, 7, 8, 9}, SourceID: 0x01020304, DestinationID: deviceid.BroadcastId()}
 	packets, err := msg.Packets()
@@ -33,6 +36,7 @@ func TestPacketRoundTrip(t *testing.T) {
 	}
 }
 
+// TestHeaderPacking verifies HeaderPacking behavior.
 func TestHeaderPacking(t *testing.T) {
 	b := make([]byte, 4)
 	putHeader(b, 508, 0x7ff, 0x804)
@@ -42,6 +46,7 @@ func TestHeaderPacking(t *testing.T) {
 	}
 }
 
+// TestMergeNeedsMoreAndDuplicate verifies MergeNeedsMoreAndDuplicate behavior.
 func TestMergeNeedsMoreAndDuplicate(t *testing.T) {
 	msg := Message{Seq: 2, ManufacturerID: 1, Function: 2, Payload: []byte{1, 2, 3, 4, 5}, SourceID: 1}
 	packets, _ := msg.Packets()
@@ -52,8 +57,31 @@ func TestMergeNeedsMoreAndDuplicate(t *testing.T) {
 	if _, _, err := Merge([]Part{p0, p0}); err == nil {
 		t.Fatal("expected duplicate error")
 	}
+	p2, _ := ParsePacket(packets[1])
+	p2.Index = 2
+	if _, done, err := Merge([]Part{p0, p2}); err != nil || done {
+		t.Fatalf("gapped chain done=%v err=%v", done, err)
+	}
 }
 
+// TestPacketsValidateIdentifiers verifies PacketsValidateIdentifiers behavior.
+func TestPacketsValidateIdentifiers(t *testing.T) {
+	valid := Message{Seq: 1, ManufacturerID: 0x7ff, Function: 0xfff}
+	if _, err := valid.Packets(); err != nil {
+		t.Fatalf("valid identifiers rejected: %v", err)
+	}
+	for _, invalid := range []Message{
+		{Seq: 1, ManufacturerID: 0x800, Function: 1},
+		{Seq: 1, ManufacturerID: 1, Function: 0},
+		{Seq: 1, ManufacturerID: 1, Function: 0x1000},
+	} {
+		if _, err := invalid.Packets(); err == nil {
+			t.Fatalf("invalid message accepted: %#v", invalid)
+		}
+	}
+}
+
+// TestCodePayload verifies CodePayload behavior.
 func TestCodePayload(t *testing.T) {
 	b, err := CodePayload(0x12345678)
 	if err != nil || !bytes.Equal(b, []byte{0x12, 0x34, 0x56, 0x78}) {
@@ -64,5 +92,30 @@ func TestCodePayload(t *testing.T) {
 	}
 	if s, err := ParseStatusAnswer([]byte{byte(ReturnSessionClosed)}); err != nil || s.Return != ReturnSessionClosed {
 		t.Fatalf("%#v %v", s, err)
+	}
+}
+
+func TestRejectsMalformedParts(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		length   int
+		function uint16
+	}{
+		{"oversized payload", MaxPayload + 1, FuncQueryID},
+		{"zero function", 0, 0},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			data := make([]byte, 9)
+			data[0] = 0x40
+			putHeader(data[1:5], tc.length, ManufacturerID, tc.function)
+			if _, err := ParsePacket(erp1.Packet{Rorg: enums.RorgSYS_EX, UserData: data}); err == nil {
+				t.Fatal("invalid header accepted")
+			}
+		})
+	}
+
+	parts := []Part{{Seq: 1, Index: 0}, {Seq: 1, Index: 1}}
+	if _, _, err := Merge(parts); err == nil {
+		t.Fatal("excess message part accepted")
 	}
 }

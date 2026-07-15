@@ -2,8 +2,10 @@ package pkg
 
 import (
 	"context"
+	"errors"
 	"io"
 	"reflect"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -11,6 +13,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 	"github.com/edlundin/enocean-esp3/pkg/erp1"
 	"github.com/edlundin/enocean-esp3/pkg/esp3"
+	"github.com/edlundin/enocean-esp3/pkg/event"
 	"github.com/edlundin/enocean-esp3/pkg/gp"
 	"github.com/edlundin/enocean-esp3/pkg/reman"
 	"github.com/edlundin/enocean-esp3/pkg/response"
@@ -19,9 +22,12 @@ import (
 )
 
 type fakePort struct {
-	reads [][]byte
+	reads             [][]byte
+	setReadTimeoutErr error
+	closed            bool
 }
 
+// Read reads the value.
 func (p *fakePort) Read(b []byte) (int, error) {
 	if len(p.reads) == 0 {
 		time.Sleep(time.Millisecond)
@@ -32,18 +38,95 @@ func (p *fakePort) Read(b []byte) (int, error) {
 	return n, nil
 }
 
-func (p *fakePort) Write([]byte) (int, error)                            { return 0, io.ErrClosedPipe }
-func (p *fakePort) SetMode(*serial.Mode) error                           { return nil }
-func (p *fakePort) Drain() error                                         { return nil }
-func (p *fakePort) ResetInputBuffer() error                              { return nil }
-func (p *fakePort) ResetOutputBuffer() error                             { return nil }
-func (p *fakePort) SetDTR(bool) error                                    { return nil }
-func (p *fakePort) SetRTS(bool) error                                    { return nil }
-func (p *fakePort) GetModemStatusBits() (*serial.ModemStatusBits, error) { return nil, nil }
-func (p *fakePort) SetReadTimeout(time.Duration) error                   { return nil }
-func (p *fakePort) Close() error                                         { return nil }
-func (p *fakePort) Break(time.Duration) error                            { return nil }
+// Write writes the value.
+func (p *fakePort) Write([]byte) (int, error) { return 0, io.ErrClosedPipe }
 
+// SetMode updates Mode.
+func (p *fakePort) SetMode(*serial.Mode) error { return nil }
+
+// Drain waits for pending serial writes to complete.
+func (p *fakePort) Drain() error { return nil }
+
+// ResetInputBuffer clears buffered serial input.
+func (p *fakePort) ResetInputBuffer() error { return nil }
+
+// ResetOutputBuffer clears buffered serial output.
+func (p *fakePort) ResetOutputBuffer() error { return nil }
+
+// SetDTR updates DTR.
+func (p *fakePort) SetDTR(bool) error { return nil }
+
+// SetRTS updates RTS.
+func (p *fakePort) SetRTS(bool) error { return nil }
+
+// GetModemStatusBits returns ModemStatusBits.
+func (p *fakePort) GetModemStatusBits() (*serial.ModemStatusBits, error) { return nil, nil }
+
+// SetReadTimeout updates ReadTimeout.
+func (p *fakePort) SetReadTimeout(time.Duration) error { return p.setReadTimeoutErr }
+
+// Close closes the serial port.
+func (p *fakePort) Close() error {
+	p.closed = true
+	return nil
+}
+
+// Break requests a serial break for the supplied duration.
+func (p *fakePort) Break(time.Duration) error { return nil }
+
+type permanentErrorPort struct {
+	fakePort
+	readCalls atomic.Int32
+	unblock   chan struct{}
+}
+
+// Read reads the value.
+func (p *permanentErrorPort) Read([]byte) (int, error) {
+	if p.readCalls.Add(1) == 1 {
+		return 0, io.ErrUnexpectedEOF
+	}
+	<-p.unblock
+	return 0, nil
+}
+
+// TestOpenSerialPortClosesPortWhenReadTimeoutFails verifies OpenSerialPortClosesPortWhenReadTimeoutFails behavior.
+func TestOpenSerialPortClosesPortWhenReadTimeoutFails(t *testing.T) {
+	wantErr := errors.New("timeout setup failed")
+	port := &fakePort{setReadTimeoutErr: wantErr}
+	oldOpen := serialOpen
+	serialOpen = func(string, *serial.Mode) (serial.Port, error) { return port, nil }
+	t.Cleanup(func() { serialOpen = oldOpen })
+
+	gotPort, channels, err := OpenSerialPort(context.Background(), "fake")
+	if !errors.Is(err, wantErr) || gotPort != nil || channels != nil || !port.closed {
+		t.Fatalf("port=%v channels=%v closed=%v err=%v", gotPort, channels, port.closed, err)
+	}
+}
+
+// TestParserStopsAfterPermanentReadError verifies ParserStopsAfterPermanentReadError behavior.
+func TestParserStopsAfterPermanentReadError(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	port := &permanentErrorPort{unblock: make(chan struct{})}
+	defer func() {
+		cancel()
+		close(port.unblock)
+	}()
+	set, channels := newChannelSet(1)
+	go parser(ctx, port, set)
+	select {
+	case _, ok := <-channels.All:
+		if ok {
+			t.Fatal("All channel remained open")
+		}
+	case <-time.After(time.Second):
+		t.Fatal("parser did not stop after read error")
+	}
+	if got := port.readCalls.Load(); got != 1 {
+		t.Fatalf("Read called %d times, want 1", got)
+	}
+}
+
+// TestParserDispatchesTelegramsAndClosesOnCancel verifies ParserDispatchesTelegramsAndClosesOnCancel behavior.
 func TestParserDispatchesTelegramsAndClosesOnCancel(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	want := esp3.NewTelegramFromData(enums.PacketTypeRADIO_ERP1, []byte{0xd2}, []byte{0x00})
@@ -71,6 +154,7 @@ func TestParserDispatchesTelegramsAndClosesOnCancel(t *testing.T) {
 	}
 }
 
+// TestParserDispatchesParsedERP1 verifies ParserDispatchesParsedERP1 behavior.
 func TestParserDispatchesParsedERP1(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -89,6 +173,7 @@ func TestParserDispatchesParsedERP1(t *testing.T) {
 	}
 }
 
+// TestParserDispatchesMergedReMan verifies ParserDispatchesMergedReMan behavior.
 func TestParserDispatchesMergedReMan(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -115,6 +200,7 @@ func TestParserDispatchesMergedReMan(t *testing.T) {
 	}
 }
 
+// TestParserSkipsInvalidPacketType verifies ParserSkipsInvalidPacketType behavior.
 func TestParserSkipsInvalidPacketType(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -130,6 +216,49 @@ func TestParserSkipsInvalidPacketType(t *testing.T) {
 	}
 }
 
+// TestParserAcceptsCRC8DEqualToSyncByte verifies ParserAcceptsCRC8DEqualToSyncByte behavior.
+func TestParserAcceptsCRC8DEqualToSyncByte(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	want := esp3.NewTelegramFromData(enums.PacketTypeCOMMON_COMMAND, []byte{0xc5}, nil)
+	serialized := want.Serialize()
+	if got := serialized[len(serialized)-1]; got != 0x55 {
+		t.Fatalf("test vector CRC8D = %#x, want 0x55", got)
+	}
+	set, channels := newChannelSet(4)
+	go parser(ctx, &fakePort{reads: [][]byte{serialized}}, set)
+	select {
+	case got := <-channels.ESP3:
+		if got.PacketType != want.PacketType || !reflect.DeepEqual(got.Data, want.Data) || len(got.OptData) != 0 {
+			t.Fatalf("telegram mismatch: got %+v want %+v", got, want)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("timed out waiting for telegram")
+	}
+}
+
+// TestParserStreamsZeroPayloadFrame verifies ParserStreamsZeroPayloadFrame behavior.
+func TestParserStreamsZeroPayloadFrame(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	zero := esp3.NewTelegramFromData(enums.PacketTypeCOMMON_COMMAND, []byte{}, []byte{})
+	next := esp3.NewTelegramFromData(enums.PacketTypeCOMMON_COMMAND, []byte{1}, []byte{})
+	set, channels := newChannelSet(4)
+	go parser(ctx, &fakePort{reads: [][]byte{append(zero.Serialize(), next.Serialize()...)}}, set)
+
+	for _, want := range []esp3.Telegram{zero, next} {
+		select {
+		case got := <-channels.ESP3:
+			if !reflect.DeepEqual(got, want) {
+				t.Fatalf("telegram mismatch: got %+v want %+v", got, want)
+			}
+		case <-time.After(time.Second):
+			t.Fatal("timed out waiting for telegram")
+		}
+	}
+}
+
+// TestParserDropsBadCRC8HThenResyncs verifies ParserDropsBadCRC8HThenResyncs behavior.
 func TestParserDropsBadCRC8HThenResyncs(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -150,6 +279,51 @@ func TestParserDropsBadCRC8HThenResyncs(t *testing.T) {
 	}
 }
 
+// TestParserResyncsFromSyncByteInsideBadHeader verifies ParserResyncsFromSyncByteInsideBadHeader behavior.
+func TestParserResyncsFromSyncByteInsideBadHeader(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	want := esp3.NewTelegramFromData(enums.PacketTypeRESPONSE, []byte{byte(enums.ReturnCodeERROR)}, nil)
+	packet := want.Serialize()
+	stream := append([]byte{0x55, 0x00}, packet[:4]...)
+	stream = append(stream, packet[4:]...)
+	set, channels := newChannelSet(4)
+	go parser(ctx, &fakePort{reads: [][]byte{stream}}, set)
+	select {
+	case got := <-channels.Response:
+		if got.Code != enums.ReturnCodeERROR {
+			t.Fatalf("got response code %s", got.Code)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("timed out waiting for parser resync")
+	}
+}
+
+func TestParserResyncsFromSyncByteInBadCRC8D(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	bad := esp3.NewTelegramFromData(enums.PacketTypeRESPONSE, []byte{byte(enums.ReturnCodeSUCCESS), 1}, nil).Serialize()
+	if bad[len(bad)-1] == 0x55 {
+		t.Fatal("bad-frame fixture already has sync byte CRC8D")
+	}
+	bad[len(bad)-1] = 0x55
+
+	want := esp3.NewTelegramFromData(enums.PacketTypeRESPONSE, []byte{byte(enums.ReturnCodeERROR)}, nil)
+	next := want.Serialize()
+	stream := append(bad, next[1:]...)
+	set, channels := newChannelSet(4)
+	go parser(ctx, &fakePort{reads: [][]byte{stream}}, set)
+	select {
+	case got := <-channels.Response:
+		if got.Code != enums.ReturnCodeERROR {
+			t.Fatalf("got response code %s", got.Code)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("timed out waiting for CRC8D resync")
+	}
+}
+
+// TestParseTelegramResponseAndUnparsed verifies ParseTelegramResponseAndUnparsed behavior.
 func TestParseTelegramResponseAndUnparsed(t *testing.T) {
 	remanMessages := newReManAssembler(time.Second)
 	resp := esp3.NewTelegramFromData(enums.PacketTypeRESPONSE, []byte{byte(enums.ReturnCodeSUCCESS), 1, 2}, []byte{3})
@@ -168,6 +342,7 @@ func TestParseTelegramResponseAndUnparsed(t *testing.T) {
 	}
 }
 
+// TestParseTelegramReportsParseErrors verifies ParseTelegramReportsParseErrors behavior.
 func TestParseTelegramReportsParseErrors(t *testing.T) {
 	cases := []esp3.Telegram{
 		esp3.NewTelegramFromData(enums.PacketTypeRESPONSE, nil, nil),
@@ -188,34 +363,90 @@ func TestParseERP1SmartAckAndGPHeader(t *testing.T) {
 		t.Fatalf("smart ack messages = %#v", msgs)
 	}
 
-	header, err := gp.EncodeRequestHeader(gp.RequestHeader{ManufacturerID: 0x123, Bidirectional: true, Purpose: gp.PurposeTeachIn})
+	requestData, err := gp.EncodeRequestHeader(gp.RequestHeader{ManufacturerID: 0x123, Bidirectional: true, Purpose: gp.PurposeTeachIn})
 	if err != nil {
 		t.Fatal(err)
 	}
-	gpPacket := erp1.Packet{Rorg: enums.RorgGP_TI, UserData: header}
-	msgs = parseERP1(newReManAssembler(time.Second), gpPacket.ToEsp3(), gpPacket)
+	request := erp1.Packet{Rorg: enums.RorgGP_TI, UserData: requestData}
+	msgs = parseERP1(newReManAssembler(time.Second), request.ToEsp3(), request)
 	if len(msgs) != 1 || msgs[0].Kind != "gp_header" {
-		t.Fatalf("GP messages = %#v", msgs)
+		t.Fatalf("GP request messages = %#v", msgs)
 	}
 	if got := msgs[0].Data.(gp.RequestHeader); got.ManufacturerID != 0x123 || !got.Bidirectional || got.Purpose != gp.PurposeTeachIn {
-		t.Fatalf("GP header = %#v", got)
+		t.Fatalf("GP request header = %#v", got)
+	}
+
+	responseData, err := gp.EncodeResponseHeader(gp.ResponseHeader{ManufacturerID: 0x321, Result: gp.ResultSuccess})
+	if err != nil {
+		t.Fatal(err)
+	}
+	gpResponse := erp1.Packet{Rorg: enums.RorgGP_TR, UserData: responseData}
+	msgs = parseERP1(newReManAssembler(time.Second), gpResponse.ToEsp3(), gpResponse)
+	if got := msgs[0].Data.(gp.ResponseHeader); got.ManufacturerID != 0x321 || got.Result != gp.ResultSuccess {
+		t.Fatalf("GP response header = %#v", got)
+	}
+
+	gpData := erp1.Packet{Rorg: enums.RorgGP_CD}
+	msgs = parseERP1(newReManAssembler(time.Second), gpData.ToEsp3(), gpData)
+	if got := msgs[0].Data.(erp1.Packet); !reflect.DeepEqual(got, gpData) {
+		t.Fatalf("GP data header = %#v", got)
+	}
+
+	invalid := erp1.Packet{Rorg: enums.RorgGP_TR}
+	msgs = parseERP1(newReManAssembler(time.Second), invalid.ToEsp3(), invalid)
+	if len(msgs) != 1 || msgs[0].Kind != "parse_error" || msgs[0].Err == nil {
+		t.Fatalf("invalid GP messages = %#v", msgs)
 	}
 }
 
 func TestPublishDispatchesTypedChannels(t *testing.T) {
-	set, channels := newChannelSet(2)
+	tests := []struct {
+		message Message
+		want    any
+		receive func(*Channels) any
+	}{
+		{Message{Kind: "esp3", Data: esp3.Telegram{}}, esp3.Telegram{}, func(c *Channels) any { return <-c.ESP3 }},
+		{Message{Kind: "erp1", Data: erp1.Packet{}}, erp1.Packet{}, func(c *Channels) any { return <-c.ERP1 }},
+		{Message{Kind: "response", Data: response.Packet{Code: enums.ReturnCodeSUCCESS}}, response.Packet{Code: enums.ReturnCodeSUCCESS}, func(c *Channels) any { return <-c.Response }},
+		{Message{Kind: "event", Data: event.Packet{}}, event.Packet{}, func(c *Channels) any { return <-c.Event }},
+		{Message{Kind: "smart_ack", Data: smartack.DataReclaim{MailboxIndex: 3}}, smartack.DataReclaim{MailboxIndex: 3}, func(c *Channels) any { return <-c.SmartAck }},
+		{Message{Kind: "reman", Data: reman.Message{Seq: 1}}, reman.Message{Seq: 1}, func(c *Channels) any { return <-c.ReMan }},
+		{Message{Kind: "reman_part", Data: reman.Part{Seq: 1}}, reman.Part{Seq: 1}, func(c *Channels) any { return <-c.ReManPart }},
+		{Message{Kind: "gp_header", Data: gp.RequestHeader{ManufacturerID: 1}}, gp.RequestHeader{ManufacturerID: 1}, func(c *Channels) any { return <-c.GPHeader }},
+		{Message{Kind: "unparsed"}, "unparsed", func(c *Channels) any { return (<-c.Unparsed).Kind }},
+		{Message{Kind: "parse_error", Err: errors.New("bad packet")}, "parse_error", func(c *Channels) any { return (<-c.ParseError).Kind }},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.message.Kind, func(t *testing.T) {
+			set, channels := newChannelSet(2)
+			if !publish(context.Background(), set, []Message{tc.message}) {
+				t.Fatal("publish returned false")
+			}
+			if got := (<-channels.All).Kind; got != tc.message.Kind {
+				t.Fatalf("All received %q, want %q", got, tc.message.Kind)
+			}
+			if got := tc.receive(channels); !reflect.DeepEqual(got, tc.want) {
+				t.Fatalf("typed channel received %#v, want %#v", got, tc.want)
+			}
+		})
+	}
+}
+
+// TestPublishFullAllStillDispatchesTypedChannel verifies PublishFullAllStillDispatchesTypedChannel behavior.
+func TestPublishFullAllStillDispatchesTypedChannel(t *testing.T) {
+	set, channels := newChannelSet(1)
+	set.all <- Message{Kind: "occupied"}
 	msg := Message{Kind: "response", Data: response.Packet{Code: enums.ReturnCodeSUCCESS}}
 	if !publish(context.Background(), set, []Message{msg}) {
 		t.Fatal("publish returned false")
 	}
-	if (<-channels.All).Kind != "response" {
-		t.Fatal("all channel missed message")
-	}
-	if (<-channels.Response).Code != enums.ReturnCodeSUCCESS {
-		t.Fatal("response channel missed message")
+	if got := <-channels.Response; got.Code != enums.ReturnCodeSUCCESS {
+		t.Fatalf("response code = %s", got.Code)
 	}
 }
 
+// TestPublishStopsWhenContextCancelled verifies PublishStopsWhenContextCancelled behavior.
 func TestPublishStopsWhenContextCancelled(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
@@ -225,6 +456,26 @@ func TestPublishStopsWhenContextCancelled(t *testing.T) {
 	}
 }
 
+// TestReManChainPeriod verifies ReManChainPeriod behavior.
+func TestReManChainPeriod(t *testing.T) {
+	if remanChainPeriod != time.Second {
+		t.Fatalf("ReMan chain period = %v", remanChainPeriod)
+	}
+	base := time.Unix(0, 0)
+	key := remanKey{seq: 1}
+	assembler := newReManAssembler(remanChainPeriod)
+	assembler.buffers[key] = remanBuffer{updated: base}
+	assembler.expire(base.Add(remanChainPeriod - time.Nanosecond))
+	if _, ok := assembler.buffers[key]; !ok {
+		t.Fatal("ReMan chain expired before one second")
+	}
+	assembler.expire(base.Add(remanChainPeriod))
+	if _, ok := assembler.buffers[key]; ok {
+		t.Fatal("ReMan chain did not expire at one second")
+	}
+}
+
+// TestSendDropsWhenChannelFull verifies SendDropsWhenChannelFull behavior.
 func TestSendDropsWhenChannelFull(t *testing.T) {
 	ch := make(chan int, 1)
 	ch <- 1

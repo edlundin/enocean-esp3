@@ -16,10 +16,12 @@ type WrLearnMode struct {
 	Channel         uint8               `enocean-esp3:"data"`
 }
 
+// Serialize encodes WrLearnMode into its wire representation.
 func (cmd *WrLearnMode) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewWrLearnMode constructs WrLearnMode.
 func NewWrLearnMode(enableLearnMode bool, timeout uint32, channel uint8) (WrLearnMode, error) {
 	return WrLearnMode{
 		CommandCode:     enums.CommonCommandWR_LEARNMODE,
@@ -34,6 +36,7 @@ type RdLearnModeResponse struct {
 	Channel         uint8
 }
 
+// ParseRdLearnModeResponseOK parses RdLearnModeResponseOK.
 func ParseRdLearnModeResponseOK(response response.Packet) (RdLearnModeResponse, error) {
 	if response.Code != enums.ReturnCodeSUCCESS {
 		return RdLearnModeResponse{}, errors.New("invalid return code")

@@ -9,6 +9,7 @@ const (
 	RadioModeERP2
 )
 
+// ParseRadioModeFromByte parses a RadioMode from a byte.
 func ParseRadioModeFromByte(b byte) (RadioMode, error) {
 	switch b {
 	case 0x00:
@@ -20,6 +21,7 @@ func ParseRadioModeFromByte(b byte) (RadioMode, error) {
 	}
 }
 
+// String returns the string representation of RadioMode.
 func (radioMode RadioMode) String() string {
 	switch radioMode {
 	case RadioModeERP1:
@@ -31,6 +33,7 @@ func (radioMode RadioMode) String() string {
 	}
 }
 
+// Valid reports whether RadioMode is valid.
 func (radioMode RadioMode) Valid() bool {
 	switch radioMode {
 	case RadioModeERP1, RadioModeERP2:

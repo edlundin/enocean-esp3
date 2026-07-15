@@ -15,6 +15,7 @@ const (
 	SmartAckCommandWR_WR_POSTMASTER
 )
 
+// ParseSmartAckCommandFromByte parses a SmartAckCommand from a byte.
 func ParseSmartAckCommandFromByte(b byte) (SmartAckCommand, error) {
 	switch b {
 	case 0x01:
@@ -38,6 +39,7 @@ func ParseSmartAckCommandFromByte(b byte) (SmartAckCommand, error) {
 	}
 }
 
+// String returns the string representation of SmartAckCommand.
 func (command SmartAckCommand) String() string {
 	switch command {
 	case SmartAckCommandWR_LEARN_MODE:
@@ -61,6 +63,7 @@ func (command SmartAckCommand) String() string {
 	}
 }
 
+// Valid reports whether SmartAckCommand is valid.
 func (command SmartAckCommand) Valid() bool {
 	switch command {
 	case SmartAckCommandWR_LEARN_MODE,

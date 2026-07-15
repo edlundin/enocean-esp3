@@ -19,6 +19,7 @@ type Packet struct {
 	EventCode enums.EventCode
 }
 
+// Description returns a human-readable packet description.
 func (p Packet) Description() enums.EventCode {
 	return p.EventCode
 }
@@ -80,6 +81,7 @@ type COLrnModeDisabled struct {
 	Packet
 }
 
+// NewPacketFromEsp3 parses an event from an ESP3 telegram.
 func NewPacketFromEsp3(telegram esp3.Telegram) (Event, error) {
 	if telegram.PacketType != enums.PacketTypeEVENT {
 		return Packet{}, errors.New("invalid packet type")
@@ -191,6 +193,7 @@ func NewPacketFromEsp3(telegram esp3.Telegram) (Event, error) {
 	}
 }
 
+// decodeBinary decodes Binary.
 func decodeBinary(data []byte, out any) error {
 	buf := bytes.NewReader(data)
 	return binary.Read(buf, binary.BigEndian, out)

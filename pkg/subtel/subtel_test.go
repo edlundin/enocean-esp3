@@ -9,6 +9,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/esp3"
 )
 
+// TestNewPacketFromEsp3 verifies NewPacketFromEsp3 behavior.
 func TestNewPacketFromEsp3(t *testing.T) {
 	t.Run("creates packet from valid ESP3 telegram", func(t *testing.T) {
 		// Create a valid ESP3 telegram with RADIO_ERP1 packet type
@@ -66,21 +67,9 @@ func TestNewPacketFromEsp3(t *testing.T) {
 			t.Errorf("expected user data %v, got %v", expectedUserData, packet.UserData)
 		}
 
-		// Check SubTels
-		if len(packet.SubTels) != 2 {
-			t.Errorf("expected 2 SubTels, got %d", len(packet.SubTels))
-		}
-
-		if packet.SubTels[0].Tick != 0x01 {
-			t.Errorf("expected SubTel tick %v, got %v", 0x01, packet.SubTels[0].Tick)
-		}
-
-		if packet.SubTels[0].Rssi != 0x02 {
-			t.Errorf("expected SubTel rssi %v, got %v", 0x02, packet.SubTels[0].Rssi)
-		}
-
-		if packet.SubTels[0].Status != 0x03 {
-			t.Errorf("expected SubTel status %v, got %v", 0x03, packet.SubTels[0].Status)
+		wantSubTels := []SubTel{{Tick: 1, Rssi: 2, Status: 3}, {Tick: 4, Rssi: 5, Status: 6}}
+		if !reflect.DeepEqual(packet.SubTels, wantSubTels) {
+			t.Errorf("expected SubTels %v, got %v", wantSubTels, packet.SubTels)
 		}
 	})
 
@@ -154,35 +143,9 @@ func TestNewPacketFromEsp3(t *testing.T) {
 			t.Errorf("expected no error, got: %s", err)
 		}
 
-		// Should have 3 SubTels
-		if len(packet.SubTels) != 3 {
-			t.Errorf("expected 3 SubTels, got %d", len(packet.SubTels))
-		}
-
-		// First SubTel
-		if packet.SubTels[0].Tick != 0x01 {
-			t.Errorf("expected first SubTel tick %v, got %v", 0x01, packet.SubTels[0].Tick)
-		}
-
-		if packet.SubTels[0].Rssi != 0x02 {
-			t.Errorf("expected first SubTel rssi %v, got %v", 0x02, packet.SubTels[0].Rssi)
-		}
-
-		if packet.SubTels[0].Status != 0x03 {
-			t.Errorf("expected first SubTel status %v, got %v", 0x03, packet.SubTels[0].Status)
-		}
-
-		// Second SubTel
-		if packet.SubTels[1].Tick != 0x04 {
-			t.Errorf("expected second SubTel tick %v, got %v", 0x04, packet.SubTels[1].Tick)
-		}
-
-		if packet.SubTels[1].Rssi != 0x05 {
-			t.Errorf("expected second SubTel rssi %v, got %v", 0x05, packet.SubTels[1].Rssi)
-		}
-
-		if packet.SubTels[1].Status != 0x06 {
-			t.Errorf("expected second SubTel status %v, got %v", 0x06, packet.SubTels[1].Status)
+		wantSubTels := []SubTel{{Tick: 1, Rssi: 2, Status: 3}, {Tick: 4, Rssi: 5, Status: 6}, {Tick: 7, Rssi: 8, Status: 9}}
+		if !reflect.DeepEqual(packet.SubTels, wantSubTels) {
+			t.Errorf("expected SubTels %v, got %v", wantSubTels, packet.SubTels)
 		}
 	})
 
@@ -205,6 +168,7 @@ func TestNewPacketFromEsp3(t *testing.T) {
 	})
 }
 
+// TestPacket_ToEsp3 verifies Packet_ToEsp3 behavior.
 func TestPacket_ToEsp3(t *testing.T) {
 	t.Run("converts packet back to ESP3 telegram", func(t *testing.T) {
 		destinationID, _ := deviceid.FromByteArray([]byte{0xaa, 0xbb, 0xcc, 0xdd})
@@ -281,6 +245,7 @@ func TestPacket_ToEsp3(t *testing.T) {
 	})
 }
 
+// TestPacket_Serialize verifies Packet_Serialize behavior.
 func TestPacket_Serialize(t *testing.T) {
 	t.Run("serializes packet to byte array", func(t *testing.T) {
 		destinationID, _ := deviceid.FromByteArray([]byte{0xaa, 0xbb, 0xcc, 0xdd})
@@ -319,6 +284,7 @@ func TestPacket_Serialize(t *testing.T) {
 	})
 }
 
+// TestSubTel verifies SubTel behavior.
 func TestSubTel(t *testing.T) {
 	t.Run("SubTel struct fields are accessible", func(t *testing.T) {
 		subTel := SubTel{

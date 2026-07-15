@@ -39,10 +39,17 @@ type EEPRef struct {
 	Type      string `xml:"Type,attr"`
 }
 
+// Parse parses a DDF document.
 func Parse(r io.Reader) (File, error) {
 	var f File
 	if err := xml.NewDecoder(r).Decode(&f); err != nil {
 		return File{}, err
+	}
+	if strings.TrimSpace(f.Version) == "" {
+		return File{}, fmt.Errorf("schemaVersion is required")
+	}
+	if len(f.Devices) == 0 {
+		return File{}, fmt.Errorf("at least one Device is required")
 	}
 	for _, d := range f.Devices {
 		if !productIDPattern.MatchString(d.ProductID) {
@@ -52,6 +59,7 @@ func Parse(r io.Reader) (File, error) {
 	return f, nil
 }
 
+// EEP returns the EEP associated with EEPRef.
 func (r EEPRef) EEP() (eep.EEP, error) {
 	rorg, err := parseHexByte(r.Rorg)
 	if err != nil {
@@ -68,6 +76,7 @@ func (r EEPRef) EEP() (eep.EEP, error) {
 	return eep.FromTriplet(enums.Rorg(rorg), fn, typ)
 }
 
+// parseOptionalHexByte parses OptionalHexByte.
 func parseOptionalHexByte(s string) (byte, error) {
 	if strings.TrimSpace(s) == "" {
 		return 0, nil
@@ -75,6 +84,7 @@ func parseOptionalHexByte(s string) (byte, error) {
 	return parseHexByte(s)
 }
 
+// parseHexByte parses HexByte.
 func parseHexByte(s string) (byte, error) {
 	s = strings.TrimPrefix(strings.TrimSpace(s), "0x")
 	v, err := strconv.ParseUint(s, 16, 8)

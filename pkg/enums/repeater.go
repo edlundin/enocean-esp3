@@ -10,6 +10,7 @@ const (
 	RepeaterModeSELECTIVE
 )
 
+// ParseRepeaterModeFromByte parses a RepeaterMode from a byte.
 func ParseRepeaterModeFromByte(b byte) (RepeaterMode, error) {
 	switch b {
 	case 0x00:
@@ -23,6 +24,7 @@ func ParseRepeaterModeFromByte(b byte) (RepeaterMode, error) {
 	}
 }
 
+// String returns the string representation of RepeaterMode.
 func (repeaterMode RepeaterMode) String() string {
 	switch repeaterMode {
 	case RepeaterModeOFF:
@@ -36,6 +38,7 @@ func (repeaterMode RepeaterMode) String() string {
 	}
 }
 
+// Valid reports whether RepeaterMode is valid.
 func (repeaterMode RepeaterMode) Valid() bool {
 	switch repeaterMode {
 	case RepeaterModeOFF,
@@ -55,6 +58,7 @@ const (
 	RepeaterLevel2_REPETITION
 )
 
+// ParseRepeaterLevelFromByte parses a RepeaterLevel from a byte.
 func ParseRepeaterLevelFromByte(b byte) (RepeaterLevel, error) {
 	switch b {
 	case 0x00:
@@ -68,6 +72,7 @@ func ParseRepeaterLevelFromByte(b byte) (RepeaterLevel, error) {
 	}
 }
 
+// String returns the string representation of RepeaterLevel.
 func (repeaterLevel RepeaterLevel) String() string {
 	switch repeaterLevel {
 	case RepeaterLevelNO_REPETITION:
@@ -81,6 +86,7 @@ func (repeaterLevel RepeaterLevel) String() string {
 	}
 }
 
+// Valid reports whether RepeaterLevel is valid.
 func (repeaterLevel RepeaterLevel) Valid() bool {
 	switch repeaterLevel {
 	case RepeaterLevelNO_REPETITION,

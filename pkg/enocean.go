@@ -17,6 +17,7 @@ import (
 	"go.bug.st/serial"
 )
 
+// GetSerialPortList returns the available serial port names.
 func GetSerialPortList() ([]string, error) {
 	ports, err := serial.GetPortsList()
 
@@ -35,6 +36,9 @@ type Message struct {
 	Err  error
 }
 
+// Channels contains independent, buffered, best-effort event streams.
+// A message is dropped from an individual stream when that stream's buffer is
+// full; slow consumers do not block serial parsing or other streams.
 type Channels struct {
 	All        <-chan Message
 	ESP3       <-chan esp3.Telegram
@@ -63,6 +67,7 @@ type channelSet struct {
 	parseError chan Message
 }
 
+// newChannelSet constructs ChannelSet.
 func newChannelSet(size int) (*channelSet, *Channels) {
 	set := &channelSet{
 		all:        make(chan Message, size),
@@ -80,6 +85,7 @@ func newChannelSet(size int) (*channelSet, *Channels) {
 	return set, &Channels{All: set.all, ESP3: set.esp3, ERP1: set.erp1, Response: set.response, Event: set.event, SmartAck: set.smartAck, ReMan: set.reman, ReManPart: set.remanPart, GPHeader: set.gpHeader, Unparsed: set.unparsed, ParseError: set.parseError}
 }
 
+// close closes all parser output channels.
 func (c *channelSet) close() {
 	close(c.all)
 	close(c.esp3)
@@ -94,6 +100,9 @@ func (c *channelSet) close() {
 	close(c.parseError)
 }
 
+var serialOpen = serial.Open
+
+// OpenSerialPort opens a serial port and starts ESP3 parsing.
 func OpenSerialPort(ctx context.Context, portPath string) (serial.Port, *Channels, error) {
 	portSettings := &serial.Mode{
 		BaudRate: 57600,
@@ -102,7 +111,7 @@ func OpenSerialPort(ctx context.Context, portPath string) (serial.Port, *Channel
 		StopBits: serial.OneStopBit,
 	}
 
-	port, err := serial.Open(portPath, portSettings)
+	port, err := serialOpen(portPath, portSettings)
 
 	if err != nil {
 		return nil, nil, err
@@ -111,6 +120,7 @@ func OpenSerialPort(ctx context.Context, portPath string) (serial.Port, *Channel
 	err = port.SetReadTimeout(time.Second * 2)
 
 	if err != nil {
+		_ = port.Close()
 		return nil, nil, err
 	}
 
@@ -120,6 +130,7 @@ func OpenSerialPort(ctx context.Context, portPath string) (serial.Port, *Channel
 	return port, channels, nil
 }
 
+// parser parses r.
 func parser(ctx context.Context, serialPort serial.Port, channels *channelSet) {
 	defer channels.close()
 	type ParserState uint8
@@ -146,10 +157,10 @@ func parser(ctx context.Context, serialPort serial.Port, channels *channelSet) {
 
 	parserBuffer := make([]uint8, 0)
 	parserCrc := uint8(0)
-	parserDataLen := uint16(0)
-	parserOptDataLen := uint8(0)
+	parserDataLen := 0
+	parserOptDataLen := 0
 	parserPacketType := uint8(0)
-	remanMessages := newReManAssembler(5 * time.Second)
+	remanMessages := newReManAssembler(remanChainPeriod)
 
 	for {
 		select {
@@ -159,8 +170,7 @@ func parser(ctx context.Context, serialPort serial.Port, channels *channelSet) {
 			byteReceived, err := serialPort.Read(readBuffer)
 
 			if err != nil {
-				fmt.Println(fmt.Errorf("error reading from serial port: %w", err))
-				continue
+				return
 			}
 
 			if byteReceived == 0 {
@@ -222,7 +232,7 @@ func parser(ctx context.Context, serialPort serial.Port, channels *channelSet) {
 
 						for i := 0; i < headerLen-syncByteIdx; i++ {
 							tmpBuffer = append(tmpBuffer, parserBuffer[syncByteIdx+i])
-							parserCrc = esp3.ComputeCrc8(parserBuffer[i], parserCrc)
+							parserCrc = esp3.ComputeCrc8(parserBuffer[syncByteIdx+i], parserCrc)
 						}
 
 						parserBuffer = append(tmpBuffer, parserByte)
@@ -236,46 +246,31 @@ func parser(ctx context.Context, serialPort serial.Port, channels *channelSet) {
 						break
 					}
 
-					parserDataLen = binary.BigEndian.Uint16(parserBuffer[dataLengthOffset : dataLengthOffset+dataLengthLen])
-					parserOptDataLen = parserBuffer[optDataLengthOffset]
+					parserDataLen = int(binary.BigEndian.Uint16(parserBuffer[dataLengthOffset : dataLengthOffset+dataLengthLen]))
+					parserOptDataLen = int(parserBuffer[optDataLengthOffset])
 					parserPacketType = parserBuffer[packetTypeOffset]
 
-					// Data length fields are invalid
-					if parserDataLen+uint16(parserOptDataLen) == 0 {
-						if parserByte == syncByte { // Sync already received
-							parserState = ParserStateWaitingForHeader
-							parserBuffer = make([]uint8, 0)
-							parserCrc = 0
-							break
-						}
-
-						parserState = ParserStateWaitingForSyncByte
-						break
-					}
-
 					parserState = ParserStateWaitingForData
+					if parserDataLen+parserOptDataLen == 0 {
+						parserState = ParserStateWaitingForCrc8D
+					}
 					parserBuffer = make([]uint8, 0)
 					parserCrc = 0
 				case ParserStateWaitingForData:
 					parserBuffer = append(parserBuffer, parserByte)
 					parserCrc = esp3.ComputeCrc8(parserByte, parserCrc)
 
-					if uint16(len(parserBuffer)) == parserDataLen+uint16(parserOptDataLen) {
+					if len(parserBuffer) == parserDataLen+parserOptDataLen {
 						parserState = ParserStateWaitingForCrc8D
 					}
 				case ParserStateWaitingForCrc8D:
-					// Parsing done, packet invalid, sync byte already received
-					if parserByte == syncByte {
-						parserState = ParserStateWaitingForHeader
-						parserBuffer = make([]uint8, 0)
-						parserCrc = 0
-
-						break
-					}
-
 					parserState = ParserStateWaitingForSyncByte
-
 					if parserByte != parserCrc {
+						if parserByte == syncByte {
+							parserState = ParserStateWaitingForHeader
+							parserBuffer = make([]uint8, 0)
+							parserCrc = 0
+						}
 						break
 					}
 
@@ -297,6 +292,8 @@ func parser(ctx context.Context, serialPort serial.Port, channels *channelSet) {
 	}
 }
 
+const remanChainPeriod = time.Second
+
 type remanKey struct {
 	seq          byte
 	source, dest uint32
@@ -312,10 +309,12 @@ type remanAssembler struct {
 	buffers map[remanKey]remanBuffer
 }
 
+// newReManAssembler constructs ReManAssembler.
 func newReManAssembler(ttl time.Duration) *remanAssembler {
 	return &remanAssembler{ttl: ttl, buffers: map[remanKey]remanBuffer{}}
 }
 
+// add adds a ReMan chain part to the assembler.
 func (a *remanAssembler) add(part reman.Part) ([]Message, error) {
 	now := time.Now()
 	a.expire(now)
@@ -343,14 +342,16 @@ func (a *remanAssembler) add(part reman.Part) ([]Message, error) {
 	return []Message{{Kind: "reman", Data: msg}}, nil
 }
 
+// expire removes stale ReMan chains.
 func (a *remanAssembler) expire(now time.Time) {
 	for key, buf := range a.buffers {
-		if now.Sub(buf.updated) > a.ttl {
+		if now.Sub(buf.updated) >= a.ttl {
 			delete(a.buffers, key)
 		}
 	}
 }
 
+// parseTelegram parses Telegram.
 func parseTelegram(remanMessages *remanAssembler, t esp3.Telegram) []Message {
 	messages := []Message{{Kind: "esp3", ESP3: t, Data: t}}
 
@@ -381,6 +382,7 @@ func parseTelegram(remanMessages *remanAssembler, t esp3.Telegram) []Message {
 	return messages
 }
 
+// parseERP1 parses ERP1.
 func parseERP1(remanMessages *remanAssembler, t esp3.Telegram, p erp1.Packet) []Message {
 	switch {
 	case p.Rorg == enums.RorgSYS_EX:
@@ -413,6 +415,7 @@ func parseERP1(remanMessages *remanAssembler, t esp3.Telegram, p erp1.Packet) []
 	}
 }
 
+// parseGPHeader parses GPHeader.
 func parseGPHeader(p erp1.Packet) (any, error) {
 	switch p.Rorg {
 	case enums.RorgGP_TI:
@@ -424,6 +427,7 @@ func parseGPHeader(p erp1.Packet) (any, error) {
 	}
 }
 
+// publish dispatches parsed messages to output channels.
 func publish(ctx context.Context, channels *channelSet, messages []Message) bool {
 	for _, msg := range messages {
 		if !send(ctx, channels.all, msg) {
@@ -475,6 +479,7 @@ func publish(ctx context.Context, channels *channelSet, messages []Message) bool
 	return true
 }
 
+// send delivers a value without blocking the parser.
 func send[T any](ctx context.Context, ch chan<- T, v T) bool {
 	select {
 	case ch <- v:

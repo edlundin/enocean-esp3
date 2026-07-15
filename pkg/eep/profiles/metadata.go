@@ -17,6 +17,7 @@ type Field struct {
 	Enums              []EnumValue
 }
 
+// Enum looks up the enum value for a raw field value.
 func (f Field) Enum(raw uint64) (EnumValue, bool) {
 	for _, e := range f.Enums {
 		if e.Raw == raw {

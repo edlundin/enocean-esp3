@@ -65,6 +65,7 @@ const (
 	CommonCommandRD_TX_ONLY_MODE             CommonCommand = 0x41
 )
 
+// ParseCommonCommandFromByte parses a CommonCommand from a byte.
 func ParseCommonCommandFromByte(b byte) (CommonCommand, error) {
 	switch b {
 	case 0x01:
@@ -188,6 +189,7 @@ func ParseCommonCommandFromByte(b byte) (CommonCommand, error) {
 	}
 }
 
+// String returns the string representation of CommonCommand.
 func (command CommonCommand) String() string {
 	switch command {
 	case CommonCommandWR_SLEEP:
@@ -311,6 +313,7 @@ func (command CommonCommand) String() string {
 	}
 }
 
+// Valid reports whether CommonCommand is valid.
 func (command CommonCommand) Valid() bool {
 	switch command {
 	case CommonCommandWR_SLEEP,
@@ -386,6 +389,7 @@ const (
 	TCMBaudrate460800
 )
 
+// String returns the string representation of TCMBaudrate.
 func (baudrate TCMBaudrate) String() string {
 	switch baudrate {
 	case TCMBaudrate57600:
@@ -401,6 +405,7 @@ func (baudrate TCMBaudrate) String() string {
 	}
 }
 
+// Valid reports whether TCMBaudrate is valid.
 func (baudrate TCMBaudrate) Valid() bool {
 	switch baudrate {
 	case TCMBaudrate57600,
@@ -413,6 +418,7 @@ func (baudrate TCMBaudrate) Valid() bool {
 	}
 }
 
+// ParseTCMBaudrateFromByte parses a TCMBaudrate from a byte.
 func ParseTCMBaudrateFromByte(b byte) (TCMBaudrate, error) {
 	switch b {
 	case 0x00:
@@ -439,6 +445,7 @@ const (
 	TCMFrequency2_4_GHZ TCMFrequency = 0x20
 )
 
+// String returns the string representation of TCMFrequency.
 func (frequency TCMFrequency) String() string {
 	switch frequency {
 	case TCMFrequency315_000_MHZ:
@@ -458,6 +465,7 @@ func (frequency TCMFrequency) String() string {
 	}
 }
 
+// Valid reports whether TCMFrequency is valid.
 func (frequency TCMFrequency) Valid() bool {
 	switch frequency {
 	case TCMFrequency315_000_MHZ,
@@ -481,6 +489,7 @@ const (
 	TCMProtocolLONG_RANGE    TCMProtocol = 0x30
 )
 
+// String returns the string representation of TCMProtocol.
 func (protocol TCMProtocol) String() string {
 	switch protocol {
 	case TCMProtocolERP1:
@@ -496,6 +505,7 @@ func (protocol TCMProtocol) String() string {
 	}
 }
 
+// Valid reports whether TCMProtocol is valid.
 func (protocol TCMProtocol) Valid() bool {
 	switch protocol {
 	case TCMProtocolERP1,
@@ -515,6 +525,7 @@ const (
 	CRCMode7BIT
 )
 
+// String returns the string representation of CRCMode.
 func (crcMode CRCMode) String() string {
 	switch crcMode {
 	case CRCMode8BIT:
@@ -526,6 +537,7 @@ func (crcMode CRCMode) String() string {
 	}
 }
 
+// Valid reports whether CRCMode is valid.
 func (crcMode CRCMode) Valid() bool {
 	switch crcMode {
 	case CRCMode8BIT,
@@ -536,6 +548,7 @@ func (crcMode CRCMode) Valid() bool {
 	}
 }
 
+// ParseCRCModeFromByte parses a CRCMode from a byte.
 func ParseCRCModeFromByte(b byte) (CRCMode, error) {
 	switch b {
 	case 0x00:
@@ -554,6 +567,7 @@ const (
 	RLCModeLEGACY
 )
 
+// String returns the string representation of RLCMode.
 func (rLCMode RLCMode) String() string {
 	switch rLCMode {
 	case RLCModeSTANDARD:
@@ -565,6 +579,7 @@ func (rLCMode RLCMode) String() string {
 	}
 }
 
+// Valid reports whether RLCMode is valid.
 func (rLCMode RLCMode) Valid() bool {
 	switch rLCMode {
 	case RLCModeSTANDARD,
@@ -575,6 +590,7 @@ func (rLCMode RLCMode) Valid() bool {
 	}
 }
 
+// ParseRLCModeFromByte parses a RLCMode from a byte.
 func ParseRLCModeFromByte(b byte) (RLCMode, error) {
 	switch b {
 	case 0x00:
@@ -593,6 +609,7 @@ const (
 	RSSITestModeENABLED
 )
 
+// String returns the string representation of RSSITestMode.
 func (rssiTestMode RSSITestMode) String() string {
 	switch rssiTestMode {
 	case RSSITestModeDISABLED:
@@ -604,6 +621,7 @@ func (rssiTestMode RSSITestMode) String() string {
 	}
 }
 
+// Valid reports whether RSSITestMode is valid.
 func (rssiTestMode RSSITestMode) Valid() bool {
 	switch rssiTestMode {
 	case RSSITestModeDISABLED,
@@ -614,6 +632,7 @@ func (rssiTestMode RSSITestMode) Valid() bool {
 	}
 }
 
+// ParseRSSITestModeFromByte parses a RSSITestMode from a byte.
 func ParseRSSITestModeFromByte(b byte) (RSSITestMode, error) {
 	switch b {
 	case 0x00:
@@ -632,6 +651,7 @@ const (
 	TransparentModeENABLED
 )
 
+// String returns the string representation of TransparentMode.
 func (transparentMode TransparentMode) String() string {
 	switch transparentMode {
 	case TransparentModeDISABLED:
@@ -643,6 +663,7 @@ func (transparentMode TransparentMode) String() string {
 	}
 }
 
+// Valid reports whether TransparentMode is valid.
 func (transparentMode TransparentMode) Valid() bool {
 	switch transparentMode {
 	case TransparentModeDISABLED,
@@ -653,6 +674,7 @@ func (transparentMode TransparentMode) Valid() bool {
 	}
 }
 
+// ParseTransparentModeFromByte parses a TransparentMode from a byte.
 func ParseTransparentModeFromByte(b byte) (TransparentMode, error) {
 	switch b {
 	case 0x00:
@@ -672,6 +694,7 @@ const (
 	TxOnlyModeENABLED_WITH_AUTO_SLEEP
 )
 
+// String returns the string representation of TxOnlyMode.
 func (txOnlyMode TxOnlyMode) String() string {
 	switch txOnlyMode {
 	case TxOnlyModeDISABLED:
@@ -685,6 +708,7 @@ func (txOnlyMode TxOnlyMode) String() string {
 	}
 }
 
+// Valid reports whether TxOnlyMode is valid.
 func (txOnlyMode TxOnlyMode) Valid() bool {
 	switch txOnlyMode {
 	case TxOnlyModeDISABLED,
@@ -696,6 +720,7 @@ func (txOnlyMode TxOnlyMode) Valid() bool {
 	}
 }
 
+// ParseTxOnlyModeFromByte parses a TxOnlyMode from a byte.
 func ParseTxOnlyModeFromByte(b byte) (TxOnlyMode, error) {
 	switch b {
 	case 0x00:

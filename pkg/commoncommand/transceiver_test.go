@@ -7,6 +7,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/response"
 )
 
+// TestNewRdDutyCycleLimit verifies NewRdDutyCycleLimit behavior.
 func TestNewRdDutyCycleLimit(t *testing.T) {
 	t.Run("creates read duty cycle limit command", func(t *testing.T) {
 		cmd, err := NewRdDutyCycleLimit()
@@ -20,6 +21,7 @@ func TestNewRdDutyCycleLimit(t *testing.T) {
 	})
 }
 
+// TestRdDutyCycleLimit_Serialize verifies RdDutyCycleLimit_Serialize behavior.
 func TestRdDutyCycleLimit_Serialize(t *testing.T) {
 	t.Run("serializes read duty cycle limit command", func(t *testing.T) {
 		cmd, _ := NewRdDutyCycleLimit()
@@ -39,6 +41,7 @@ func TestRdDutyCycleLimit_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseRdDutyCycleLimitResponseOK verifies ParseRdDutyCycleLimitResponseOK behavior.
 func TestParseRdDutyCycleLimitResponseOK(t *testing.T) {
 	t.Run("parses duty cycle limit response", func(t *testing.T) {
 		// Response: AvailableDutyCycle(1) + Slots(1) + SlotPeriod(2) + TimeLeftInCurrentSlot(2) + AvailableDutyCycleAfterCurrentSlot(1) = 7 bytes
@@ -101,6 +104,7 @@ func TestParseRdDutyCycleLimitResponseOK(t *testing.T) {
 	})
 }
 
+// TestNewSetBaudrate verifies NewSetBaudrate behavior.
 func TestNewSetBaudrate(t *testing.T) {
 	t.Run("creates set baudrate command", func(t *testing.T) {
 		cmd, err := NewSetBaudrate(enums.TCMBaudrate115200)
@@ -129,6 +133,7 @@ func TestNewSetBaudrate(t *testing.T) {
 	})
 }
 
+// TestSetBaudrate_Serialize verifies SetBaudrate_Serialize behavior.
 func TestSetBaudrate_Serialize(t *testing.T) {
 	t.Run("serializes set baudrate command", func(t *testing.T) {
 		cmd, _ := NewSetBaudrate(enums.TCMBaudrate115200)
@@ -149,6 +154,7 @@ func TestSetBaudrate_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewGetFrequencyInfo verifies NewGetFrequencyInfo behavior.
 func TestNewGetFrequencyInfo(t *testing.T) {
 	t.Run("creates get frequency info command", func(t *testing.T) {
 		cmd, err := NewGetFrequencyInfo()
@@ -162,6 +168,7 @@ func TestNewGetFrequencyInfo(t *testing.T) {
 	})
 }
 
+// TestGetFrequencyInfo_Serialize verifies GetFrequencyInfo_Serialize behavior.
 func TestGetFrequencyInfo_Serialize(t *testing.T) {
 	t.Run("serializes get frequency info command", func(t *testing.T) {
 		cmd, _ := NewGetFrequencyInfo()
@@ -177,6 +184,7 @@ func TestGetFrequencyInfo_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseGetFrequencyInfoResponseOK verifies ParseGetFrequencyInfoResponseOK behavior.
 func TestParseGetFrequencyInfoResponseOK(t *testing.T) {
 	t.Run("parses frequency info response", func(t *testing.T) {
 		// Response: Frequency(1) + Protocol(1) = 2 bytes
@@ -227,6 +235,7 @@ func TestParseGetFrequencyInfoResponseOK(t *testing.T) {
 	})
 }
 
+// TestNewGetStepCode verifies NewGetStepCode behavior.
 func TestNewGetStepCode(t *testing.T) {
 	t.Run("creates get stepcode command", func(t *testing.T) {
 		cmd, err := NewGetStepCode()
@@ -240,6 +249,7 @@ func TestNewGetStepCode(t *testing.T) {
 	})
 }
 
+// TestGetStepCode_Serialize verifies GetStepCode_Serialize behavior.
 func TestGetStepCode_Serialize(t *testing.T) {
 	t.Run("serializes get stepcode command", func(t *testing.T) {
 		cmd, _ := NewGetStepCode()
@@ -255,6 +265,7 @@ func TestGetStepCode_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseGetStepCodeResponseOK verifies ParseGetStepCodeResponseOK behavior.
 func TestParseGetStepCodeResponseOK(t *testing.T) {
 	t.Run("parses stepcode response", func(t *testing.T) {
 		// Response: StepCode(1) + Revision(1) = 2 bytes
@@ -309,6 +320,7 @@ func TestParseGetStepCodeResponseOK(t *testing.T) {
 	})
 }
 
+// TestNewWrStartupDelay verifies NewWrStartupDelay behavior.
 func TestNewWrStartupDelay(t *testing.T) {
 	t.Run("creates write startup delay command", func(t *testing.T) {
 		cmd, err := NewWrStartupDelay(50)
@@ -326,6 +338,7 @@ func TestNewWrStartupDelay(t *testing.T) {
 	})
 }
 
+// TestWrStartupDelay_Serialize verifies WrStartupDelay_Serialize behavior.
 func TestWrStartupDelay_Serialize(t *testing.T) {
 	t.Run("serializes write startup delay command", func(t *testing.T) {
 		cmd, _ := NewWrStartupDelay(100)
@@ -346,6 +359,7 @@ func TestWrStartupDelay_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewSetNoiseThreshold verifies NewSetNoiseThreshold behavior.
 func TestNewSetNoiseThreshold(t *testing.T) {
 	t.Run("creates set noise threshold command", func(t *testing.T) {
 		cmd, err := NewSetNoiseThreshold(80)
@@ -363,6 +377,7 @@ func TestNewSetNoiseThreshold(t *testing.T) {
 	})
 }
 
+// TestSetNoiseThreshold_Serialize verifies SetNoiseThreshold_Serialize behavior.
 func TestSetNoiseThreshold_Serialize(t *testing.T) {
 	t.Run("serializes set noise threshold command", func(t *testing.T) {
 		cmd, _ := NewSetNoiseThreshold(80)
@@ -379,6 +394,7 @@ func TestSetNoiseThreshold_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewGetNoiseThreshold verifies NewGetNoiseThreshold behavior.
 func TestNewGetNoiseThreshold(t *testing.T) {
 	t.Run("creates get noise threshold command", func(t *testing.T) {
 		cmd, err := NewGetNoiseThreshold()
@@ -392,6 +408,7 @@ func TestNewGetNoiseThreshold(t *testing.T) {
 	})
 }
 
+// TestGetNoiseThreshold_Serialize verifies GetNoiseThreshold_Serialize behavior.
 func TestGetNoiseThreshold_Serialize(t *testing.T) {
 	t.Run("serializes get noise threshold command", func(t *testing.T) {
 		cmd, _ := NewGetNoiseThreshold()
@@ -407,6 +424,7 @@ func TestGetNoiseThreshold_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseGetNoiseThresholdResponseOK verifies ParseGetNoiseThresholdResponseOK behavior.
 func TestParseGetNoiseThresholdResponseOK(t *testing.T) {
 	t.Run("parses noise threshold response", func(t *testing.T) {
 		// Response: RSSILevel(1) = 1 byte
@@ -457,6 +475,7 @@ func TestParseGetNoiseThresholdResponseOK(t *testing.T) {
 	})
 }
 
+// TestNewSetCRCMode verifies NewSetCRCMode behavior.
 func TestNewSetCRCMode(t *testing.T) {
 	t.Run("creates set CRC mode command", func(t *testing.T) {
 		cmd, err := NewSetCRCMode(enums.CRCMode8BIT)
@@ -474,6 +493,7 @@ func TestNewSetCRCMode(t *testing.T) {
 	})
 }
 
+// TestSetCRCMode_Serialize verifies SetCRCMode_Serialize behavior.
 func TestSetCRCMode_Serialize(t *testing.T) {
 	t.Run("serializes set CRC mode command", func(t *testing.T) {
 		cmd, _ := NewSetCRCMode(enums.CRCMode8BIT)
@@ -490,6 +510,7 @@ func TestSetCRCMode_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewGetCRCMode verifies NewGetCRCMode behavior.
 func TestNewGetCRCMode(t *testing.T) {
 	t.Run("creates get CRC mode command", func(t *testing.T) {
 		cmd, err := NewGetCRCMode()
@@ -503,6 +524,7 @@ func TestNewGetCRCMode(t *testing.T) {
 	})
 }
 
+// TestGetCRCMode_Serialize verifies GetCRCMode_Serialize behavior.
 func TestGetCRCMode_Serialize(t *testing.T) {
 	t.Run("serializes get CRC mode command", func(t *testing.T) {
 		cmd, _ := NewGetCRCMode()
@@ -518,6 +540,7 @@ func TestGetCRCMode_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseGetCRCModeResponseOK verifies ParseGetCRCModeResponseOK behavior.
 func TestParseGetCRCModeResponseOK(t *testing.T) {
 	t.Run("parses CRC mode response", func(t *testing.T) {
 		// Response: CRCMode(1) = 1 byte
@@ -568,6 +591,7 @@ func TestParseGetCRCModeResponseOK(t *testing.T) {
 	})
 }
 
+// TestNewWrRSSITestMode verifies NewWrRSSITestMode behavior.
 func TestNewWrRSSITestMode(t *testing.T) {
 	t.Run("creates write RSSI test mode command", func(t *testing.T) {
 		cmd, err := NewWrRSSITestMode(enums.RSSITestModeENABLED, 1000)
@@ -589,6 +613,7 @@ func TestNewWrRSSITestMode(t *testing.T) {
 	})
 }
 
+// TestWrRSSITestMode_Serialize verifies WrRSSITestMode_Serialize behavior.
 func TestWrRSSITestMode_Serialize(t *testing.T) {
 	t.Run("serializes write RSSI test mode command", func(t *testing.T) {
 		cmd, _ := NewWrRSSITestMode(enums.RSSITestModeENABLED, 500)
@@ -605,6 +630,7 @@ func TestWrRSSITestMode_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewRdRSSITestMode verifies NewRdRSSITestMode behavior.
 func TestNewRdRSSITestMode(t *testing.T) {
 	t.Run("creates read RSSI test mode command", func(t *testing.T) {
 		cmd, err := NewRdRSSITestMode()
@@ -618,6 +644,7 @@ func TestNewRdRSSITestMode(t *testing.T) {
 	})
 }
 
+// TestRdRSSITestMode_Serialize verifies RdRSSITestMode_Serialize behavior.
 func TestRdRSSITestMode_Serialize(t *testing.T) {
 	t.Run("serializes read RSSI test mode command", func(t *testing.T) {
 		cmd, _ := NewRdRSSITestMode()
@@ -633,6 +660,7 @@ func TestRdRSSITestMode_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseRdRSSITestModeResponseOK verifies ParseRdRSSITestModeResponseOK behavior.
 func TestParseRdRSSITestModeResponseOK(t *testing.T) {
 	t.Run("parses RSSI test mode response", func(t *testing.T) {
 		// Response: TestMode(1) = 1 byte
@@ -683,6 +711,7 @@ func TestParseRdRSSITestModeResponseOK(t *testing.T) {
 	})
 }
 
+// TestNewWrTransparentMode verifies NewWrTransparentMode behavior.
 func TestNewWrTransparentMode(t *testing.T) {
 	t.Run("creates write transparent mode command", func(t *testing.T) {
 		cmd, err := NewWrTransparentMode(enums.TransparentModeENABLED)
@@ -700,6 +729,7 @@ func TestNewWrTransparentMode(t *testing.T) {
 	})
 }
 
+// TestWrTransparentMode_Serialize verifies WrTransparentMode_Serialize behavior.
 func TestWrTransparentMode_Serialize(t *testing.T) {
 	t.Run("serializes write transparent mode command", func(t *testing.T) {
 		cmd, _ := NewWrTransparentMode(enums.TransparentModeENABLED)
@@ -716,6 +746,7 @@ func TestWrTransparentMode_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewRdTransparentMode verifies NewRdTransparentMode behavior.
 func TestNewRdTransparentMode(t *testing.T) {
 	t.Run("creates read transparent mode command", func(t *testing.T) {
 		cmd, err := NewRdTransparentMode()
@@ -729,6 +760,7 @@ func TestNewRdTransparentMode(t *testing.T) {
 	})
 }
 
+// TestRdTransparentMode_Serialize verifies RdTransparentMode_Serialize behavior.
 func TestRdTransparentMode_Serialize(t *testing.T) {
 	t.Run("serializes read transparent mode command", func(t *testing.T) {
 		cmd, _ := NewRdTransparentMode()
@@ -744,6 +776,7 @@ func TestRdTransparentMode_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseRdTransparentModeResponseOK verifies ParseRdTransparentModeResponseOK behavior.
 func TestParseRdTransparentModeResponseOK(t *testing.T) {
 	t.Run("parses transparent mode response", func(t *testing.T) {
 		// Response: TransparentMode(1) = 1 byte
@@ -794,6 +827,7 @@ func TestParseRdTransparentModeResponseOK(t *testing.T) {
 	})
 }
 
+// TestNewWrTxOnlyMode verifies NewWrTxOnlyMode behavior.
 func TestNewWrTxOnlyMode(t *testing.T) {
 	t.Run("creates write TX only mode command", func(t *testing.T) {
 		cmd, err := NewWrTxOnlyMode(enums.TxOnlyModeENABLED_WITHOUT_AUTO_SLEEP)
@@ -811,6 +845,7 @@ func TestNewWrTxOnlyMode(t *testing.T) {
 	})
 }
 
+// TestWrTxOnlyMode_Serialize verifies WrTxOnlyMode_Serialize behavior.
 func TestWrTxOnlyMode_Serialize(t *testing.T) {
 	t.Run("serializes write TX only mode command", func(t *testing.T) {
 		cmd, _ := NewWrTxOnlyMode(enums.TxOnlyModeENABLED_WITHOUT_AUTO_SLEEP)
@@ -827,6 +862,7 @@ func TestWrTxOnlyMode_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewRdTxOnlyMode verifies NewRdTxOnlyMode behavior.
 func TestNewRdTxOnlyMode(t *testing.T) {
 	t.Run("creates read TX only mode command", func(t *testing.T) {
 		cmd, err := NewRdTxOnlyMode()
@@ -840,6 +876,7 @@ func TestNewRdTxOnlyMode(t *testing.T) {
 	})
 }
 
+// TestRdTxOnlyMode_Serialize verifies RdTxOnlyMode_Serialize behavior.
 func TestRdTxOnlyMode_Serialize(t *testing.T) {
 	t.Run("serializes read TX only mode command", func(t *testing.T) {
 		cmd, _ := NewRdTxOnlyMode()
@@ -855,6 +892,7 @@ func TestRdTxOnlyMode_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseRdTxOnlyModeResponseOK verifies ParseRdTxOnlyModeResponseOK behavior.
 func TestParseRdTxOnlyModeResponseOK(t *testing.T) {
 	t.Run("parses TX only mode response", func(t *testing.T) {
 		// Response: TxOnlyMode(1) = 1 byte

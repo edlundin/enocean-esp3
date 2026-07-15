@@ -30,6 +30,7 @@ type ProductID struct {
 	Product      uint32
 }
 
+// MarshalBinary marshals Binary.
 func (p ProductID) MarshalBinary() []byte {
 	b := make([]byte, 6)
 	binary.BigEndian.PutUint16(b[:2], p.Manufacturer)
@@ -37,6 +38,7 @@ func (p ProductID) MarshalBinary() []byte {
 	return b
 }
 
+// ParseProductID parses ProductID.
 func ParseProductID(b []byte) (ProductID, error) {
 	if len(b) != 6 {
 		return ProductID{}, fmt.Errorf("product ID length %d, want 6", len(b))
@@ -49,6 +51,7 @@ type ParamRecord struct {
 	Value []byte
 }
 
+// MarshalParamRecords marshals ParamRecords.
 func MarshalParamRecords(records []ParamRecord) ([]byte, error) {
 	var out []byte
 	for _, r := range records {
@@ -65,6 +68,7 @@ func MarshalParamRecords(records []ParamRecord) ([]byte, error) {
 	return out, nil
 }
 
+// ParseParamRecords parses ParamRecords.
 func ParseParamRecords(b []byte) ([]ParamRecord, error) {
 	var records []ParamRecord
 	for len(b) > 0 {
@@ -88,6 +92,7 @@ type LinkEntry struct {
 	Data     [2]byte
 }
 
+// MarshalBinary marshals Binary.
 func (e LinkEntry) MarshalBinary() []byte {
 	b := make([]byte, 9)
 	copy(b[:3], e.EEP[:])
@@ -97,6 +102,7 @@ func (e LinkEntry) MarshalBinary() []byte {
 	return b
 }
 
+// ParseLinkEntry parses LinkEntry.
 func ParseLinkEntry(b []byte) (LinkEntry, error) {
 	if len(b) != 9 {
 		return LinkEntry{}, fmt.Errorf("link entry length %d, want 9", len(b))

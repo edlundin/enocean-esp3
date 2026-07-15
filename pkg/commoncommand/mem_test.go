@@ -7,6 +7,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/response"
 )
 
+// TestNewWrMem verifies NewWrMem behavior.
 func TestNewWrMem(t *testing.T) {
 	t.Run("creates write memory command", func(t *testing.T) {
 		data := []byte{0x01, 0x02, 0x03, 0x04}
@@ -45,6 +46,7 @@ func TestNewWrMem(t *testing.T) {
 	})
 }
 
+// TestWrMem_Serialize verifies WrMem_Serialize behavior.
 func TestWrMem_Serialize(t *testing.T) {
 	t.Run("serializes write memory command", func(t *testing.T) {
 		data := []byte{0x01, 0x02, 0x03}
@@ -67,6 +69,7 @@ func TestWrMem_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewRdMem verifies NewRdMem behavior.
 func TestNewRdMem(t *testing.T) {
 	t.Run("creates read memory command", func(t *testing.T) {
 		cmd, err := NewRdMem(enums.MemoryTypeFLASH, 0x00100000, 256)
@@ -92,6 +95,7 @@ func TestNewRdMem(t *testing.T) {
 	})
 }
 
+// TestRdMem_Serialize verifies RdMem_Serialize behavior.
 func TestRdMem_Serialize(t *testing.T) {
 	t.Run("serializes read memory command", func(t *testing.T) {
 		cmd, _ := NewRdMem(enums.MemoryTypeRAM0, 0x00200000, 128)
@@ -112,6 +116,7 @@ func TestRdMem_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseRdMemResponseOK verifies ParseRdMemResponseOK behavior.
 func TestParseRdMemResponseOK(t *testing.T) {
 	t.Run("parses read memory response", func(t *testing.T) {
 		// Response: Data(variable bytes)
@@ -173,6 +178,7 @@ func TestParseRdMemResponseOK(t *testing.T) {
 	})
 }
 
+// TestNewRdMemAddress verifies NewRdMemAddress behavior.
 func TestNewRdMemAddress(t *testing.T) {
 	t.Run("creates read memory address command", func(t *testing.T) {
 		cmd, err := NewRdMemAddress(enums.MemoryAreaCONFIG)
@@ -201,6 +207,7 @@ func TestNewRdMemAddress(t *testing.T) {
 	})
 }
 
+// TestRdMemAddress_Serialize verifies RdMemAddress_Serialize behavior.
 func TestRdMemAddress_Serialize(t *testing.T) {
 	t.Run("serializes read memory address command", func(t *testing.T) {
 		cmd, _ := NewRdMemAddress(enums.MemoryAreaCONFIG)
@@ -221,6 +228,7 @@ func TestRdMemAddress_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseRdMemAddressResponseOK verifies ParseRdMemAddressResponseOK behavior.
 func TestParseRdMemAddressResponseOK(t *testing.T) {
 	t.Run("parses read memory address response", func(t *testing.T) {
 		// Response: Type(1) + Address(4) + Length(4) = 9 bytes

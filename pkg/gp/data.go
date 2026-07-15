@@ -7,6 +7,7 @@ type SelectedValue struct {
 	Value uint64
 }
 
+// EncodeCompleteData encodes CompleteData.
 func EncodeCompleteData(channels []Channel, values []uint64) ([]byte, error) {
 	ops, err := operationalChannels(channels)
 	if err != nil {
@@ -39,6 +40,7 @@ func EncodeCompleteData(channels []Channel, values []uint64) ([]byte, error) {
 	return out, nil
 }
 
+// DecodeCompleteData decodes CompleteData.
 func DecodeCompleteData(channels []Channel, data []byte) ([]uint64, error) {
 	ops, err := operationalChannels(channels)
 	if err != nil {
@@ -63,6 +65,7 @@ func DecodeCompleteData(channels []Channel, data []byte) ([]uint64, error) {
 	return out, nil
 }
 
+// EncodeSelectiveData encodes SelectiveData.
 func EncodeSelectiveData(channels []Channel, values []SelectedValue) ([]byte, error) {
 	ops, err := operationalChannels(channels)
 	if err != nil {
@@ -99,6 +102,7 @@ func EncodeSelectiveData(channels []Channel, values []SelectedValue) ([]byte, er
 	return out, nil
 }
 
+// DecodeSelectiveData decodes SelectiveData.
 func DecodeSelectiveData(channels []Channel, data []byte) ([]SelectedValue, error) {
 	ops, err := operationalChannels(channels)
 	if err != nil {
@@ -133,6 +137,7 @@ func DecodeSelectiveData(channels []Channel, data []byte) ([]SelectedValue, erro
 	return out, nil
 }
 
+// operationalChannels returns the operational channels.
 func operationalChannels(channels []Channel) ([]Channel, error) {
 	out := make([]Channel, 0, len(channels))
 	for _, ch := range channels {

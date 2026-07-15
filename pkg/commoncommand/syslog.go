@@ -14,10 +14,12 @@ type RdSysLog struct {
 	CommandCode enums.CommonCommand `enocean-esp3:"data"`
 }
 
+// Serialize encodes RdSysLog into its wire representation.
 func (cmd *RdSysLog) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewRdSysLog constructs RdSysLog.
 func NewRdSysLog() (RdSysLog, error) {
 	return RdSysLog{
 		CommandCode: enums.CommonCommandRD_SYS_LOG,
@@ -29,6 +31,7 @@ type RdSysLogResponse struct {
 	AppLogEntries []byte
 }
 
+// ParseRdSysLogResponseOK parses RdSysLogResponseOK.
 func ParseRdSysLogResponseOK(response response.Packet) (RdSysLogResponse, error) {
 	if response.Code != enums.ReturnCodeSUCCESS {
 		return RdSysLogResponse{}, errors.New("invalid return code")
@@ -45,10 +48,12 @@ type ResetSysLog struct {
 	CommandCode enums.CommonCommand `enocean-esp3:"data"`
 }
 
+// Serialize encodes ResetSysLog into its wire representation.
 func (cmd *ResetSysLog) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewResetSysLog constructs ResetSysLog.
 func NewResetSysLog() (ResetSysLog, error) {
 	return ResetSysLog{
 		CommandCode: enums.CommonCommandRESET_SYS_LOG,

@@ -7,6 +7,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/response"
 )
 
+// TestNewWrRepeater verifies NewWrRepeater behavior.
 func TestNewWrRepeater(t *testing.T) {
 	t.Run("creates write repeater command", func(t *testing.T) {
 		cmd, err := NewWrRepeater(enums.RepeaterModeON, enums.RepeaterLevel1_REPETITION)
@@ -43,6 +44,7 @@ func TestNewWrRepeater(t *testing.T) {
 	})
 }
 
+// TestWrRepeater_Serialize verifies WrRepeater_Serialize behavior.
 func TestWrRepeater_Serialize(t *testing.T) {
 	t.Run("serializes write repeater command", func(t *testing.T) {
 		cmd, _ := NewWrRepeater(enums.RepeaterModeON, enums.RepeaterLevel1_REPETITION)
@@ -63,6 +65,7 @@ func TestWrRepeater_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseRdRepeaterResponseOK verifies ParseRdRepeaterResponseOK behavior.
 func TestParseRdRepeaterResponseOK(t *testing.T) {
 	t.Run("parses read repeater response", func(t *testing.T) {
 		// Response: RepeaterMode(1) + RepeaterLevel(1) = 2 bytes

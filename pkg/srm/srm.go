@@ -38,6 +38,7 @@ type Message struct {
 	Payload        []byte
 }
 
+// MarshalSYSEx marshals SYSEx.
 func (m Message) MarshalSYSEx() ([]byte, error) {
 	if m.Function == 0 || m.Function > 0x0fff {
 		return nil, fmt.Errorf("invalid function 0x%x", m.Function)
@@ -46,20 +47,30 @@ func (m Message) MarshalSYSEx() ([]byte, error) {
 	if m.ManufacturerID == nil {
 		binary.BigEndian.PutUint16(out[:2], m.Function&0x0fff)
 	} else {
+		if *m.ManufacturerID > 0x07ff {
+			return nil, fmt.Errorf("invalid manufacturer ID 0x%x", *m.ManufacturerID)
+		}
 		out = make([]byte, 3, 3+len(m.Payload))
-		v := uint32(1)<<23 | uint32(*m.ManufacturerID&0x07ff)<<12 | uint32(m.Function&0x0fff)
+		v := uint32(1)<<23 | uint32(*m.ManufacturerID)<<12 | uint32(m.Function&0x0fff)
 		out[0], out[1], out[2] = byte(v>>16), byte(v>>8), byte(v)
 	}
 	out = append(out, m.Payload...)
 	return out, nil
 }
 
+// ParseSYSEx parses SYSEx.
 func ParseSYSEx(b []byte) (Message, error) {
 	if len(b) < 2 {
 		return Message{}, fmt.Errorf("SYS_EX payload too short")
 	}
 	if b[0]&0x80 == 0 {
+		if b[0]&0x70 != 0 {
+			return Message{}, fmt.Errorf("reserved Alliance SYS_EX header bits set")
+		}
 		fn := binary.BigEndian.Uint16(b[:2]) & 0x0fff
+		if fn == 0 {
+			return Message{}, fmt.Errorf("invalid function 0x%x", fn)
+		}
 		return Message{Function: fn, Payload: append([]byte(nil), b[2:]...)}, nil
 	}
 	if len(b) < 3 {
@@ -67,7 +78,11 @@ func ParseSYSEx(b []byte) (Message, error) {
 	}
 	v := uint32(b[0])<<16 | uint32(b[1])<<8 | uint32(b[2])
 	mid := uint16((v >> 12) & 0x07ff)
-	return Message{ManufacturerID: &mid, Function: uint16(v & 0x0fff), Payload: append([]byte(nil), b[3:]...)}, nil
+	fn := uint16(v & 0x0fff)
+	if fn == 0 {
+		return Message{}, fmt.Errorf("invalid function 0x%x", fn)
+	}
+	return Message{ManufacturerID: &mid, Function: fn, Payload: append([]byte(nil), b[3:]...)}, nil
 }
 
 type QueryStatusAnswer struct {
@@ -75,6 +90,7 @@ type QueryStatusAnswer struct {
 	Return       ReturnCode
 }
 
+// Payload returns the serialized payload.
 func (a QueryStatusAnswer) Payload() []byte {
 	b := make([]byte, 3)
 	binary.BigEndian.PutUint16(b[:2], a.LastFunction&0x0fff)
@@ -82,22 +98,51 @@ func (a QueryStatusAnswer) Payload() []byte {
 	return b
 }
 
+// ParseQueryStatusAnswer parses QueryStatusAnswer.
 func ParseQueryStatusAnswer(b []byte) (QueryStatusAnswer, error) {
 	if len(b) != 3 {
 		return QueryStatusAnswer{}, fmt.Errorf("query status answer length %d, want 3", len(b))
 	}
-	return QueryStatusAnswer{LastFunction: binary.BigEndian.Uint16(b[:2]) & 0x0fff, Return: ReturnCode(b[2])}, nil
+	if b[0]&0xf0 != 0 {
+		return QueryStatusAnswer{}, fmt.Errorf("reserved query status bits set")
+	}
+	return QueryStatusAnswer{LastFunction: binary.BigEndian.Uint16(b[:2]), Return: ReturnCode(b[2])}, nil
 }
 
-func PingPayload() []byte                  { return nil }
+type RemoteLearnFlag byte
+
+const (
+	RemoteLearnStart            RemoteLearnFlag = 0x01
+	RemoteLearnNextChannel      RemoteLearnFlag = 0x02
+	RemoteLearnStop             RemoteLearnFlag = 0x03
+	RemoteLearnSmartAckSimple   RemoteLearnFlag = 0x04
+	RemoteLearnSmartAckAdvanced RemoteLearnFlag = 0x05
+	RemoteLearnSmartAckStop     RemoteLearnFlag = 0x06
+)
+
+// PingPayload builds a ping payload.
+func PingPayload() []byte { return nil }
+
+// PingResponsePayload builds a ping-response payload.
 func PingResponsePayload(rssi byte) []byte { return []byte{rssi} }
+
+// RemoteLearnPayload builds a remote-learn payload.
 func RemoteLearnPayload(enable bool) []byte {
 	if enable {
-		return []byte{1}
+		return []byte{byte(RemoteLearnStart)}
 	}
-	return []byte{0}
+	return []byte{byte(RemoteLearnStop)}
 }
 
+// ParseRemoteLearnPayload parses RemoteLearnPayload.
+func ParseRemoteLearnPayload(b []byte) (RemoteLearnFlag, error) {
+	if len(b) != 1 || b[0] < byte(RemoteLearnStart) || b[0] > byte(RemoteLearnSmartAckStop) {
+		return 0, fmt.Errorf("invalid remote learn payload")
+	}
+	return RemoteLearnFlag(b[0]), nil
+}
+
+// MemoryReadPayload builds a memory-read payload.
 func MemoryReadPayload(addr uint32, n byte) []byte {
 	b := make([]byte, 5)
 	binary.BigEndian.PutUint32(b[:4], addr)
@@ -105,6 +150,7 @@ func MemoryReadPayload(addr uint32, n byte) []byte {
 	return b
 }
 
+// MemoryWritePayload builds a memory-write payload.
 func MemoryWritePayload(addr uint32, data []byte) ([]byte, error) {
 	if len(data) > 255 {
 		return nil, fmt.Errorf("memory write length %d > 255", len(data))

@@ -2,6 +2,7 @@ package enums
 
 import "testing"
 
+// TestRepeaterMode verifies RepeaterMode behavior.
 func TestRepeaterMode(t *testing.T) {
 	cases := []struct{ b byte; v RepeaterMode; s string }{
 		{0x00, RepeaterModeOFF, "OFF"}, {0x01, RepeaterModeON, "ON"}, {0x02, RepeaterModeSELECTIVE, "SELECTIVE"},
@@ -14,6 +15,7 @@ func TestRepeaterMode(t *testing.T) {
 	if RepeaterMode(0xff).String() != "UNKNOWN" || RepeaterMode(0xff).Valid() { t.Fatal("invalid repeater mode accepted") }
 }
 
+// TestRepeaterLevel verifies RepeaterLevel behavior.
 func TestRepeaterLevel(t *testing.T) {
 	cases := []struct{ b byte; v RepeaterLevel; s string }{
 		{0x00, RepeaterLevelNO_REPETITION, "NO_REPEATING"}, {0x01, RepeaterLevel1_REPETITION, "1_REPEAT"}, {0x02, RepeaterLevel2_REPETITION, "2_REPEAT"},

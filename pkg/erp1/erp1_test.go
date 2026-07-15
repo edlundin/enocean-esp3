@@ -9,6 +9,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/esp3"
 )
 
+// TestNewErp1PacketFromEsp3 verifies NewErp1PacketFromEsp3 behavior.
 func TestNewErp1PacketFromEsp3(t *testing.T) {
 	t.Run("successfully creates Erp1Packet from valid ESP3 telegram", func(t *testing.T) {
 		telegram := esp3.Telegram{
@@ -255,6 +256,7 @@ func TestNewErp1PacketFromEsp3(t *testing.T) {
 	})
 }
 
+// TestErp1Packet_ToEsp3 verifies Erp1Packet_ToEsp3 behavior.
 func TestErp1Packet_ToEsp3(t *testing.T) {
 	t.Run("converts Erp1Packet to ESP3 telegram correctly", func(t *testing.T) {
 		destID, _ := deviceid.FromByteArray([]byte{0x12, 0x34, 0x56, 0x78})
@@ -332,6 +334,7 @@ func TestErp1Packet_ToEsp3(t *testing.T) {
 	})
 }
 
+// TestErp1Packet_Serialize verifies Erp1Packet_Serialize behavior.
 func TestErp1Packet_Serialize(t *testing.T) {
 	t.Run("serializes Erp1Packet to byte array", func(t *testing.T) {
 		destinationID, _ := deviceid.FromByteArray([]byte{0x12, 0x34, 0x56, 0x78})

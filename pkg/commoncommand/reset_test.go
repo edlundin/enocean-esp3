@@ -6,6 +6,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 )
 
+// TestNewWrReset verifies NewWrReset behavior.
 func TestNewWrReset(t *testing.T) {
 	t.Run("creates reset command", func(t *testing.T) {
 		cmd, err := NewWrReset()
@@ -19,9 +20,13 @@ func TestNewWrReset(t *testing.T) {
 	})
 }
 
+// TestWrReset_Serialize verifies WrReset_Serialize behavior.
 func TestWrReset_Serialize(t *testing.T) {
 	t.Run("serializes reset command", func(t *testing.T) {
-		cmd, _ := NewWrReset()
+		cmd, err := NewWrReset()
+		if err != nil {
+			t.Fatalf("expected no constructor error, got: %v", err)
+		}
 		telegram, err := cmd.Serialize()
 
 		if err != nil {
@@ -30,7 +35,7 @@ func TestWrReset_Serialize(t *testing.T) {
 
 		// Data: Command(1) = 1 byte
 		if len(telegram.Data) != 1 {
-			t.Errorf("expected Data length 1, got %d", len(telegram.Data))
+			t.Fatalf("expected Data length 1, got %d", len(telegram.Data))
 		}
 
 		if telegram.Data[0] != byte(enums.CommonCommandWR_RESET) {

@@ -62,6 +62,7 @@ type StructWithUnexported struct {
 
 type CustomDeserializerType uint32
 
+// TestDeserializerConfig_sanitize verifies DeserializerConfig_sanitize behavior.
 func TestDeserializerConfig_sanitize(t *testing.T) {
 	t.Run("nil Deserializers", func(t *testing.T) {
 		cfg := DeserializerConfig{
@@ -121,6 +122,7 @@ func TestDeserializerConfig_sanitize(t *testing.T) {
 	})
 }
 
+// TestMergeDeserializerConfigs verifies MergeDeserializerConfigs behavior.
 func TestMergeDeserializerConfigs(t *testing.T) {
 	t.Run("empty configs", func(t *testing.T) {
 		result := mergeDeserializerConfigs([]DeserializerConfig{})
@@ -204,6 +206,7 @@ func TestMergeDeserializerConfigs(t *testing.T) {
 	})
 }
 
+// TestBytesToStruct verifies BytesToStruct behavior.
 func TestBytesToStruct(t *testing.T) {
 	t.Run("nil pointer", func(t *testing.T) {
 		err := BytesToStruct([]byte{1, 2, 3}, nil)
@@ -297,6 +300,7 @@ func TestBytesToStruct(t *testing.T) {
 	})
 }
 
+// TestDeserializeValue verifies DeserializeValue behavior.
 func TestDeserializeValue(t *testing.T) {
 	t.Run("pointer - nil", func(t *testing.T) {
 		data := []byte{0x01, 0x02, 0x03, 0x04}
@@ -713,18 +717,11 @@ func TestDeserializeValue(t *testing.T) {
 	})
 
 	t.Run("slice - non-byte slice with partial element", func(t *testing.T) {
-		data := []byte{0x01, 0x02, 0x03} // Only 1.5 uint16s
-		reader := bytes.NewReader(data)
+		reader := bytes.NewReader([]byte{0x01, 0x02, 0x03})
 		var slice []uint16
 		v := reflect.ValueOf(&slice).Elem()
-		cfg := DeserializerConfig{}
-
-		err := deserializeValue(reader, v, cfg)
-		if err != nil {
-			t.Fatalf("Unexpected error: %v", err)
-		}
-		if len(slice) != 1 {
-			t.Errorf("Expected 1 element (partial), got %d", len(slice))
+		if err := deserializeValue(reader, v, DeserializerConfig{}); err == nil {
+			t.Fatal("Expected partial element error")
 		}
 	})
 
@@ -770,6 +767,7 @@ func TestDeserializeValue(t *testing.T) {
 	})
 }
 
+// TestDeserializeStruct verifies DeserializeStruct behavior.
 func TestDeserializeStruct(t *testing.T) {
 	t.Run("nested struct", func(t *testing.T) {
 		data := []byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08}
@@ -824,6 +822,7 @@ func TestDeserializeStruct(t *testing.T) {
 	})
 }
 
+// TestDeserializeArray verifies DeserializeArray behavior.
 func TestDeserializeArray(t *testing.T) {
 	t.Run("byte array", func(t *testing.T) {
 		data := []byte{0x01, 0x02, 0x03, 0x04}
@@ -906,6 +905,7 @@ func TestDeserializeArray(t *testing.T) {
 	})
 }
 
+// TestDeserializeSlice verifies DeserializeSlice behavior.
 func TestDeserializeSlice(t *testing.T) {
 	t.Run("byte slice with data", func(t *testing.T) {
 		data := []byte{0x01, 0x02, 0x03, 0x04}
@@ -1017,19 +1017,41 @@ func TestDeserializeSlice(t *testing.T) {
 		}
 	})
 
+	t.Run("non-byte slice uses encoded rather than in-memory size", func(t *testing.T) {
+		type record struct {
+			A uint8
+			B uint32
+		}
+		reader := bytes.NewReader([]byte{1, 0, 0, 0, 2, 3, 0, 0, 0, 4})
+		var slice []record
+		v := reflect.ValueOf(&slice).Elem()
+		if err := deserializeSlice(reader, v, DeserializerConfig{}); err != nil {
+			t.Fatal(err)
+		}
+		if len(slice) != 2 || slice[0] != (record{1, 2}) || slice[1] != (record{3, 4}) {
+			t.Fatalf("records = %#v", slice)
+		}
+	})
+
+	t.Run("non-byte slice rejects no-progress deserializer", func(t *testing.T) {
+		type empty struct{}
+		reader := bytes.NewReader([]byte{1})
+		var slice []empty
+		v := reflect.ValueOf(&slice).Elem()
+		cfg := DeserializerConfig{Deserializers: map[reflect.Type]CustomDeserializer{
+			reflect.TypeOf(empty{}): func(*bytes.Reader, reflect.Value, binary.ByteOrder) error { return nil },
+		}}
+		if err := deserializeSlice(reader, v, cfg); err == nil {
+			t.Fatal("Expected no-progress error")
+		}
+	})
+
 	t.Run("non-byte slice with insufficient bytes", func(t *testing.T) {
-		data := []byte{0x01} // Not enough for uint16
-		reader := bytes.NewReader(data)
+		reader := bytes.NewReader([]byte{0x01})
 		var slice []uint16
 		v := reflect.ValueOf(&slice).Elem()
-		cfg := DeserializerConfig{}
-
-		err := deserializeSlice(reader, v, cfg)
-		if err != nil {
-			t.Fatalf("Unexpected error (should handle gracefully): %v", err)
-		}
-		if len(slice) != 0 {
-			t.Errorf("Expected empty slice, got %d elements", len(slice))
+		if err := deserializeSlice(reader, v, DeserializerConfig{}); err == nil {
+			t.Fatal("Expected partial element error")
 		}
 	})
 
@@ -1050,6 +1072,7 @@ func TestDeserializeSlice(t *testing.T) {
 	})
 }
 
+// TestBytesToStruct_ComplexTypes verifies BytesToStruct_ComplexTypes behavior.
 func TestBytesToStruct_ComplexTypes(t *testing.T) {
 	t.Run("struct with arrays", func(t *testing.T) {
 		// ByteArray (4 bytes) + IntArray (4 bytes) + EmptyArray (0 bytes)

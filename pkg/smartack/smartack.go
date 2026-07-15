@@ -31,6 +31,7 @@ const (
 
 type AckCode byte
 
+// Class returns the acknowledgement code class.
 func (a AckCode) Class() string {
 	switch {
 	case a == 0x00:
@@ -76,6 +77,7 @@ type LearnReclaim struct{ Data bool }
 type DataReclaim struct{ MailboxIndex byte }
 type Signal struct{ Index byte }
 
+// Parse parses a Smart Ack packet.
 func Parse(p erp1.Packet) (Message, error) {
 	switch p.Rorg {
 	case enums.RorgSM_LRN_REQ:
@@ -91,6 +93,7 @@ func Parse(p erp1.Packet) (Message, error) {
 	}
 }
 
+// parseLearnRequest parses LearnRequest.
 func parseLearnRequest(b []byte) (LearnRequest, error) {
 	if len(b) != 10 {
 		return LearnRequest{}, fmt.Errorf("learn request length %d, want 10", len(b))
@@ -100,6 +103,7 @@ func parseLearnRequest(b []byte) (LearnRequest, error) {
 	return LearnRequest{RequestCode: RequestCode(head >> 11), ManufacturerID: head & 0x07ff, EEP: eep.EEP{Rorg: enums.Rorg(b[2]), Func: b[3], Type: b[4]}, RSSI: b[5], RepeaterID: rep}, nil
 }
 
+// parseLearnAnswer parses LearnAnswer.
 func parseLearnAnswer(b []byte) (Message, error) {
 	if len(b) == 0 {
 		return nil, errors.New("empty learn answer")
@@ -121,6 +125,7 @@ func parseLearnAnswer(b []byte) (Message, error) {
 	}
 }
 
+// parseReclaim parses Reclaim.
 func parseReclaim(b []byte) (Message, error) {
 	if len(b) != 1 {
 		return nil, fmt.Errorf("reclaim length %d, want 1", len(b))
@@ -131,6 +136,7 @@ func parseReclaim(b []byte) (Message, error) {
 	return DataReclaim{MailboxIndex: b[0] & 0x7f}, nil
 }
 
+// parseSignal parses Signal.
 func parseSignal(b []byte) (Signal, error) {
 	if len(b) != 1 {
 		return Signal{}, fmt.Errorf("signal length %d, want 1", len(b))
@@ -141,6 +147,7 @@ func parseSignal(b []byte) (Signal, error) {
 	return Signal{Index: b[0]}, nil
 }
 
+// ERP1 converts LearnRequest to an ERP1 packet.
 func (m LearnRequest) ERP1(sender deviceid.DeviceID) erp1.Packet {
 	head := uint16(m.RequestCode&0x1f)<<11 | (m.ManufacturerID & 0x07ff)
 	b := make([]byte, 10)
@@ -151,6 +158,7 @@ func (m LearnRequest) ERP1(sender deviceid.DeviceID) erp1.Packet {
 	return packet(enums.RorgSM_LRN_REQ, b, sender, 3)
 }
 
+// ERP1 converts LearnReply to an ERP1 packet.
 func (m LearnReply) ERP1(sender deviceid.DeviceID) erp1.Packet {
 	b := make([]byte, 8)
 	b[0] = LearnReplyIndex
@@ -161,12 +169,14 @@ func (m LearnReply) ERP1(sender deviceid.DeviceID) erp1.Packet {
 	return packet(enums.RorgSM_LRN_ANS, b, sender, 3)
 }
 
+// ERP1 converts LearnAcknowledge to an ERP1 packet.
 func (m LearnAcknowledge) ERP1(sender deviceid.DeviceID) erp1.Packet {
 	b := []byte{LearnAcknowledgeIndex, 0, 0, byte(m.AckCode), m.MailboxIndex}
 	binary.BigEndian.PutUint16(b[1:3], m.ResponseTime)
 	return packet(enums.RorgSM_LRN_ANS, b, sender, 1)
 }
 
+// ERP1 converts LearnReclaim to an ERP1 packet.
 func (m LearnReclaim) ERP1(sender deviceid.DeviceID) erp1.Packet {
 	var v byte
 	if m.Data {
@@ -175,14 +185,17 @@ func (m LearnReclaim) ERP1(sender deviceid.DeviceID) erp1.Packet {
 	return packet(enums.RorgSM_REC, []byte{v}, sender, 1)
 }
 
+// ERP1 converts DataReclaim to an ERP1 packet.
 func (m DataReclaim) ERP1(sender deviceid.DeviceID) erp1.Packet {
 	return packet(enums.RorgSM_REC, []byte{0x80 | (m.MailboxIndex & 0x7f)}, sender, 1)
 }
 
+// ERP1 converts Signal to an ERP1 packet.
 func (m Signal) ERP1(sender deviceid.DeviceID) erp1.Packet {
 	return packet(enums.RorgSIGNAL, []byte{m.Index}, sender, 1)
 }
 
+// packet constructs an ERP1 packet.
 func packet(r enums.Rorg, data []byte, sender deviceid.DeviceID, subTel byte) erp1.Packet {
 	return erp1.Packet{Rorg: r, UserData: data, SenderID: sender, SubTelNum: subTel, SecurityLevel: 3, Rssi: 0xff, DestinationID: deviceid.BroadcastId()}
 }

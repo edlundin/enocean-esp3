@@ -310,22 +310,17 @@ func deserializeSlice(reader *bytes.Reader, v reflect.Value, cfg DeserializerCon
 		return nil
 	}
 
-	// For non-byte slices, we can't determine length from the buffer alone.
-	// This is a limitation - in practice, slices might need length prefixes.
-	// For now, we'll try to read until the buffer is exhausted.
+	// Non-byte slices must be the last field; consume complete elements until
+	// the input is exhausted and reject malformed trailing data.
 	slice := reflect.MakeSlice(v.Type(), 0, 0)
-	for {
-		// Check if we have enough bytes for one element
-		elemSize := elemType.Size()
-		remaining := reader.Len()
-		if remaining < int(elemSize) {
-			break
-		}
-
+	for reader.Len() > 0 {
+		before := reader.Len()
 		elem := reflect.New(elemType).Elem()
 		if err := deserializeValue(reader, elem, cfg); err != nil {
-			// If we hit EOF or can't read, stop
-			break
+			return err
+		}
+		if reader.Len() == before {
+			return fmt.Errorf("deserializer made no progress for %s", elemType)
 		}
 		slice = reflect.Append(slice, elem)
 	}

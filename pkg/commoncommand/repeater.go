@@ -15,10 +15,12 @@ type WrRepeater struct {
 	RepeaterLevel enums.RepeaterLevel `enocean-esp3:"data"`
 }
 
+// Serialize encodes WrRepeater into its wire representation.
 func (cmd *WrRepeater) Serialize() (esp3.Telegram, error) {
 	return serializer.CommandToTelegram(cmd)
 }
 
+// NewWrRepeater constructs WrRepeater.
 func NewWrRepeater(repeaterMode enums.RepeaterMode, repeaterLevel enums.RepeaterLevel) (WrRepeater, error) {
 	return WrRepeater{
 		CommandCode:   enums.CommonCommandWR_REPEATER,
@@ -32,6 +34,7 @@ type RdRepeaterResponse struct {
 	RepeaterLevel enums.RepeaterLevel
 }
 
+// ParseRdRepeaterResponseOK parses RdRepeaterResponseOK.
 func ParseRdRepeaterResponseOK(response response.Packet) (RdRepeaterResponse, error) {
 	if response.Code != enums.ReturnCodeSUCCESS {
 		return RdRepeaterResponse{}, errors.New("invalid return code")

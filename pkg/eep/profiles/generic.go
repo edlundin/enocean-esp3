@@ -21,11 +21,13 @@ type Decoded struct {
 	status  byte
 }
 
+// Lookup looks up metadata for an EEP.
 func Lookup(prof eep.EEP) (Profile, bool) {
 	p, ok := Registry[prof.String()]
 	return p, ok
 }
 
+// Decode decodes the value.
 func Decode(prof eep.EEP, userData []byte, status byte) (Decoded, error) {
 	p, ok := Lookup(prof)
 	if !ok {
@@ -49,6 +51,7 @@ func Decode(prof eep.EEP, userData []byte, status byte) (Decoded, error) {
 	return Decoded{Profile: p, Values: vals, status: status}, nil
 }
 
+// Encode encodes the value.
 func Encode(prof eep.EEP, values map[string]uint64) ([]byte, byte, error) {
 	p, ok := Lookup(prof)
 	if !ok {
@@ -64,16 +67,15 @@ func Encode(prof eep.EEP, values map[string]uint64) ([]byte, byte, error) {
 	for i, f := range p.Fields {
 		if raw, ok := values[fieldKey(f, i)]; ok {
 			setBits(data, f.BitOff, f.BitSize, raw)
-		} else if f.Shortcut != "" {
-			if raw, ok := values[f.Shortcut]; ok {
-				setBits(data, f.BitOff, f.BitSize, raw)
-			}
 		}
 	}
 	return data, 0, nil
 }
 
+// EEP returns the EEP associated with Decoded.
 func (d Decoded) EEP() eep.EEP { return d.Profile.EEP }
+
+// MarshalERP1UserData marshals ERP1UserData.
 func (d Decoded) MarshalERP1UserData() ([]byte, byte, error) {
 	vals := make(map[string]uint64, len(d.Values))
 	for k, v := range d.Values {
@@ -82,6 +84,8 @@ func (d Decoded) MarshalERP1UserData() ([]byte, byte, error) {
 	data, _, err := Encode(d.Profile.EEP, vals)
 	return data, d.status, err
 }
+
+// Format returns the formatted representation of Decoded.
 func (d Decoded) Format() string {
 	keys := make([]string, 0, len(d.Values))
 	for k := range d.Values {
@@ -104,6 +108,7 @@ func (d Decoded) Format() string {
 	return strings.Join(parts, " ")
 }
 
+// fieldKey returns the map key for a profile field.
 func fieldKey(f Field, i int) string {
 	if f.Shortcut != "" {
 		return f.Shortcut

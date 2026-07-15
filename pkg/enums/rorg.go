@@ -30,6 +30,7 @@ const (
 	RorgUTE        Rorg = 0xd4
 )
 
+// ParseRorgFromByte parses a Rorg from a byte.
 func ParseRorgFromByte(b byte) (Rorg, error) {
 	switch b {
 	case 0xf6:
@@ -81,6 +82,7 @@ func ParseRorgFromByte(b byte) (Rorg, error) {
 	}
 }
 
+// String returns the string representation of Rorg.
 func (rorg Rorg) String() string {
 	switch rorg {
 	case RorgRPS:
@@ -132,6 +134,7 @@ func (rorg Rorg) String() string {
 	}
 }
 
+// Valid reports whether Rorg is valid.
 func (rorg Rorg) Valid() bool {
 	switch rorg {
 	case RorgRPS,

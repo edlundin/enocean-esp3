@@ -2,6 +2,7 @@ package enums
 
 import "testing"
 
+// TestSecureDeviceDirection verifies SecureDeviceDirection behavior.
 func TestSecureDeviceDirection(t *testing.T) {
 	cases := []struct{ b byte; v SecureDeviceDirection; s string }{
 		{0x00, SecureDeviceDirectionINBOUND_TABLE, "INBOUND_TABLE"},

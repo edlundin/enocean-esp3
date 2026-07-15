@@ -2,6 +2,7 @@ package enums
 
 import "testing"
 
+// TestMaturity verifies Maturity behavior.
 func TestMaturity(t *testing.T) {
 	cases := []struct{ b byte; v Maturity; s string }{
 		{0x00, MaturityFORWARDED_IMMEDIATELY, "FORWARDED_IMMEDIATELY"},

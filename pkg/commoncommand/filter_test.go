@@ -7,6 +7,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/response"
 )
 
+// TestNewWrFilterAdd verifies NewWrFilterAdd behavior.
 func TestNewWrFilterAdd(t *testing.T) {
 	t.Run("creates filter add command with forward and repeat", func(t *testing.T) {
 		cmd, err := NewWrFilterAdd(enums.FilterCriterionRSSI, 0x12345678, true, true)
@@ -57,6 +58,7 @@ func TestNewWrFilterAdd(t *testing.T) {
 	})
 }
 
+// TestWrFilterAdd_Serialize verifies WrFilterAdd_Serialize behavior.
 func TestWrFilterAdd_Serialize(t *testing.T) {
 	t.Run("serializes filter add command", func(t *testing.T) {
 		cmd, _ := NewWrFilterAdd(enums.FilterCriterionRSSI, 0x12345678, true, true)
@@ -82,6 +84,7 @@ func TestWrFilterAdd_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewWrFilterDel verifies NewWrFilterDel behavior.
 func TestNewWrFilterDel(t *testing.T) {
 	t.Run("creates filter del command with forward and repeat", func(t *testing.T) {
 		cmd, err := NewWrFilterDel(enums.FilterCriterionDESTINATION_ID, 0x87654321, true, true)
@@ -112,6 +115,7 @@ func TestNewWrFilterDel(t *testing.T) {
 	})
 }
 
+// TestWrFilterDel_Serialize verifies WrFilterDel_Serialize behavior.
 func TestWrFilterDel_Serialize(t *testing.T) {
 	t.Run("serializes filter del command", func(t *testing.T) {
 		cmd, _ := NewWrFilterDel(enums.FilterCriterionRORG, 0xAABBCCDD, false, false)
@@ -132,6 +136,7 @@ func TestWrFilterDel_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewWrFilterDelAll verifies NewWrFilterDelAll behavior.
 func TestNewWrFilterDelAll(t *testing.T) {
 	t.Run("creates filter delete all command", func(t *testing.T) {
 		cmd, err := NewWrFilterDelAll()
@@ -145,6 +150,7 @@ func TestNewWrFilterDelAll(t *testing.T) {
 	})
 }
 
+// TestWrFilterDelAll_Serialize verifies WrFilterDelAll_Serialize behavior.
 func TestWrFilterDelAll_Serialize(t *testing.T) {
 	t.Run("serializes filter del all command", func(t *testing.T) {
 		cmd, _ := NewWrFilterDelAll()
@@ -165,6 +171,7 @@ func TestWrFilterDelAll_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewWrFilterEnable verifies NewWrFilterEnable behavior.
 func TestNewWrFilterEnable(t *testing.T) {
 	t.Run("creates filter enable command with OR_ALL_FILTERS operator", func(t *testing.T) {
 		cmd, err := NewWrFilterEnable(true, enums.FilerOperatorOR_ALL_FILTERS)
@@ -201,6 +208,7 @@ func TestNewWrFilterEnable(t *testing.T) {
 	})
 }
 
+// TestWrFilterEnable_Serialize verifies WrFilterEnable_Serialize behavior.
 func TestWrFilterEnable_Serialize(t *testing.T) {
 	t.Run("serializes filter enable command", func(t *testing.T) {
 		cmd, _ := NewWrFilterEnable(true, enums.FilerOperatorOR_ALL_FILTERS)
@@ -225,6 +233,7 @@ func TestWrFilterEnable_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewRdFilter verifies NewRdFilter behavior.
 func TestNewRdFilter(t *testing.T) {
 	t.Run("creates read filter command", func(t *testing.T) {
 		cmd, err := NewRdFilter()
@@ -238,6 +247,7 @@ func TestNewRdFilter(t *testing.T) {
 	})
 }
 
+// TestRdFilter_Serialize verifies RdFilter_Serialize behavior.
 func TestRdFilter_Serialize(t *testing.T) {
 	t.Run("serializes read filter command", func(t *testing.T) {
 		cmd, _ := NewRdFilter()
@@ -258,6 +268,7 @@ func TestRdFilter_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseRdFilterResponseOK verifies ParseRdFilterResponseOK behavior.
 func TestParseRdFilterResponseOK(t *testing.T) {
 	t.Run("parses filter response with no filters", func(t *testing.T) {
 		// Count = 0, no filter data
@@ -278,30 +289,28 @@ func TestParseRdFilterResponseOK(t *testing.T) {
 	})
 
 	t.Run("parses filter response with multiple filters", func(t *testing.T) {
-		// Response: Count(1) + Filters (each filter is Criterion(1) + Value(4) = 5 bytes)
-		// The deserialization reads sequentially, so we provide enough bytes
-		// Note: The exact parsing depends on the serializer.BytesToStruct implementation
-		resp := response.Packet{
-			Code: enums.ReturnCodeSUCCESS,
-			Data: []byte{
-				0x02, // Count = 2
-				// Provide enough bytes for the filters - total needs at least 10 bytes for 2 filters
-				0x00, 0x00, 0x00, 0x00, 0x01, // 5 bytes
-				0x01, 0x00, 0x00, 0x00, 0x02, // 5 bytes
-				0x02, 0x00, 0x00, 0x00, 0x03, // 5 bytes (extra for safety)
-			},
-			OptData: nil,
-		}
-
+		resp := response.Packet{Code: enums.ReturnCodeSUCCESS, Data: []byte{
+			0x02,
+			0x00, 0x00, 0x00, 0x00, 0x01,
+			0x01, 0x00, 0x00, 0x00, 0x02,
+		}}
 		result, err := ParseRdFilterResponseOK(resp)
 		if err != nil {
-			t.Fatalf("expected no error, got: %v", err)
+			t.Fatal(err)
 		}
+		if len(result.Filters) != 2 || result.Filters[0].Value != 1 || result.Filters[1].Value != 2 {
+			t.Fatalf("filters = %#v", result.Filters)
+		}
+	})
 
-		// We expect at least 1 filter (the actual count depends on BytesToStruct behavior with slices)
-		// The test verifies the function runs without error
-		if result.Filters == nil {
-			t.Error("expected non-nil Filters slice")
+	t.Run("rejects filter count mismatches", func(t *testing.T) {
+		for _, data := range [][]byte{
+			{0x02, 0x00, 0, 0, 0, 1},
+			{0x02, 0x00, 0, 0, 0, 1, 0x01, 0, 0, 0, 2, 0x02, 0, 0, 0, 3},
+		} {
+			if _, err := ParseRdFilterResponseOK(response.Packet{Code: enums.ReturnCodeSUCCESS, Data: data}); err == nil {
+				t.Fatalf("count mismatch accepted: %x", data)
+			}
 		}
 	})
 

@@ -2,6 +2,7 @@ package enums
 
 import "testing"
 
+// TestRadioMode verifies RadioMode behavior.
 func TestRadioMode(t *testing.T) {
 	cases := []struct{ b byte; v RadioMode; s string }{
 		{0x00, RadioModeERP1, "ERP1"},

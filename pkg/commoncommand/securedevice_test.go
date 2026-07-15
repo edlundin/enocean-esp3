@@ -8,6 +8,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/response"
 )
 
+// TestNewWrSecureDeviceAdd verifies NewWrSecureDeviceAdd behavior.
 func TestNewWrSecureDeviceAdd(t *testing.T) {
 	t.Run("creates secure device add command with valid teach info", func(t *testing.T) {
 		securityKey := [16]byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10}
@@ -60,6 +61,7 @@ func TestNewWrSecureDeviceAdd(t *testing.T) {
 	})
 }
 
+// TestWrSecureDeviceAdd_Serialize verifies WrSecureDeviceAdd_Serialize behavior.
 func TestWrSecureDeviceAdd_Serialize(t *testing.T) {
 	t.Run("serializes secure device add command", func(t *testing.T) {
 		securityKey := [16]byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10}
@@ -91,6 +93,7 @@ func TestWrSecureDeviceAdd_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewWrSecureDeviceDel verifies NewWrSecureDeviceDel behavior.
 func TestNewWrSecureDeviceDel(t *testing.T) {
 	t.Run("creates secure device delete command", func(t *testing.T) {
 		cmd, err := NewWrSecureDeviceDel(
@@ -115,6 +118,7 @@ func TestNewWrSecureDeviceDel(t *testing.T) {
 	})
 }
 
+// TestWrSecureDeviceDel_Serialize verifies WrSecureDeviceDel_Serialize behavior.
 func TestWrSecureDeviceDel_Serialize(t *testing.T) {
 	t.Run("serializes secure device delete command", func(t *testing.T) {
 		cmd, _ := NewWrSecureDeviceDel(
@@ -139,6 +143,7 @@ func TestWrSecureDeviceDel_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewRdSecureDeviceByIndex verifies NewRdSecureDeviceByIndex behavior.
 func TestNewRdSecureDeviceByIndex(t *testing.T) {
 	t.Run("creates read secure device by index command", func(t *testing.T) {
 		cmd, err := NewRdSecureDeviceByIndex(0x05, enums.SecureDeviceDirectionOUTBOUND_TABLE)
@@ -171,6 +176,7 @@ func TestNewRdSecureDeviceByIndex(t *testing.T) {
 	})
 }
 
+// TestRdSecureDeviceByIndex_Serialize verifies RdSecureDeviceByIndex_Serialize behavior.
 func TestRdSecureDeviceByIndex_Serialize(t *testing.T) {
 	t.Run("serializes read secure device by index command", func(t *testing.T) {
 		cmd, _ := NewRdSecureDeviceByIndex(0x05, enums.SecureDeviceDirectionOUTBOUND_TABLE)
@@ -192,6 +198,7 @@ func TestRdSecureDeviceByIndex_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseRdSecureDeviceByIndexResponseOK verifies ParseRdSecureDeviceByIndexResponseOK behavior.
 func TestParseRdSecureDeviceByIndexResponseOK(t *testing.T) {
 	t.Run("parses secure device by index response", func(t *testing.T) {
 		// Response from Data: SecurityLevelFormat(1) + DeviceID(4) + PrivateKey(16) = 21 bytes
@@ -266,6 +273,7 @@ func TestParseRdSecureDeviceByIndexResponseOK(t *testing.T) {
 	})
 }
 
+// TestNewRdNumSecureDevices verifies NewRdNumSecureDevices behavior.
 func TestNewRdNumSecureDevices(t *testing.T) {
 	t.Run("creates read number of secure devices command", func(t *testing.T) {
 		cmd, err := NewRdNumSecureDevices(enums.SecureDeviceDirectionOUTBOUND_TABLE)
@@ -283,6 +291,7 @@ func TestNewRdNumSecureDevices(t *testing.T) {
 	})
 }
 
+// TestRdNumSecureDevices_Serialize verifies RdNumSecureDevices_Serialize behavior.
 func TestRdNumSecureDevices_Serialize(t *testing.T) {
 	t.Run("serializes read number of secure devices command", func(t *testing.T) {
 		cmd, _ := NewRdNumSecureDevices(enums.SecureDeviceDirectionOUTBOUND_TABLE)
@@ -304,6 +313,7 @@ func TestRdNumSecureDevices_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseRdNumSecureDevicesResponseOK verifies ParseRdNumSecureDevicesResponseOK behavior.
 func TestParseRdNumSecureDevicesResponseOK(t *testing.T) {
 	t.Run("parses number of secure devices response", func(t *testing.T) {
 		// Response: NumSecureDevices(1) = 1 byte
@@ -358,6 +368,7 @@ func TestParseRdNumSecureDevicesResponseOK(t *testing.T) {
 	})
 }
 
+// TestNewRdSecureDeviceByID verifies NewRdSecureDeviceByID behavior.
 func TestNewRdSecureDeviceByID(t *testing.T) {
 	t.Run("creates read secure device by ID command", func(t *testing.T) {
 		cmd, err := NewRdSecureDeviceByID(
@@ -382,6 +393,7 @@ func TestNewRdSecureDeviceByID(t *testing.T) {
 	})
 }
 
+// TestRdSecureDeviceByID_Serialize verifies RdSecureDeviceByID_Serialize behavior.
 func TestRdSecureDeviceByID_Serialize(t *testing.T) {
 	t.Run("serializes read secure device by ID command", func(t *testing.T) {
 		cmd, _ := NewRdSecureDeviceByID(
@@ -406,6 +418,7 @@ func TestRdSecureDeviceByID_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseRdSecureDeviceByIDResponseOK verifies ParseRdSecureDeviceByIDResponseOK behavior.
 func TestParseRdSecureDeviceByIDResponseOK(t *testing.T) {
 	t.Run("parses secure device by ID response", func(t *testing.T) {
 		// Response: SecurityLevelFormat(1) + Index(1) = 2 bytes
@@ -481,6 +494,7 @@ func TestParseRdSecureDeviceByIDResponseOK(t *testing.T) {
 	})
 }
 
+// TestNewWrSecureDeviceAddPSK verifies NewWrSecureDeviceAddPSK behavior.
 func TestNewWrSecureDeviceAddPSK(t *testing.T) {
 	t.Run("creates secure device add PSK command", func(t *testing.T) {
 		psk := [16]byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10}
@@ -503,6 +517,7 @@ func TestNewWrSecureDeviceAddPSK(t *testing.T) {
 	})
 }
 
+// TestWrSecureDeviceAddPSK_Serialize verifies WrSecureDeviceAddPSK_Serialize behavior.
 func TestWrSecureDeviceAddPSK_Serialize(t *testing.T) {
 	t.Run("serializes secure device add PSK command", func(t *testing.T) {
 		psk := [16]byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10}
@@ -520,6 +535,7 @@ func TestWrSecureDeviceAddPSK_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewWrSecureDeviceSendTeachIn verifies NewWrSecureDeviceSendTeachIn behavior.
 func TestNewWrSecureDeviceSendTeachIn(t *testing.T) {
 	t.Run("creates secure device send teach-in command", func(t *testing.T) {
 		cmd, err := NewWrSecureDeviceSendTeachIn(deviceid.DeviceID(0x12345678), 0x05)
@@ -541,6 +557,7 @@ func TestNewWrSecureDeviceSendTeachIn(t *testing.T) {
 	})
 }
 
+// TestWrSecureDeviceSendTeachIn_Serialize verifies WrSecureDeviceSendTeachIn_Serialize behavior.
 func TestWrSecureDeviceSendTeachIn_Serialize(t *testing.T) {
 	t.Run("serializes secure device send teach-in command", func(t *testing.T) {
 		cmd, _ := NewWrSecureDeviceSendTeachIn(deviceid.DeviceID(0x12345678), 0x05)
@@ -562,6 +579,7 @@ func TestWrSecureDeviceSendTeachIn_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewWrTemporaryRLCWindow verifies NewWrTemporaryRLCWindow behavior.
 func TestNewWrTemporaryRLCWindow(t *testing.T) {
 	t.Run("creates write temporary RLC window command", func(t *testing.T) {
 		cmd, err := NewWrTemporaryRLCWindow(true, 0x00010000)
@@ -594,6 +612,7 @@ func TestNewWrTemporaryRLCWindow(t *testing.T) {
 	})
 }
 
+// TestWrTemporaryRLCWindow_Serialize verifies WrTemporaryRLCWindow_Serialize behavior.
 func TestWrTemporaryRLCWindow_Serialize(t *testing.T) {
 	t.Run("serializes write temporary RLC window command", func(t *testing.T) {
 		cmd, _ := NewWrTemporaryRLCWindow(true, 0x00010000)
@@ -610,6 +629,7 @@ func TestWrTemporaryRLCWindow_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewRdSecureDevicePSK verifies NewRdSecureDevicePSK behavior.
 func TestNewRdSecureDevicePSK(t *testing.T) {
 	t.Run("creates read secure device PSK command", func(t *testing.T) {
 		cmd, err := NewRdSecureDevicePSK(deviceid.DeviceID(0x12345678), enums.SecureDeviceDirectionOUTBOUND_TABLE)
@@ -638,6 +658,7 @@ func TestNewRdSecureDevicePSK(t *testing.T) {
 	})
 }
 
+// TestRdSecureDevicePSK_Serialize verifies RdSecureDevicePSK_Serialize behavior.
 func TestRdSecureDevicePSK_Serialize(t *testing.T) {
 	t.Run("serializes read secure device PSK command", func(t *testing.T) {
 		cmd, _ := NewRdSecureDevicePSK(deviceid.DeviceID(0x12345678), enums.SecureDeviceDirectionOUTBOUND_TABLE)
@@ -654,6 +675,7 @@ func TestRdSecureDevicePSK_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseRdSecureDevicePSKResponseOK verifies ParseRdSecureDevicePSKResponseOK behavior.
 func TestParseRdSecureDevicePSKResponseOK(t *testing.T) {
 	t.Run("parses secure device PSK response", func(t *testing.T) {
 		// Response: PSK(16) = 16 bytes
@@ -715,6 +737,7 @@ func TestParseRdSecureDevicePSKResponseOK(t *testing.T) {
 	})
 }
 
+// TestNewWrRLCSavePeriod verifies NewWrRLCSavePeriod behavior.
 func TestNewWrRLCSavePeriod(t *testing.T) {
 	t.Run("creates write RLC save period command", func(t *testing.T) {
 		cmd, err := NewWrRLCSavePeriod(0x10)
@@ -732,6 +755,7 @@ func TestNewWrRLCSavePeriod(t *testing.T) {
 	})
 }
 
+// TestWrRLCSavePeriod_Serialize verifies WrRLCSavePeriod_Serialize behavior.
 func TestWrRLCSavePeriod_Serialize(t *testing.T) {
 	t.Run("serializes write RLC save period command", func(t *testing.T) {
 		cmd, _ := NewWrRLCSavePeriod(0x10)
@@ -748,6 +772,7 @@ func TestWrRLCSavePeriod_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewWrRLCLegacyMode verifies NewWrRLCLegacyMode behavior.
 func TestNewWrRLCLegacyMode(t *testing.T) {
 	t.Run("creates write RLC legacy mode command", func(t *testing.T) {
 		cmd, err := NewWrRLCLegacyMode(enums.RLCModeSTANDARD)
@@ -776,6 +801,7 @@ func TestNewWrRLCLegacyMode(t *testing.T) {
 	})
 }
 
+// TestWrRLCLegacyMode_Serialize verifies WrRLCLegacyMode_Serialize behavior.
 func TestWrRLCLegacyMode_Serialize(t *testing.T) {
 	t.Run("serializes write RLC legacy mode command", func(t *testing.T) {
 		cmd, _ := NewWrRLCLegacyMode(enums.RLCModeSTANDARD)
@@ -792,6 +818,7 @@ func TestWrRLCLegacyMode_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewWrSecureDeviceV2Add verifies NewWrSecureDeviceV2Add behavior.
 func TestNewWrSecureDeviceV2Add(t *testing.T) {
 	t.Run("creates secure device V2 add command", func(t *testing.T) {
 		privateKey := [16]byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10}
@@ -820,6 +847,7 @@ func TestNewWrSecureDeviceV2Add(t *testing.T) {
 	})
 }
 
+// TestWrSecureDeviceV2Add_Serialize verifies WrSecureDeviceV2Add_Serialize behavior.
 func TestWrSecureDeviceV2Add_Serialize(t *testing.T) {
 	t.Run("serializes secure device V2 add command", func(t *testing.T) {
 		privateKey := [16]byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10}
@@ -866,6 +894,7 @@ func TestWrSecureDeviceV2Add_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewRdSecureDeviceV2ByIndex verifies NewRdSecureDeviceV2ByIndex behavior.
 func TestNewRdSecureDeviceV2ByIndex(t *testing.T) {
 	t.Run("creates read secure device V2 by index command", func(t *testing.T) {
 		cmd, err := NewRdSecureDeviceV2ByIndex(0x05, enums.SecureDeviceDirectionOUTBOUND_TABLE)
@@ -898,6 +927,7 @@ func TestNewRdSecureDeviceV2ByIndex(t *testing.T) {
 	})
 }
 
+// TestRdSecureDeviceV2ByIndex_Serialize verifies RdSecureDeviceV2ByIndex_Serialize behavior.
 func TestRdSecureDeviceV2ByIndex_Serialize(t *testing.T) {
 	t.Run("serializes read secure device V2 by index command", func(t *testing.T) {
 		cmd, _ := NewRdSecureDeviceV2ByIndex(0x05, enums.SecureDeviceDirectionOUTBOUND_TABLE)
@@ -949,6 +979,7 @@ func TestRdSecureDeviceV2ByIndex_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseRdSecureDeviceV2ByIndexResponseOK verifies ParseRdSecureDeviceV2ByIndexResponseOK behavior.
 func TestParseRdSecureDeviceV2ByIndexResponseOK(t *testing.T) {
 	t.Run("parses secure device V2 by index response", func(t *testing.T) {
 		// Response from Data: SecurityLevelFormat(1) + DeviceID(4) + PrivateKey(16) = 21 bytes
@@ -1026,6 +1057,7 @@ func TestParseRdSecureDeviceV2ByIndexResponseOK(t *testing.T) {
 	})
 }
 
+// TestNewWrSecureDeviceRemainCode verifies NewWrSecureDeviceRemainCode behavior.
 func TestNewWrSecureDeviceRemainCode(t *testing.T) {
 	t.Run("creates secure device reman key command", func(t *testing.T) {
 		remanKey := [16]byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10}
@@ -1048,6 +1080,7 @@ func TestNewWrSecureDeviceRemainCode(t *testing.T) {
 	})
 }
 
+// TestWrSecureDeviceRemanKey_Serialize verifies WrSecureDeviceRemanKey_Serialize behavior.
 func TestWrSecureDeviceRemanKey_Serialize(t *testing.T) {
 	t.Run("serializes secure device reman key command", func(t *testing.T) {
 		remanKey := [16]byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10}
@@ -1065,6 +1098,7 @@ func TestWrSecureDeviceRemanKey_Serialize(t *testing.T) {
 	})
 }
 
+// TestNewRdSecureDeviceRemanKey verifies NewRdSecureDeviceRemanKey behavior.
 func TestNewRdSecureDeviceRemanKey(t *testing.T) {
 	t.Run("creates read secure device reman key command", func(t *testing.T) {
 		cmd, err := NewRdSecureDeviceRemanKey(0x05)
@@ -1082,6 +1116,7 @@ func TestNewRdSecureDeviceRemanKey(t *testing.T) {
 	})
 }
 
+// TestRdSecureDeviceRemanKey_Serialize verifies RdSecureDeviceRemanKey_Serialize behavior.
 func TestRdSecureDeviceRemanKey_Serialize(t *testing.T) {
 	t.Run("serializes read secure device reman key command", func(t *testing.T) {
 		cmd, _ := NewRdSecureDeviceRemanKey(0x05)
@@ -1098,6 +1133,7 @@ func TestRdSecureDeviceRemanKey_Serialize(t *testing.T) {
 	})
 }
 
+// TestParseRdSecureDeviceRemanKeyResponseOK verifies ParseRdSecureDeviceRemanKeyResponseOK behavior.
 func TestParseRdSecureDeviceRemanKeyResponseOK(t *testing.T) {
 	t.Run("parses secure device reman key response", func(t *testing.T) {
 		// Response: Index(1) + DeviceID(4) + PrivateKey(16) + KeyNumber(1) +
@@ -1177,6 +1213,7 @@ func TestParseRdSecureDeviceRemanKeyResponseOK(t *testing.T) {
 	})
 }
 
+// TestWrSecureDeviceRemanKey_Serialize_InvalidKeyNumber verifies WrSecureDeviceRemanKey_Serialize_InvalidKeyNumber behavior.
 func TestWrSecureDeviceRemanKey_Serialize_InvalidKeyNumber(t *testing.T) {
 	t.Run("returns error for key number 0", func(t *testing.T) {
 		cmd := WrSecureDeviceRemanKey{
@@ -1211,6 +1248,7 @@ func TestWrSecureDeviceRemanKey_Serialize_InvalidKeyNumber(t *testing.T) {
 	})
 }
 
+// TestRdSecureDeviceRemanKey_Serialize_InvalidIndex verifies RdSecureDeviceRemanKey_Serialize_InvalidIndex behavior.
 func TestRdSecureDeviceRemanKey_Serialize_InvalidIndex(t *testing.T) {
 	t.Run("returns error for index 0", func(t *testing.T) {
 		cmd := RdSecureDeviceRemanKey{

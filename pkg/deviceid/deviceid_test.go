@@ -5,6 +5,7 @@ import (
 	"testing"
 )
 
+// TestDeviceId_GetBroadcastId verifies DeviceId_GetBroadcastId behavior.
 func TestDeviceId_GetBroadcastId(t *testing.T) {
 	t.Run("returns 0xffffffff (broadcast ID)", func(t *testing.T) {
 		if BroadcastId() != DeviceID(0xffffffff) {
@@ -13,6 +14,7 @@ func TestDeviceId_GetBroadcastId(t *testing.T) {
 	})
 }
 
+// TestDeviceId_String verifies DeviceId_String behavior.
 func TestDeviceId_String(t *testing.T) {
 	t.Run("returns lower case without hex prefix", func(t *testing.T) {
 		deviceId := DeviceID(0xffabc123)
@@ -37,6 +39,7 @@ func TestDeviceId_String(t *testing.T) {
 	})
 }
 
+// TestDeviceIdFromHexString verifies DeviceIdFromHexString behavior.
 func TestDeviceIdFromHexString(t *testing.T) {
 	const sizeMaxStr = DeviceIDSize * 2
 
@@ -107,6 +110,7 @@ func TestDeviceIdFromHexString(t *testing.T) {
 	})
 }
 
+// TestDeviceIdFromByteArray verifies DeviceIdFromByteArray behavior.
 func TestDeviceIdFromByteArray(t *testing.T) {
 	t.Run("returns the DeviceID representation of the array content", func(t *testing.T) {
 		byteArray := []byte{0xff, 0xab, 0xcd, 0xef}
@@ -149,6 +153,7 @@ func TestDeviceIdFromByteArray(t *testing.T) {
 	})
 }
 
+// TestDeviceId_ToArray verifies DeviceId_ToArray behavior.
 func TestDeviceId_ToArray(t *testing.T) {
 	t.Run("returns big-endian byte array representation", func(t *testing.T) {
 		deviceId := DeviceID(0xffabcdef)

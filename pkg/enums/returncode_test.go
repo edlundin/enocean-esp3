@@ -4,6 +4,7 @@ import (
 	"testing"
 )
 
+// TestReturnCodeConstants verifies ReturnCodeConstants behavior.
 func TestReturnCodeConstants(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -29,6 +30,7 @@ func TestReturnCodeConstants(t *testing.T) {
 	}
 }
 
+// TestParseReturnCodeFromByte verifies ParseReturnCodeFromByte behavior.
 func TestParseReturnCodeFromByte(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -70,6 +72,7 @@ func TestParseReturnCodeFromByte(t *testing.T) {
 	}
 }
 
+// TestReturnCodeString verifies ReturnCodeString behavior.
 func TestReturnCodeString(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -98,6 +101,7 @@ func TestReturnCodeString(t *testing.T) {
 	}
 }
 
+// TestReturnCodeRoundTrip verifies ReturnCodeRoundTrip behavior.
 func TestReturnCodeRoundTrip(t *testing.T) {
 	// Test that parsing a byte and converting back gives the same result
 	codes := []ReturnCode{
@@ -124,6 +128,7 @@ func TestReturnCodeRoundTrip(t *testing.T) {
 	}
 }
 
+// TestReturnCodeStringRoundTrip verifies ReturnCodeStringRoundTrip behavior.
 func TestReturnCodeStringRoundTrip(t *testing.T) {
 	// Test that converting to string and back gives consistent results
 	codes := []ReturnCode{
@@ -150,6 +155,7 @@ func TestReturnCodeStringRoundTrip(t *testing.T) {
 	}
 }
 
+// TestReturnCodeValid verifies ReturnCodeValid behavior.
 func TestReturnCodeValid(t *testing.T) {
 	t.Run("ReturnCode_Valid", func(t *testing.T) {
 		// Test valid return codes
