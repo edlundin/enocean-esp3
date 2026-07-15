@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/edlundin/enocean-esp3/pkg/deviceid"
+	"github.com/edlundin/enocean-esp3/pkg/enums"
+	"github.com/edlundin/enocean-esp3/pkg/erp1"
 )
 
 // TestPacketRoundTrip verifies PacketRoundTrip behavior.
@@ -90,5 +92,30 @@ func TestCodePayload(t *testing.T) {
 	}
 	if s, err := ParseStatusAnswer([]byte{byte(ReturnSessionClosed)}); err != nil || s.Return != ReturnSessionClosed {
 		t.Fatalf("%#v %v", s, err)
+	}
+}
+
+func TestRejectsMalformedParts(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		length   int
+		function uint16
+	}{
+		{"oversized payload", MaxPayload + 1, FuncQueryID},
+		{"zero function", 0, 0},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			data := make([]byte, 9)
+			data[0] = 0x40
+			putHeader(data[1:5], tc.length, ManufacturerID, tc.function)
+			if _, err := ParsePacket(erp1.Packet{Rorg: enums.RorgSYS_EX, UserData: data}); err == nil {
+				t.Fatal("invalid header accepted")
+			}
+		})
+	}
+
+	parts := []Part{{Seq: 1, Index: 0}, {Seq: 1, Index: 1}}
+	if _, _, err := Merge(parts); err == nil {
+		t.Fatal("excess message part accepted")
 	}
 }

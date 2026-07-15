@@ -54,6 +54,15 @@ func TestEnumNameGeneralizesLongDescriptions(t *testing.T) {
 	}
 }
 
+func TestDescribedEnum(t *testing.T) {
+	if value, description, ok := describedEnum("Control; value 255 = auto, use default"); !ok || value != 255 || description != "auto" {
+		t.Fatalf("describedEnum() = %d, %q, %v", value, description, ok)
+	}
+	if _, _, ok := describedEnum("Control; value nope = auto"); ok {
+		t.Fatal("invalid enum value accepted")
+	}
+}
+
 // TestLoadRealEEP268 verifies LoadRealEEP268 behavior.
 func TestLoadRealEEP268(t *testing.T) {
 	path := filepath.Join("..", "..", "eep268.xml")

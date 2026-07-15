@@ -3,6 +3,9 @@ package security
 import (
 	"bytes"
 	"testing"
+
+	"github.com/edlundin/enocean-esp3/pkg/enums"
+	"github.com/edlundin/enocean-esp3/pkg/erp1"
 )
 
 // TestSECCDMChain verifies SECCDMChain behavior.
@@ -75,5 +78,29 @@ func TestSECCDMNeedsMoreDuplicate(t *testing.T) {
 	p2.Data = bytes.Repeat([]byte{2}, 20)
 	if _, done, err := MergeSEC_CDM([]ChainPart{p0, p2}); err != nil || done {
 		t.Fatalf("gapped chain done=%v err=%v", done, err)
+	}
+}
+
+func TestSECCDMMalformedInputs(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		data []byte
+	}{
+		{"short packet", []byte{0x40}},
+		{"long packet", make([]byte, 15)},
+		{"short first part", []byte{0x40, 0}},
+		{"oversized declared length", []byte{0x40, 0xff, 0xff}},
+		{"oversized first part", append([]byte{0x40}, make([]byte, 13)...)},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if _, err := ParseSEC_CDM(erp1.Packet{Rorg: enums.RorgSEC_CDM, UserData: tc.data}); err == nil {
+				t.Fatal("malformed packet accepted")
+			}
+		})
+	}
+
+	parts := []ChainPart{{Seq: 1, Index: 0, Length: 1, Data: []byte{1, 2}}}
+	if _, _, err := MergeSEC_CDM(parts); err == nil {
+		t.Fatal("data exceeding declared length accepted")
 	}
 }

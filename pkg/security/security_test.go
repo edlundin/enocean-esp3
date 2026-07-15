@@ -131,3 +131,39 @@ func TestSECNeedsChainingAndPartialRLCState(t *testing.T) {
 		t.Fatalf("stateful decode = %#v, %v", got, err)
 	}
 }
+
+func TestSECRejectsInvalidInputs(t *testing.T) {
+	key := [16]byte{1}
+	slf := SLF(RLCExplicit24Of32CMAC24VAES)
+	rlc := []byte{1, 2, 3, 4}
+	packet, err := EncodeSEC_R(key, slf, rlc, enums.RorgRPS, []byte{1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	short := packet
+	short.UserData = nil
+
+	tests := []struct {
+		name string
+		run  func() error
+	}{
+		{"invalid SLF encode", func() error { _, err := EncodeSEC_R(key, 0, nil, enums.RorgRPS, nil); return err }},
+		{"invalid RLC length encode", func() error { _, err := EncodeSEC_R(key, slf, rlc[:3], enums.RorgRPS, nil); return err }},
+		{"invalid SLF chained encode", func() error { _, err := EncodeSEC_CDM(key, 0, nil, 1, enums.RorgRPS, nil); return err }},
+		{"oversized chained payload", func() error {
+			_, err := EncodeSEC_CDM(key, slf, rlc, 1, enums.RorgRPS, make([]byte, MaxChainData))
+			return err
+		}},
+		{"invalid SLF decode", func() error { _, err := DecodeSEC_RWithRLC(key, 0, rlc, packet); return err }},
+		{"short payload", func() error { _, err := DecodeSEC_RWithRLC(key, slf, rlc, short); return err }},
+		{"invalid receiver RLC length", func() error { _, err := DecodeSEC_RWithRLC(key, slf, rlc[:3], packet); return err }},
+		{"mismatched receiver RLC", func() error { _, err := DecodeSEC_RWithRLC(key, slf, []byte{1, 2, 3, 5}, packet); return err }},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			if err := tc.run(); err == nil {
+				t.Fatal("invalid input accepted")
+			}
+		})
+	}
+}

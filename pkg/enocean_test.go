@@ -299,6 +299,30 @@ func TestParserResyncsFromSyncByteInsideBadHeader(t *testing.T) {
 	}
 }
 
+func TestParserResyncsFromSyncByteInBadCRC8D(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	bad := esp3.NewTelegramFromData(enums.PacketTypeRESPONSE, []byte{byte(enums.ReturnCodeSUCCESS), 1}, nil).Serialize()
+	if bad[len(bad)-1] == 0x55 {
+		t.Fatal("bad-frame fixture already has sync byte CRC8D")
+	}
+	bad[len(bad)-1] = 0x55
+
+	want := esp3.NewTelegramFromData(enums.PacketTypeRESPONSE, []byte{byte(enums.ReturnCodeERROR)}, nil)
+	next := want.Serialize()
+	stream := append(bad, next[1:]...)
+	set, channels := newChannelSet(4)
+	go parser(ctx, &fakePort{reads: [][]byte{stream}}, set)
+	select {
+	case got := <-channels.Response:
+		if got.Code != enums.ReturnCodeERROR {
+			t.Fatalf("got response code %s", got.Code)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("timed out waiting for CRC8D resync")
+	}
+}
+
 // TestParseTelegramResponseAndUnparsed verifies ParseTelegramResponseAndUnparsed behavior.
 func TestParseTelegramResponseAndUnparsed(t *testing.T) {
 	remanMessages := newReManAssembler(time.Second)
