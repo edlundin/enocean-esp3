@@ -9,10 +9,9 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/esp3"
 )
 
-// TestGenericDecodeEncodeGeneratedRegistry verifies GenericDecodeEncodeGeneratedRegistry behavior.
 func TestGenericDecodeEncodeGeneratedRegistry(t *testing.T) {
 	prof := mustEEP(enums.RorgRPS, 0x02, 0x01) // generated-only path
-	got, err := ParseUserData(prof, []byte{0x11}, 0)
+	got, err := ParseUserData(prof, []byte{0x11}, 0xa5)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -20,15 +19,57 @@ func TestGenericDecodeEncodeGeneratedRegistry(t *testing.T) {
 	if !ok {
 		t.Fatalf("got %T", got)
 	}
-	if d.Values["EB"].Raw != 1 || d.Values["SA"].Raw != 1 {
-		t.Fatalf("%#v", d.Values)
+	if d.EEP() != prof || d.Values["EB"].Raw != 1 || d.Values["SA"].Raw != 1 {
+		t.Fatalf("%#v", d)
 	}
-	data, _, err := Encode(prof, map[string]uint64{"EB": 1, "SA": 1})
+	data, status, err := d.MarshalERP1UserData()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(data) != 1 || data[0] != 0x11 {
-		t.Fatalf("% x", data)
+	if len(data) != 1 || data[0] != 0x11 || status != 0xa5 {
+		t.Fatalf("data=% x status=%02x", data, status)
+	}
+}
+
+func TestGenericFormattingAndErrors(t *testing.T) {
+	prof := mustEEP(enums.RorgRPS, 0x02, 0x01)
+	d := Decoded{
+		Profile: Profile{EEP: prof},
+		Values: map[string]Value{
+			"zraw":  {Raw: 7},
+			"atext": {Text: "on"},
+			"munit": {Scaled: 12.345, Unit: "°C"},
+		},
+	}
+	if got, want := d.Format(), prof.String()+" atext=on munit=12.35°C zraw=7"; got != want {
+		t.Fatalf("Format() = %q, want %q", got, want)
+	}
+
+	unknown := eep.EEP{Rorg: enums.Rorg(0xff), Func: 0xff, Type: 0xff}
+	if _, err := Decode(unknown, nil, 0); err == nil {
+		t.Fatal("Decode accepted an unsupported EEP")
+	}
+	if _, _, err := Encode(unknown, nil); err == nil {
+		t.Fatal("Encode accepted an unsupported EEP")
+	}
+}
+
+func TestFieldKeyFallbacks(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		field Field
+		index int
+		want  string
+	}{
+		{name: "shortcut", field: Field{Name: "name", Shortcut: "shortcut"}, want: "shortcut"},
+		{name: "name", field: Field{Name: "name"}, want: "name"},
+		{name: "index", index: 3, want: "field3"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := fieldKey(tc.field, tc.index); got != tc.want {
+				t.Fatalf("fieldKey() = %q, want %q", got, tc.want)
+			}
+		})
 	}
 }
 

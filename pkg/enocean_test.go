@@ -13,6 +13,7 @@ import (
 	"github.com/edlundin/enocean-esp3/pkg/enums"
 	"github.com/edlundin/enocean-esp3/pkg/erp1"
 	"github.com/edlundin/enocean-esp3/pkg/esp3"
+	"github.com/edlundin/enocean-esp3/pkg/event"
 	"github.com/edlundin/enocean-esp3/pkg/gp"
 	"github.com/edlundin/enocean-esp3/pkg/reman"
 	"github.com/edlundin/enocean-esp3/pkg/response"
@@ -331,7 +332,6 @@ func TestParseTelegramReportsParseErrors(t *testing.T) {
 	}
 }
 
-// TestParseERP1SmartAckAndGPHeader verifies ParseERP1SmartAckAndGPHeader behavior.
 func TestParseERP1SmartAckAndGPHeader(t *testing.T) {
 	sa := smartack.DataReclaim{MailboxIndex: 3}.ERP1(deviceid.DeviceID(1))
 	msgs := parseERP1(newReManAssembler(time.Second), sa.ToEsp3(), sa)
@@ -339,32 +339,73 @@ func TestParseERP1SmartAckAndGPHeader(t *testing.T) {
 		t.Fatalf("smart ack messages = %#v", msgs)
 	}
 
-	header, err := gp.EncodeRequestHeader(gp.RequestHeader{ManufacturerID: 0x123, Bidirectional: true, Purpose: gp.PurposeTeachIn})
+	requestData, err := gp.EncodeRequestHeader(gp.RequestHeader{ManufacturerID: 0x123, Bidirectional: true, Purpose: gp.PurposeTeachIn})
 	if err != nil {
 		t.Fatal(err)
 	}
-	gpPacket := erp1.Packet{Rorg: enums.RorgGP_TI, UserData: header}
-	msgs = parseERP1(newReManAssembler(time.Second), gpPacket.ToEsp3(), gpPacket)
+	request := erp1.Packet{Rorg: enums.RorgGP_TI, UserData: requestData}
+	msgs = parseERP1(newReManAssembler(time.Second), request.ToEsp3(), request)
 	if len(msgs) != 1 || msgs[0].Kind != "gp_header" {
-		t.Fatalf("GP messages = %#v", msgs)
+		t.Fatalf("GP request messages = %#v", msgs)
 	}
 	if got := msgs[0].Data.(gp.RequestHeader); got.ManufacturerID != 0x123 || !got.Bidirectional || got.Purpose != gp.PurposeTeachIn {
-		t.Fatalf("GP header = %#v", got)
+		t.Fatalf("GP request header = %#v", got)
+	}
+
+	responseData, err := gp.EncodeResponseHeader(gp.ResponseHeader{ManufacturerID: 0x321, Result: gp.ResultSuccess})
+	if err != nil {
+		t.Fatal(err)
+	}
+	gpResponse := erp1.Packet{Rorg: enums.RorgGP_TR, UserData: responseData}
+	msgs = parseERP1(newReManAssembler(time.Second), gpResponse.ToEsp3(), gpResponse)
+	if got := msgs[0].Data.(gp.ResponseHeader); got.ManufacturerID != 0x321 || got.Result != gp.ResultSuccess {
+		t.Fatalf("GP response header = %#v", got)
+	}
+
+	gpData := erp1.Packet{Rorg: enums.RorgGP_CD}
+	msgs = parseERP1(newReManAssembler(time.Second), gpData.ToEsp3(), gpData)
+	if got := msgs[0].Data.(erp1.Packet); !reflect.DeepEqual(got, gpData) {
+		t.Fatalf("GP data header = %#v", got)
+	}
+
+	invalid := erp1.Packet{Rorg: enums.RorgGP_TR}
+	msgs = parseERP1(newReManAssembler(time.Second), invalid.ToEsp3(), invalid)
+	if len(msgs) != 1 || msgs[0].Kind != "parse_error" || msgs[0].Err == nil {
+		t.Fatalf("invalid GP messages = %#v", msgs)
 	}
 }
 
-// TestPublishDispatchesTypedChannels verifies PublishDispatchesTypedChannels behavior.
 func TestPublishDispatchesTypedChannels(t *testing.T) {
-	set, channels := newChannelSet(2)
-	msg := Message{Kind: "response", Data: response.Packet{Code: enums.ReturnCodeSUCCESS}}
-	if !publish(context.Background(), set, []Message{msg}) {
-		t.Fatal("publish returned false")
+	tests := []struct {
+		message Message
+		want    any
+		receive func(*Channels) any
+	}{
+		{Message{Kind: "esp3", Data: esp3.Telegram{}}, esp3.Telegram{}, func(c *Channels) any { return <-c.ESP3 }},
+		{Message{Kind: "erp1", Data: erp1.Packet{}}, erp1.Packet{}, func(c *Channels) any { return <-c.ERP1 }},
+		{Message{Kind: "response", Data: response.Packet{Code: enums.ReturnCodeSUCCESS}}, response.Packet{Code: enums.ReturnCodeSUCCESS}, func(c *Channels) any { return <-c.Response }},
+		{Message{Kind: "event", Data: event.Packet{}}, event.Packet{}, func(c *Channels) any { return <-c.Event }},
+		{Message{Kind: "smart_ack", Data: smartack.DataReclaim{MailboxIndex: 3}}, smartack.DataReclaim{MailboxIndex: 3}, func(c *Channels) any { return <-c.SmartAck }},
+		{Message{Kind: "reman", Data: reman.Message{Seq: 1}}, reman.Message{Seq: 1}, func(c *Channels) any { return <-c.ReMan }},
+		{Message{Kind: "reman_part", Data: reman.Part{Seq: 1}}, reman.Part{Seq: 1}, func(c *Channels) any { return <-c.ReManPart }},
+		{Message{Kind: "gp_header", Data: gp.RequestHeader{ManufacturerID: 1}}, gp.RequestHeader{ManufacturerID: 1}, func(c *Channels) any { return <-c.GPHeader }},
+		{Message{Kind: "unparsed"}, "unparsed", func(c *Channels) any { return (<-c.Unparsed).Kind }},
+		{Message{Kind: "parse_error", Err: errors.New("bad packet")}, "parse_error", func(c *Channels) any { return (<-c.ParseError).Kind }},
 	}
-	if (<-channels.All).Kind != "response" {
-		t.Fatal("all channel missed message")
-	}
-	if (<-channels.Response).Code != enums.ReturnCodeSUCCESS {
-		t.Fatal("response channel missed message")
+
+	for _, tc := range tests {
+		t.Run(tc.message.Kind, func(t *testing.T) {
+			set, channels := newChannelSet(2)
+			if !publish(context.Background(), set, []Message{tc.message}) {
+				t.Fatal("publish returned false")
+			}
+			if got := (<-channels.All).Kind; got != tc.message.Kind {
+				t.Fatalf("All received %q, want %q", got, tc.message.Kind)
+			}
+			if got := tc.receive(channels); !reflect.DeepEqual(got, tc.want) {
+				t.Fatalf("typed channel received %#v, want %#v", got, tc.want)
+			}
+		})
 	}
 }
 

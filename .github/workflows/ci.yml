@@ -14,6 +14,8 @@ jobs:
         run: |
           go test -race -coverprofile=coverage.raw.txt -covermode=atomic ./...
           grep -v '/profiles_gen.go:' coverage.raw.txt > coverage.txt
+          go tool cover -func=coverage.txt | tee coverage.func.txt
+          awk '/^total:/ { sub(/%/, "", $3); if ($3 + 0 < 88) { print "coverage below 88%"; exit 1 } }' coverage.func.txt
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4.0.1
         with:

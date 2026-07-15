@@ -67,10 +67,6 @@ func Encode(prof eep.EEP, values map[string]uint64) ([]byte, byte, error) {
 	for i, f := range p.Fields {
 		if raw, ok := values[fieldKey(f, i)]; ok {
 			setBits(data, f.BitOff, f.BitSize, raw)
-		} else if f.Shortcut != "" {
-			if raw, ok := values[f.Shortcut]; ok {
-				setBits(data, f.BitOff, f.BitSize, raw)
-			}
 		}
 	}
 	return data, 0, nil
